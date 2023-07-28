@@ -7,3 +7,7 @@
 [submodule "sw/deps/musl"]
 	path = sw/deps/musl
 	url = git@github.com:kraj/musl.git
+[submodule "sw/deps/riscv-isa-sim"]
+	path = sw/deps/riscv-isa-sim
+	url = https://github.com/pulp-platform/riscv-isa-sim.git
+	branch = GiannaP-snitch
