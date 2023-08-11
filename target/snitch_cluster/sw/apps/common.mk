@@ -35,7 +35,12 @@ INCDIRS += $(SNRT_DIR)/api
 INCDIRS += $(SNRT_DIR)/api/omp
 INCDIRS += $(SNRT_DIR)/src
 INCDIRS += $(SNRT_DIR)/src/omp
-INCDIRS += $(SNRT_DIR)/vendor/riscv-opcodes
+INCDIRS += $(ROOT)/sw/deps/riscv-opcodes
+
+# Math library override
+INCDIRS += $(ROOT)/sw/math/src/internal
+INCDIRS += $(ROOT)/sw/math/include
+INCDIRS += $(ROOT)/sw/math/arch/generic
 
 RISCV_LDFLAGS += -L$(abspath $(RUNTIME_DIR))
 RISCV_LDFLAGS += -T$(abspath $(SNRT_DIR)/base.ld)
