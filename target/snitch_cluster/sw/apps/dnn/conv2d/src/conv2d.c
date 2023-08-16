@@ -8,7 +8,10 @@
 #include "dnn.h"
 #include "snrt.h"
 
+// clang-format off
+// needs to be included after dnn.h
 #include "data.h"
+// clang-format on
 
 int main() {
     conv2d_l.ifmap = (double*)conv2d_ifmap_dram;

@@ -10,7 +10,10 @@
 #include "dnn.h"
 #include "snrt.h"
 
+// clang-format off
+// needs to be included after dnn.h
 #include "data.h"
+// clang-format on
 
 int main() {
     linear_l.ifmap = (float*)linear_ifmap_dram;

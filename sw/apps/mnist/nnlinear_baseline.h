@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "math.h"
-// #include "printf.h"
+#include <math.h>
+
 #include "snrt.h"
 #include "utils.h"
 

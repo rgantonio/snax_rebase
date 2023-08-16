@@ -10,7 +10,10 @@
 #include "dnn.h"
 #include "snrt.h"
 
+// clang-format off
+// needs to be included after dnn.h
 #include "data.h"
+// clang-format on
 
 // Padding of innermost dimension of a Matrix
 // Useful for preventing banking conflicts between cores

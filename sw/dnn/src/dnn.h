@@ -192,9 +192,8 @@ typedef struct network_single_cluster_t_ {
 // Must be included before batchnorm since the batchnorm layer
 // uses the conv_layer struct. This is bad design.
 // TODO Fix this, union types should be preferred
-#include "conv2d.h"
-
 #include "batchnorm.h"
+#include "conv2d.h"
 #include "gelu.h"
 #include "gemm.h"
 #include "layernorm.h"

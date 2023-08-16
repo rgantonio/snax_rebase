@@ -8,7 +8,10 @@
 #include "dnn.h"
 #include "snrt.h"
 
+// clang-format off
+// needs to be included after dnn.h
 #include "data.h"
+// clang-format on
 
 int main() {
     batchnorm_l.ifmap = (double *)batchnorm_ifmap_dram;

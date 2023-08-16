@@ -7,8 +7,9 @@
 // different memory layouts for matrices (transposed/not-transposed)
 // Correctness of results are checked automatically
 
+#include <math.h>
+
 #include "data_fp32_nnlinear.h"
-#include "math.h"
 #include "network.h"
 #include "nnlinear_backend_baseline.h"
 // #include "perf_cnt.h"

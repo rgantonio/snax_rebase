@@ -1,0 +1,6 @@
+# ignore vendored third_party code from clang-format checks
+sw/math/src/math/*
+sw/math/src/internal/*
+sw/math/src/include/*
+sw/math/include/*
+sw/math/arch/riscv64/bits/*

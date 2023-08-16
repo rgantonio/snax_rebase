@@ -2,10 +2,10 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "nnlinear_backend_baseline.h"
+#include "nnlinear_baseline.h"
 
 #include "network.h"
-#include "nnlinear_baseline.h"
+#include "nnlinear_backend_baseline.h"
 // #include "printf.h"
 #include "snrt.h"
 #include "utils.h"

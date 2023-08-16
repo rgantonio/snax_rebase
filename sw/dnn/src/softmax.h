@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "math.h"
+#include <math.h>
+
 #include "snrt.h"
-// #include "printf.h"
 #include "utils.h"
 
 /**
