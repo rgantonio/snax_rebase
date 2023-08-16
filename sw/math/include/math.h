@@ -435,6 +435,8 @@ float       pow10f(float);
 long double pow10l(long double);
 #endif
 
+#include "../src/math/tanh.c"
+
 #ifdef __cplusplus
 }
 #endif
