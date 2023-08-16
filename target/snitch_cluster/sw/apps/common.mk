@@ -38,6 +38,8 @@ INCDIRS += $(SNRT_DIR)/src/omp
 INCDIRS += $(ROOT)/sw/deps/riscv-opcodes
 
 # Math library override
+INCDIRS += $(ROOT)/sw/math/arch/riscv64
+INCDIRS += $(ROOT)/sw/math/src/include
 INCDIRS += $(ROOT)/sw/math/src/internal
 INCDIRS += $(ROOT)/sw/math/include
 INCDIRS += $(ROOT)/sw/math/arch/generic

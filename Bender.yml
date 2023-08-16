@@ -33,13 +33,19 @@ vendor_package:
     upstream: { git: https://github.com/kraj/musl.git, rev: 7a43f6fea9081bdd53d8a11cef9e9fab0348c53d } # v1.2.4
     patch_dir: sw/deps/patches/musl
     include_from_upstream:
+      - ".gitignore"
+      - "Makefile"
       - "src/math/tanh.c"
+      - "src/include/features.h"
       - "src/internal/libm.h"
       - "include/endian.h"
       - "include/math.h"
       - "include/features.h"
       - "include/alltypes.h.in"
+      - "include/stdint.h"
       - "arch/riscv64/bits/alltypes.h.in"
+      - "arch/riscv64/bits/float.h"
+      - "arch/riscv64/bits/stdint.h"
       - "tools/mkalltypes.sed"
       - "arch/generic/fp_arch.h"
 
