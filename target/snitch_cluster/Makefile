@@ -88,6 +88,7 @@ VLT_FLAGS  += --trace
 ###############
 
 TB_CC_SOURCES += \
+	${TB_DIR}/bootrom.cc \
 	${TB_DIR}/ipc.cc \
 	${TB_DIR}/rtl_lib.cc \
 	${TB_DIR}/common_lib.cc \
@@ -100,11 +101,11 @@ TB_CC_FLAGS += \
 	-I${TB_DIR}
 
 # Required C sources for the verilator TB that are linked against the verilated model
-VLT_COBJ += $(VLT_BUILDDIR)/tb/s/bootrom.o
-VLT_COBJ += $(VLT_BUILDDIR)/tb/c/ipc.o
-VLT_COBJ += $(VLT_BUILDDIR)/tb/c/common_lib.o
-VLT_COBJ += $(VLT_BUILDDIR)/tb/c/verilator_lib.o
-VLT_COBJ += $(VLT_BUILDDIR)/tb/c/tb_bin.o
+VLT_COBJ += $(VLT_BUILDDIR)/tb/bootrom.o
+VLT_COBJ += $(VLT_BUILDDIR)/tb/ipc.o
+VLT_COBJ += $(VLT_BUILDDIR)/tb/common_lib.o
+VLT_COBJ += $(VLT_BUILDDIR)/tb/verilator_lib.o
+VLT_COBJ += $(VLT_BUILDDIR)/tb/tb_bin.o
 # Sources from verilator root
 VLT_COBJ += $(VLT_BUILDDIR)/vlt/verilated.o
 VLT_COBJ += $(VLT_BUILDDIR)/vlt/verilated_dpi.o
@@ -207,10 +208,7 @@ $(VLT_AR): ${VLT_SOURCES} ${TB_SRCS}
 verilate: $(VLT_AR)
 
 # Build targets for verilator TB
-$(VLT_BUILDDIR)/tb/s/%.o: $(TB_DIR)/%.s $(VLT_AR) ${VLT_BUILDDIR}/lib/libfesvr.a
-	mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) $(VLT_CFLAGS) -c $< -o $@
-$(VLT_BUILDDIR)/tb/c/%.o: $(TB_DIR)/%.cc $(VLT_AR) ${VLT_BUILDDIR}/lib/libfesvr.a
+$(VLT_BUILDDIR)/tb/%.o: $(TB_DIR)/%.cc $(VLT_AR) ${VLT_BUILDDIR}/lib/libfesvr.a
 	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(VLT_CFLAGS) -c $< -o $@
 $(VLT_BUILDDIR)/vlt/%.o: $(VLT_ROOT)/include/%.cpp
@@ -239,11 +237,11 @@ clean-vsim: clean-work
 ${VSIM_BUILDDIR}/compile.vsim.tcl:
 	vlib $(dir $@)
 	${BENDER} script vsim ${VSIM_BENDER} --vlog-arg="${VLOG_FLAGS} -work $(dir $@) " > $@
-	echo '${VLOG} -work $(dir $@) ${TB_CC_SOURCES} -ccflags "$(TB_CC_FLAGS)"' >> $@
+	echo '${VLOG} -work $(dir $@) ${TB_CC_SOURCES} ${TB_ASM_SOURCES} -vv -ccflags "$(TB_CC_FLAGS)"' >> $@
 	echo 'return 0' >> $@
 
 # Build compilation script and compile all sources for Questasim simulation
-bin/snitch_cluster.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl $(VSIM_SOURCES) ${TB_SRCS} ${TB_CC_SOURCES} work/lib/libfesvr.a
+bin/snitch_cluster.vsim: ${VSIM_BUILDDIR}/compile.vsim.tcl $(VSIM_SOURCES) ${TB_SRCS} ${TB_CC_SOURCES} ${TB_ASM_SOURCES} work/lib/libfesvr.a
 	$(call QUESTASIM,tb_bin)
 
 #######
@@ -257,10 +255,10 @@ clean-vcs: clean-work
 	rm -rf bin/snitch_cluster.vcs $(VCS_BUILDDIR) vc_hdrs.h
 
 # Build compilation script and compile all sources for VCS simulation
-bin/snitch_cluster.vcs: ${VCS_SOURCES} ${TB_SRCS} $(TB_CC_SOURCES) $(VCS_BUILDDIR)/compile.sh work/lib/libfesvr.a
+bin/snitch_cluster.vcs: ${VCS_SOURCES} ${TB_SRCS} $(TB_CC_SOURCES) $(TB_ASM_SOURCES) $(VCS_BUILDDIR)/compile.sh work/lib/libfesvr.a
 	mkdir -p bin
 	vcs -Mlib=$(VCS_BUILDDIR) -Mdir=$(VCS_BUILDDIR) -o bin/snitch_cluster.vcs -cc $(CC) -cpp $(CXX) \
-		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin $(TB_CC_SOURCES) \
+		-assert disable_cover -override_timescale=1ns/1ps -full64 tb_bin $(TB_CC_SOURCES) $(TB_ASM_SOURCES) \
 		-CFLAGS "$(TB_CC_FLAGS)" -LDFLAGS "-L${FESVR}/lib" -lfesvr
 
 ##########
