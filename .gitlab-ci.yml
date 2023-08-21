@@ -29,7 +29,11 @@ before_script:
 
 docs:
   script:
-    - mkdocs build
+    - make docs
+    - if mkdocs build | grep -q "ERROR"; then
+        exit 1
+      fi
+
 
 #################################
 # Build Snitch cluster software #

@@ -19,7 +19,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build docs
-        run: mkdocs build
+        run: |
+          make docs
+          if mkdocs build | grep -q "ERROR"; then
+            exit 1
+          fi
 
   ##############################################
   # Simulate SW on Snitch Cluster w/ Verilator #
