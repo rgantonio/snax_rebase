@@ -36,7 +36,7 @@ jobs:
           submodules: 'recursive'
       - name: Build Software
         run: |
-          bender-0.27.1 vendor init
+          bender vendor init
           git submodule update --init --recursive
           make -C target/snitch_cluster sw
       - name: Build Hardware
@@ -63,7 +63,7 @@ jobs:
           submodules: 'recursive'
       - name: Build Software
         run: |
-          bender-0.27.1 vendor init
+          bender vendor init
           git submodule update --init --recursive
           make -C target/snitch_cluster SELECT_RUNTIME=banshee sw
       - name: Run Tests
