@@ -21,6 +21,7 @@ RUNTIME_DIR := $(ROOT)/target/snitch_cluster/sw/runtime/banshee
 else
 RUNTIME_DIR := $(ROOT)/target/snitch_cluster/sw/runtime/rtl
 endif
+MATH_DIR    := $(ROOT)/sw/math/build
 
 # Paths relative to the app including this Makefile
 BUILDDIR = $(abspath build)
@@ -48,6 +49,8 @@ INCDIRS += $(ROOT)/sw/math/include
 RISCV_LDFLAGS += -L$(abspath $(RUNTIME_DIR))
 RISCV_LDFLAGS += -T$(abspath $(SNRT_DIR)/base.ld)
 RISCV_LDFLAGS += -L$(abspath $(RUNTIME_DIR)/build/)
+RISCV_LDFLAGS += -L$(abspath $(MATH_DIR))/
+RISCV_LDFLAGS += -lmath
 RISCV_LDFLAGS += -lsnRuntime
 
 ###########
