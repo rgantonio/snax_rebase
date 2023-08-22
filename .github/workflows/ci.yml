@@ -10,7 +10,7 @@ jobs:
 variables:
   BENDER: bender-0.27.1
 
-before_script:
+before_script: 
   - $BENDER vendor init
   - git submodule update --init --recursive
 
@@ -43,8 +43,6 @@ before_script:
           submodules: 'recursive'
       - name: Build Software
         run: |
-          bender vendor init
-          git submodule update --init --recursive
           make -C target/snitch_cluster sw
       - name: Build Hardware
         run: |
@@ -70,8 +68,6 @@ before_script:
           submodules: 'recursive'
       - name: Build Software
         run: |
-          bender vendor init
-          git submodule update --init --recursive
           make -C target/snitch_cluster SELECT_RUNTIME=banshee sw
       - name: Run Tests
         env:

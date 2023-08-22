@@ -40,8 +40,6 @@ docs:
 snitch-cluster-sw:
   script:
     - cd target/snitch_cluster
-    - bender vendor init
-    - git submodule update --init --recursive
     - make sw
   artifacts:
     paths:
