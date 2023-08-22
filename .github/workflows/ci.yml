@@ -7,6 +7,13 @@ name: ci
 on: [push, pull_request]
 jobs:
 
+variables:
+  BENDER: bender-0.27.1
+
+before_script:
+  - $BENDER vendor init
+  - git submodule update --init --recursive
+
   ########
   # Docs #
   ########

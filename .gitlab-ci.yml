@@ -22,6 +22,8 @@ before_script:
   - $PYTHON -m venv .venv
   - source .venv/bin/activate
   - pip install -r python-requirements.txt
+  - $BENDER vendor init
+  - git submodule update --init --recursive
 
 ##############
 # Build docs #
