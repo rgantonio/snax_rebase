@@ -72,8 +72,8 @@ static inline void softmax_fp32(float *input, float *output, int32_t ldI,
                     // lib conflict
                     // TODO: Try out with musl lib
                     expf(input[b * batch_offset + s * ldI + i] - max_core);
-                    // FIXME: actually there should be an exponentiation
-                    // input[b * batch_offset + s * ldI + i] - max_core;
+                // FIXME: actually there should be an exponentiation
+                // input[b * batch_offset + s * ldI + i] - max_core;
                 sum += output[b * batch_offset + s * ldI + i];
             }
 
