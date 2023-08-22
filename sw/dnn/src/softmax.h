@@ -1,12 +1,13 @@
 // Copyright 2020 ETH Zurich and University of Bologna.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
+//
+// Viviane Potocnik, ETH Zurich, <vivianep@iis.ee.ethz.ch>
 
 #pragma once
 
 #include "math.h"
 #include "snrt.h"
-// #include "printf.h"
 #include "utils.h"
 
 /**
@@ -70,9 +71,9 @@ static inline void softmax_fp32(float *input, float *output, int32_t ldI,
                     // FIXME: Below code is erroring due to the standard math
                     // lib conflict
                     // TODO: Try out with musl lib
-                    // expf(input[b * batch_offset + s * ldI + i] - max_core);
+                    expf(input[b * batch_offset + s * ldI + i] - max_core);
                     // FIXME: actually there should be an exponentiation
-                    input[b * batch_offset + s * ldI + i] - max_core;
+                    // input[b * batch_offset + s * ldI + i] - max_core;
                 sum += output[b * batch_offset + s * ldI + i];
             }
 
