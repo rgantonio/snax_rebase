@@ -22,8 +22,6 @@ before_script:
   - $PYTHON -m venv .venv
   - source .venv/bin/activate
   - pip install -r python-requirements.txt
-  - $BENDER vendor init
-  - git submodule update --init --recursive
 
 ##############
 # Build docs #
@@ -39,6 +37,8 @@ docs:
 
 snitch-cluster-sw:
   script:
+    - $BENDER vendor init
+    - git submodule update --init --recursive
     - cd target/snitch_cluster
     - make sw
   artifacts:
@@ -49,6 +49,8 @@ snitch-cluster-sw:
 
 snitch-cluster-sw-banshee:
   script:
+    - $BENDER vendor init
+    - git submodule update --init --recursive
     - cd target/snitch_cluster
     - make SELECT_RUNTIME=banshee sw
   artifacts:
