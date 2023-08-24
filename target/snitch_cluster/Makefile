@@ -100,10 +100,11 @@ TB_CC_FLAGS += \
 	-I${TB_DIR}
 
 # Required C sources for the verilator TB that are linked against the verilated model
-VLT_COBJ += $(VLT_BUILDDIR)/tb/ipc.o
-VLT_COBJ += $(VLT_BUILDDIR)/tb/common_lib.o
-VLT_COBJ += $(VLT_BUILDDIR)/tb/verilator_lib.o
-VLT_COBJ += $(VLT_BUILDDIR)/tb/tb_bin.o
+VLT_COBJ += $(VLT_BUILDDIR)/tb/s/bootrom.o
+VLT_COBJ += $(VLT_BUILDDIR)/tb/c/ipc.o
+VLT_COBJ += $(VLT_BUILDDIR)/tb/c/common_lib.o
+VLT_COBJ += $(VLT_BUILDDIR)/tb/c/verilator_lib.o
+VLT_COBJ += $(VLT_BUILDDIR)/tb/c/tb_bin.o
 # Sources from verilator root
 VLT_COBJ += $(VLT_BUILDDIR)/vlt/verilated.o
 VLT_COBJ += $(VLT_BUILDDIR)/vlt/verilated_dpi.o
@@ -206,7 +207,10 @@ $(VLT_AR): ${VLT_SOURCES} ${TB_SRCS}
 verilate: $(VLT_AR)
 
 # Build targets for verilator TB
-$(VLT_BUILDDIR)/tb/%.o: $(TB_DIR)/%.cc $(VLT_AR) ${VLT_BUILDDIR}/lib/libfesvr.a
+$(VLT_BUILDDIR)/tb/s/%.o: $(TB_DIR)/%.s $(VLT_AR) ${VLT_BUILDDIR}/lib/libfesvr.a
+	mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) $(VLT_CFLAGS) -c $< -o $@
+$(VLT_BUILDDIR)/tb/c/%.o: $(TB_DIR)/%.cc $(VLT_AR) ${VLT_BUILDDIR}/lib/libfesvr.a
 	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(VLT_CFLAGS) -c $< -o $@
 $(VLT_BUILDDIR)/vlt/%.o: $(VLT_ROOT)/include/%.cpp
