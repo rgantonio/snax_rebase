@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Copyright 2023 ETH Zurich and University of Bologna.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
@@ -49,6 +50,11 @@ def parse_args():
         choices=SIMULATORS,
         help='Choose a simulator to run the test with')
     parser.add_argument(
+        '--sim-bin',
+        action='store',
+        nargs='?',
+        help='Override default path to simulator binary')
+    parser.add_argument(
         '--dry-run',
         action='store_true',
         help='Preview the simulation commands which will be run')
@@ -75,15 +81,20 @@ def check_exit_code(test, exit_code):
         return exit_code
 
 
-def run_test(test, format_elf_path, simulator, dry_run=False):
-    # Get test parameters
-    app = test['app']
+def run_test(test, args):
+    # Extract args
+    simulator = args.simulator
+    sim_bin = args.sim_bin if args.sim_bin else SIMULATOR_BINS[simulator]
+    dry_run = args.dry_run
+    testlist = args.testlist
+
+    # Check if simulator is supported for this test
     if 'simulators' in test:
         if simulator not in test['simulators']:
             return 0
 
     # Construct path to executable
-    elf = format_elf_path(app)
+    elf = Path(testlist).absolute().parent / Path(test['elf'])
     cprint(f'Run test {colored(elf, "cyan")}', attrs=["bold"])
 
     # Construct simulation command (override only supported for RTL)
@@ -91,7 +102,7 @@ def run_test(test, format_elf_path, simulator, dry_run=False):
         cmd = test['cmd']
     else:
         cmd = SIMULATOR_CMDS[simulator]
-    cmd = cmd.format(sim_bin=SIMULATOR_BINS[simulator], elf=elf)
+    cmd = cmd.format(sim_bin=sim_bin, elf=elf)
     print(f'$ {cmd}', flush=True)
 
     # Run test
@@ -133,15 +144,15 @@ def run_test(test, format_elf_path, simulator, dry_run=False):
 
         # Report failure or success
         if result != 0:
-            cprint(f'{app} test failed', 'red', attrs=['bold'], flush=True)
+            cprint(f'{elf} test failed', 'red', attrs=['bold'], flush=True)
         else:
-            cprint(f'{app} test passed', 'green', attrs=['bold'], flush=True)
+            cprint(f'{elf} test passed', 'green', attrs=['bold'], flush=True)
 
     return result
 
 
 def print_failed_test(test):
-    print(f'{colored(test["app"], "cyan")} test {colored("failed", "red")}')
+    print(f'{colored(test["elf"], "cyan")} test {colored("failed", "red")}')
 
 
 def print_test_summary(failed_tests, dry_run=False):
@@ -157,28 +168,25 @@ def print_test_summary(failed_tests, dry_run=False):
     return 0
 
 
-def run_tests(testlist, format_elf_path, simulator, dry_run=False, early_exit=False):
+def run_tests(args):
     # Iterate tests
-    tests = get_tests(testlist)
+    tests = get_tests(args.testlist)
     failed_tests = []
     for test in tests:
         # Run test
-        result = run_test(test, format_elf_path, simulator, dry_run)
+        result = run_test(test, args)
         if result != 0:
             failed_tests.append(test)
             # End program if requested on first test failure
-            if early_exit:
+            if args.early_exit:
                 break
+    return print_test_summary(failed_tests, args.dry_run)
 
-    return print_test_summary(failed_tests, dry_run)
 
-
-# format_elf_path: function which constructs the path to an ELF binary
-#                  from a test name as listed in the test list file
-def main(format_elf_path):
+def main():
     args = parse_args()
-    sys.exit(run_tests(args.testlist,
-                       format_elf_path,
-                       args.simulator,
-                       args.dry_run,
-                       args.early_exit))
+    sys.exit(run_tests(args))
+
+
+if __name__ == '__main__':
+    main()
