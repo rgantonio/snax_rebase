@@ -253,7 +253,7 @@ module snax_cluster
   endfunction
 
   // SNAX TCDM
-  localparam int unsigned SnaxLocalMemPorts = 4;
+  localparam int unsigned SnaxTcdmPorts = 4;
 
   localparam int unsigned NrTCDMPortsCores = get_tcdm_port_offs(NrCores);
   localparam int unsigned NumTCDMIn = NrTCDMPortsCores + 1;
@@ -920,12 +920,12 @@ module snax_cluster
     if(SNAX) begin: gen_yes_mac
 
       // Generation of SNAX wires
-      tcdm_req_t 	[SnaxLocalMemPorts-1:0 ] snax_tcdm_req;
-      tcdm_rsp_t 	[SnaxLocalMemPorts-1:0 ] snax_tcdm_rsp;
+      tcdm_req_t 	[SnaxTcdmPorts-1:0 ] snax_tcdm_req;
+      tcdm_rsp_t 	[SnaxTcdmPorts-1:0 ] snax_tcdm_rsp;
 
       snax_mac # (
         .DataWidth          ( 32         				),
-        .SnaxLocalMemPorts  ( SnaxLocalMemPorts	),
+        .SnaxTcdmPorts      ( SnaxTcdmPorts	    ),
         .acc_req_t          ( acc_req_t       	),
         .acc_rsp_t         	( acc_resp_t     		),
         .tcdm_req_t         ( tcdm_req_t      	),
