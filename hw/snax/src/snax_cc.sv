@@ -83,6 +83,7 @@ module snax_cc #(
   parameter int unsigned NumITLBEntries         = 0,
   parameter int unsigned NumSequencerInstr      = 0,
   parameter int unsigned NumSsrs                = 0,          // SSR Parameter
+  parameter int unsigned SsrMuxRespDepth        = 0,
   parameter snitch_ssr_pkg::ssr_cfg_t [NumSsrs-1:0] SsrCfgs = '0,
   parameter logic [NumSsrs-1:0][4:0] SsrRegs    = '0,
   parameter bit          IsoCrossing            = 0,          // Add isochronous clock-domain crossings e.g., make it possible to operate the core in a slower clock domain.
@@ -205,36 +206,36 @@ module snax_cc #(
   `SNITCH_VM_TYPEDEF(AddrWidth)
 
   snax_snitch #(
-    .AddrWidth              ( AddrWidth              ),
-    .DataWidth              ( DataWidth              ),
-    .acc_req_t              ( acc_req_t              ),
-    .acc_resp_t             ( acc_resp_t             ),
-    .dreq_t                 ( dreq_t                 ),
-    .drsp_t                 ( drsp_t                 ),
-    .pa_t                   ( pa_t                   ),
-    .l0_pte_t               ( l0_pte_t               ),
-    .BootAddr               ( BootAddr               ),
-    .SnitchPMACfg           ( SnitchPMACfg           ),
-    .NumIntOutstandingLoads ( NumIntOutstandingLoads ),
-    .NumIntOutstandingMem   ( NumIntOutstandingMem   ),
-    .VMSupport              ( VMSupport              ),
-    .NumDTLBEntries         ( NumDTLBEntries         ),
-    .NumITLBEntries         ( NumITLBEntries         ),
-    .RVE                    ( RVE                    ),
-    .FP_EN                  ( FPEn                   ),
-    .Xdma                   ( EnableDma              ),
-    .Xssr                   ( Xssr                   ),
-    .RVF                    ( RVF                    ),
-    .RVD                    ( RVD                    ),
-    .XDivSqrt               ( XDivSqrt               ),
-    .XF16                   ( XF16                   ),
-    .XF16ALT                ( XF16ALT                ),
-    .XF8                    ( XF8                    ),
-    .XF8ALT                 ( XF8ALT                 ),
-    .XFVEC                  ( XFVEC                  ),
-    .XFDOTP                 ( XFDOTP                 ),
-    .XFAUX                  ( XFauxMerged            ),
-    .FLEN                   ( FLEN                   )
+    .AddrWidth              ( AddrWidth                 ),
+    .DataWidth              ( DataWidth                 ),
+    .acc_req_t              ( acc_req_t                 ),
+    .acc_resp_t             ( acc_resp_t                ),
+    .dreq_t                 ( dreq_t                    ),
+    .drsp_t                 ( drsp_t                    ),
+    .pa_t                   ( pa_t                      ),
+    .l0_pte_t               ( l0_pte_t                  ),
+    .BootAddr               ( BootAddr                  ),
+    .SnitchPMACfg           ( SnitchPMACfg              ),
+    .NumIntOutstandingLoads ( NumIntOutstandingLoads    ),
+    .NumIntOutstandingMem   ( NumIntOutstandingMem      ),
+    .VMSupport              ( VMSupport                 ),
+    .NumDTLBEntries         ( NumDTLBEntries            ),
+    .NumITLBEntries         ( NumITLBEntries            ),
+    .RVE                    ( RVE                       ),
+    .FP_EN                  ( FPEn                      ),
+    .Xdma                   ( Xdma                      ),
+    .Xssr                   ( Xssr                      ),
+    .RVF                    ( RVF                       ),
+    .RVD                    ( RVD                       ),
+    .XDivSqrt               ( XDivSqrt                  ),
+    .XF16                   ( XF16                      ),
+    .XF16ALT                ( XF16ALT                   ),
+    .XF8                    ( XF8                       ),
+    .XF8ALT                 ( XF8ALT                    ),
+    .XFVEC                  ( XFVEC                     ),
+    .XFDOTP                 ( XFDOTP                    ),
+    .XFAUX                  ( XFauxMerged               ),
+    .FLEN                   ( FLEN                      )
   ) i_snax_snitch (
     .clk_i                  ( clk_d2_i                  ), // if necessary operate on half the frequency
     .rst_i                  ( ~rst_ni                   ),
@@ -918,42 +919,42 @@ module snax_cc #(
       extras_snitch = '{
         // State
         source:       snax_snitch_pkg::SrcSnitch,
-        stall:        i_snitch.stall,
-        exception:    i_snitch.exception,
+        stall:        i_snax_snitch.stall,
+        exception:    i_snax_snitch.exception,
         // Decoding
-        rs1:          i_snitch.rs1,
-        rs2:          i_snitch.rs2,
-        rd:           i_snitch.rd,
-        is_load:      i_snitch.is_load,
-        is_store:     i_snitch.is_store,
-        is_branch:    i_snitch.is_branch,
-        pc_d:         i_snitch.pc_d,
+        rs1:          i_snax_snitch.rs1,
+        rs2:          i_snax_snitch.rs2,
+        rd:           i_snax_snitch.rd,
+        is_load:      i_snax_snitch.is_load,
+        is_store:     i_snax_snitch.is_store,
+        is_branch:    i_snax_snitch.is_branch,
+        pc_d:         i_snax_snitch.pc_d,
         // Operands
-        opa:          i_snitch.opa,
-        opb:          i_snitch.opb,
-        opa_select:   i_snitch.opa_select,
-        opb_select:   i_snitch.opb_select,
-        write_rd:     i_snitch.write_rd,
-        csr_addr:     i_snitch.inst_data_i[31:20],
+        opa:          i_snax_snitch.opa,
+        opb:          i_snax_snitch.opb,
+        opa_select:   i_snax_snitch.opa_select,
+        opb_select:   i_snax_snitch.opb_select,
+        write_rd:     i_snax_snitch.write_rd,
+        csr_addr:     i_snax_snitch.inst_data_i[31:20],
         // Pipeline writeback
-        writeback:    i_snitch.alu_writeback,
+        writeback:    i_snax_snitch.alu_writeback,
         // Load/Store
-        gpr_rdata_1:  i_snitch.gpr_rdata[1],
-        ls_size:      i_snitch.ls_size,
-        ld_result_32: i_snitch.ld_result[31:0],
-        lsu_rd:       i_snitch.lsu_rd,
-        retire_load:  i_snitch.retire_load,
-        alu_result:   i_snitch.alu_result,
+        gpr_rdata_1:  i_snax_snitch.gpr_rdata[1],
+        ls_size:      i_snax_snitch.ls_size,
+        ld_result_32: i_snax_snitch.ld_result[31:0],
+        lsu_rd:       i_snax_snitch.lsu_rd,
+        retire_load:  i_snax_snitch.retire_load,
+        alu_result:   i_snax_snitch.alu_result,
         // Atomics
-        ls_amo:       i_snitch.ls_amo,
+        ls_amo:       i_snax_snitch.ls_amo,
         // Accelerator
-        retire_acc:   i_snitch.retire_acc,
-        acc_pid:      i_snitch.acc_prsp_i.id,
-        acc_pdata_32: i_snitch.acc_prsp_i.data[31:0],
+        retire_acc:   i_snax_snitch.retire_acc,
+        acc_pid:      i_snax_snitch.acc_prsp_i.id,
+        acc_pdata_32: i_snax_snitch.acc_prsp_i.data[31:0],
         // FPU offload
         fpu_offload:
-          (i_snitch.acc_qready_i && i_snitch.acc_qvalid_o && i_snitch.acc_qreq_o.addr == 0),
-        is_seq_insn:  (i_snitch.inst_data_i inside {riscv_instr::FREP_I, riscv_instr::FREP_O})
+          (i_snax_snitch.acc_qready_i && i_snax_snitch.acc_qvalid_o && i_snax_snitch.acc_qreq_o.addr == 0),
+        is_seq_insn:  (i_snax_snitch.inst_data_i inside {riscv_instr::FREP_I, riscv_instr::FREP_O})
       };
 
       if (FPEn) begin
@@ -969,10 +970,10 @@ module snax_cc #(
       // we are not stalled <==> we have issued and processed an instruction (including offloads)
       // OR we are retiring (issuing a writeback from) a load or accelerator instruction
       if (
-          !i_snitch.stall || i_snitch.retire_load || i_snitch.retire_acc
+          !i_snax_snitch.stall || i_snax_snitch.retire_load || i_snax_snitch.retire_acc
       ) begin
         $sformat(trace_entry, "%t %1d %8d 0x%h DASM(%h) #; %s\n",
-            $time, cycle, i_snitch.priv_lvl_q, i_snitch.pc_q, i_snitch.inst_data_i,
+            $time, cycle, i_snax_snitch.priv_lvl_q, i_snax_snitch.pc_q, i_snax_snitch.inst_data_i,
             snax_snitch_pkg::print_snitch_trace(extras_snitch));
         $fwrite(f, trace_entry);
       end
@@ -985,7 +986,7 @@ module snax_cc #(
         if (extras_fpu.acc_q_hs || extras_fpu.fpu_out_hs
         || extras_fpu.lsu_q_hs || extras_fpu.fpr_we) begin
           $sformat(trace_entry, "%t %1d %8d 0x%h DASM(%h) #; %s\n",
-              $time, cycle, i_snitch.priv_lvl_q, 32'hz, extras_fpu.op_in,
+              $time, cycle, i_snax_snitch.priv_lvl_q, 32'hz, extras_fpu.op_in,
               snax_snitch_pkg::print_fpu_trace(extras_fpu));
           $fwrite(f, trace_entry);
         end
@@ -993,7 +994,7 @@ module snax_cc #(
         if (Xfrep) begin
           if (extras_fpu_seq_out.cbuf_push) begin
             $sformat(trace_entry, "%t %1d %8d 0x%h DASM(%h) #; %s\n",
-                $time, cycle, i_snitch.priv_lvl_q, 32'hz, 64'hz,
+                $time, cycle, i_snax_snitch.priv_lvl_q, 32'hz, 64'hz,
                 snax_snitch_pkg::print_fpu_sequencer_trace(extras_fpu_seq_out));
             $fwrite(f, trace_entry);
           end
