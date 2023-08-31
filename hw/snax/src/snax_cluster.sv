@@ -20,7 +20,7 @@
 
 /// Snitch many-core cluster with improved TCDM interconnect.
 /// Snitch Cluster Top-Level.
-module snitch_cluster
+module snax_cluster
   import snitch_pkg::*;
 #(
   /// Width of physical address.
