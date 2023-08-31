@@ -86,7 +86,7 @@ module snax_mac # (
   //------------------------------
   // Main MAC engine
   //------------------------------
-  mac_top_wrap #(
+  snax_remodel_mac_top_wrap #(
       .N_CORES      ( 1                   ),
       .MP           ( SnaxTcdmPorts       ),
       .ID           ( 5                   )
