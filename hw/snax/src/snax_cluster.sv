@@ -821,7 +821,7 @@ module snax_cluster
     acc_req_t 	snax_req;
 		logic 			snax_qvalid;
 		logic 			snax_qready;
-		acc_rsp_t 	snax_resp;
+		acc_resp_t 	snax_resp;
 		logic 			snax_pvalid;
 		logic 			snax_pready;
 
@@ -927,7 +927,7 @@ module snax_cluster
         .DataWidth          ( 32         				),
         .SnaxLocalMemPorts  ( SnaxLocalMemPorts	),
         .acc_req_t          ( acc_req_t       	),
-        .acc_rsp_t         	( acc_rsp_t      		),
+        .acc_rsp_t         	( acc_resp_t     		),
         .tcdm_req_t         ( tcdm_req_t      	),
         .tcdm_rsp_t         ( tcdm_rsp_t      	)
       ) i_snax_mac (
