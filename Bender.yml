@@ -134,7 +134,7 @@ sources:
       - hw/tcdm_interface/test/reqrsp_to_tcdm_tb.sv
       - hw/tcdm_interface/test/tcdm_mux_tb.sv
 
-  # snitch
+  # snitch and snax
   - files:
       # Level 0
       - hw/snitch/src/snitch_pma_pkg.sv
@@ -234,7 +234,7 @@ sources:
       # Level 1
       - hw/snax_hwpe_mac/src/snax_mac.sv
 
-  # snitch_cluster
+  # snitch_cluster and snax_cluster
   - files:
       # Level 0
       - hw/snitch_cluster/src/snitch_amo_shim.sv
@@ -255,6 +255,7 @@ sources:
       - hw/snitch_cluster/src/snitch_hive.sv
       # Level 4
       - hw/snitch_cluster/src/snitch_cluster.sv
+      - hw/snax/src/snax_cluster.sv
   - target: test
     files:
       - hw/snitch_cluster/test/snitch_tcdm_interconnect_tb.sv
