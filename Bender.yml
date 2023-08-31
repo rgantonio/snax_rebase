@@ -230,8 +230,13 @@ sources:
   - files:
       # Level 0
       - hw/snax_hwpe_mac/src/snax_hwpe_ctrl.sv
-      - hw/snax_hwpe_mac/src/snax_hwpe_to_reqrsp.sv 
+      - hw/snax_hwpe_mac/src/snax_hwpe_to_reqrsp.sv
+      - hw/snax_hwpe_mac/src/snax_remodel_mac_stream.sv
       # Level 1
+      - hw/snax_hwpe_mac/src/snax_remodel_mac_top.sv
+      # Level 2
+      - hw/snax_hwpe_mac/src/snax_remodel_mac_top_wrap.sv
+      # Level 3
       - hw/snax_hwpe_mac/src/snax_mac.sv
 
   # snitch_cluster and snax_cluster
