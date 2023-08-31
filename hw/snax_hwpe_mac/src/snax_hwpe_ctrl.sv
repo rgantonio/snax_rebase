@@ -96,6 +96,7 @@ module snax_hwpe_ctrl #(
   //---------------------------------------------
 
   // A transaction is valid when both ready and valid signal for requestor are valid
+  logic transaction_valid;
   assign transaction_valid = req_valid_i & req_ready_o;
 
   // wen = 1'b1 whenever we read. wen = 1'b0 whenever we write
@@ -103,7 +104,7 @@ module snax_hwpe_ctrl #(
   // Need to use unique casez to ignore `?` bits
   always_comb begin
     unique casez (req_i.data_op)
-      SNAX_RD_ACC, CSRRS, CSRRSI, CSRRC, CSRRCI: begin
+      CSRRS, CSRRSI, CSRRC, CSRRCI: begin
         wen = 1'b1;
       end
       default: begin
