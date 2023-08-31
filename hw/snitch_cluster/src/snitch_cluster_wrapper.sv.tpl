@@ -288,7 +288,7 @@ module ${cfg['name']}_wrapper (
     .ICacheLineCount (${cfg['pkg_name']}::ICacheLineCount),
     .ICacheSets (${cfg['pkg_name']}::ICacheSets),
 % if cfg['enable_snax']:
-    .SNAX(${core_cfg_flat('snax')})
+    .SNAX(${core_cfg_flat('snax')}),
 % endif
     .VMSupport (${int(cfg['vm_support'])}),
     .RVE (${core_isa('e')}),
