@@ -226,6 +226,14 @@ sources:
       - hw/snitch_ssr/test/tb_simple_ssr.sv
       - hw/snitch_ssr/test/tb_simple_ssr_streamer.sv
 
+  # hwpe_mac
+  - files:
+      # Level 0
+      - hw/snax_hwpe_mac/src/snax_hwpe_ctrl.sv
+      - hw/snax_hwpe_mac/src/snax_hwpe_to_reqrsp.sv 
+      # Level 1
+      - hw/snax_hwpe_mac/src/snax_mac.sv
+
   # snitch_cluster
   - files:
       # Level 0
