@@ -254,7 +254,6 @@ module snax_cluster
 
   // SNAX TCDM
   localparam int unsigned SnaxTcdmPorts = 4;
-  localparam int unsigned SnaxTotalTcdmPorts = SnaxTcdmPorts*NrCores;
 
   localparam int unsigned NrTCDMPortsCores = get_tcdm_port_offs(NrCores);
   localparam int unsigned NumTCDMIn = NrTCDMPortsCores + 1;
@@ -489,10 +488,6 @@ module snax_cluster
 
   tcdm_req_t [NrTCDMPortsCores-1:0] tcdm_req;
   tcdm_rsp_t [NrTCDMPortsCores-1:0] tcdm_rsp;
-
-  // Generation of SNAX wires
-  tcdm_req_t 	[SnaxTotalTcdmPorts-1:0 ] snax_tcdm_req;
-  tcdm_rsp_t 	[SnaxTotalTcdmPorts-1:0 ] snax_tcdm_rsp;
 
   core_events_t [NrCores-1:0] core_events;
   tcdm_events_t               tcdm_events;
@@ -761,56 +756,27 @@ module snax_cluster
     end
   end
 
-  if ( SNAX ) begin: gen_yes_snax_tcdm_interconnect
-
-    snitch_tcdm_interconnect #(
-      .NumInp                 ( NumTCDMIn + SnaxTotalTcdmPorts         ),
-      .NumOut                 ( NrBanks                                ),
-      .tcdm_req_t             ( tcdm_req_t                             ),
-      .tcdm_rsp_t             ( tcdm_rsp_t                             ),
-      .mem_req_t              ( mem_req_t                              ),
-      .mem_rsp_t              ( mem_rsp_t                              ),
-      .MemAddrWidth           ( TCDMMemAddrWidth                       ),
-      .DataWidth              ( NarrowDataWidth                        ),
-      .user_t                 ( tcdm_user_t                            ),
-      .MemoryResponseLatency  ( 1 + RegisterTCDMCuts                   ),
-      .Radix                  ( Radix                                  ),
-      .Topology               ( Topology                               )
-    ) i_tcdm_interconnect (
-      .clk_i                  ( clk_i                                  ),
-      .rst_ni                 ( rst_ni                                 ),
-      .req_i                  ( {axi_soc_req, tcdm_req, snax_tcdm_req} ),
-      .rsp_o                  ( {axi_soc_rsp, tcdm_rsp, snax_tcdm_rsp} ),
-      .mem_req_o              ( ic_req                                 ),
-      .mem_rsp_i              ( ic_rsp                                 )
-    );
-
-  end else begin: gen_no_snax_tcdm_interconnect
-
-    snitch_tcdm_interconnect #(
-      .NumInp                 ( NumTCDMIn               ),
-      .NumOut                 ( NrBanks                 ),
-      .tcdm_req_t             ( tcdm_req_t              ),
-      .tcdm_rsp_t             ( tcdm_rsp_t              ),
-      .mem_req_t              ( mem_req_t               ),
-      .mem_rsp_t              ( mem_rsp_t               ),
-      .MemAddrWidth           ( TCDMMemAddrWidth        ),
-      .DataWidth              ( NarrowDataWidth         ),
-      .user_t                 ( tcdm_user_t             ),
-      .MemoryResponseLatency  ( 1 + RegisterTCDMCuts    ),
-      .Radix                  ( Radix                   ),
-      .Topology               ( Topology                )
-    ) i_tcdm_interconnect (
-      .clk_i                  ( clk_i                   ),
-      .rst_ni                 ( rst_ni                  ),
-      .req_i                  ( {axi_soc_req, tcdm_req} ),
-      .rsp_o                  ( {axi_soc_rsp, tcdm_rsp} ),
-      .mem_req_o              ( ic_req                  ),
-      .mem_rsp_i              ( ic_rsp                  )
-    );
-
-  end
-  
+  snitch_tcdm_interconnect #(
+    .NumInp (NumTCDMIn),
+    .NumOut (NrBanks),
+    .tcdm_req_t (tcdm_req_t),
+    .tcdm_rsp_t (tcdm_rsp_t),
+    .mem_req_t (mem_req_t),
+    .mem_rsp_t (mem_rsp_t),
+    .MemAddrWidth (TCDMMemAddrWidth),
+    .DataWidth (NarrowDataWidth),
+    .user_t (tcdm_user_t),
+    .MemoryResponseLatency (1 + RegisterTCDMCuts),
+    .Radix (Radix),
+    .Topology (Topology)
+  ) i_tcdm_interconnect (
+    .clk_i,
+    .rst_ni,
+    .req_i ({axi_soc_req, tcdm_req}),
+    .rsp_o ({axi_soc_rsp, tcdm_rsp}),
+    .mem_req_o (ic_req),
+    .mem_rsp_i (ic_rsp)
+  );
 
   logic clk_d2;
 
@@ -953,6 +919,10 @@ module snax_cluster
     //---------------------------------------------
     if(SNAX) begin: gen_yes_mac
 
+      // Generation of SNAX wires
+      tcdm_req_t 	[SnaxTcdmPorts-1:0 ] snax_tcdm_req;
+      tcdm_rsp_t 	[SnaxTcdmPorts-1:0 ] snax_tcdm_rsp;
+
       snax_mac # (
         .DataWidth          ( 32         				),
         .SnaxTcdmPorts      ( SnaxTcdmPorts	    ),
@@ -969,8 +939,8 @@ module snax_cluster
         .snax_resp_o        ( snax_resp       	),
         .snax_pvalid_o      ( snax_pvalid     	),
         .snax_pready_i      ( snax_pready     	),
-        .snax_tcdm_req_o    ( snax_tcdm_req[SnaxTcdmPorts*(i+1)-1:i*SnaxTcdmPorts] ),
-        .snax_tcdm_rsp_i    ( snax_tcdm_rsp[SnaxTcdmPorts*(i+1)-1:i*SnaxTcdmPorts] )
+        .snax_tcdm_req_o    ( snax_tcdm_req   	),
+        .snax_tcdm_rsp_i    ( snax_tcdm_rsp   	)
       );
 
       // TODO: Fix me later but tie to zero for now
@@ -978,7 +948,7 @@ module snax_cluster
 
     end else begin: gen_no_mac
 
-      // Tie these signal to low when no MAC is present 
+      // Tie these signal to low when no MAC is present
       assign snax_qready = '0;
       assign snax_resp   = '0;
       assign snax_pvalid = '0;
