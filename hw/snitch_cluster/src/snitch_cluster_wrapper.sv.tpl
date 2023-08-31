@@ -252,8 +252,14 @@ module ${cfg['name']}_wrapper (
   localparam int unsigned NumSsrs [${cfg['nr_cores']}] = '{${core_cfg('num_ssrs')}};
   localparam int unsigned SsrMuxRespDepth [${cfg['nr_cores']}] = '{${core_cfg('ssr_mux_resp_depth')}};
 
+
+% if cfg['enable_snax']:
+  // SNAX cluster under test.
+  snax_cluster #(
+% else:
   // Snitch cluster under test.
   snitch_cluster #(
+%endif
     .PhysicalAddrWidth (${cfg['addr_width']}),
     .NarrowDataWidth (${cfg['data_width']}),
     .WideDataWidth (${cfg['dma_data_width']}),
@@ -281,6 +287,9 @@ module ${cfg['name']}_wrapper (
     .ICacheLineWidth (${cfg['pkg_name']}::ICacheLineWidth),
     .ICacheLineCount (${cfg['pkg_name']}::ICacheLineCount),
     .ICacheSets (${cfg['pkg_name']}::ICacheSets),
+% if cfg['enable_snax']:
+    .SNAX(${core_cfg_flat('snax')})
+% endif
     .VMSupport (${int(cfg['vm_support'])}),
     .RVE (${core_isa('e')}),
     .RVF (${core_isa('f')}),
