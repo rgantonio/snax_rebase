@@ -10,7 +10,7 @@
 
 module snax_mac # (
   parameter int unsigned DataWidth         = 32,
-  parameter int unsigned SnaxLocalMemPorts = 4,
+  parameter int unsigned SnaxTcdmPorts = 4,
   parameter type         acc_req_t         = logic,
   parameter type         acc_rsp_t         = logic,
   parameter type         tcdm_req_t        = logic,
@@ -24,8 +24,8 @@ module snax_mac # (
   output    acc_rsp_t                           snax_resp_o,
   output    logic                               snax_pvalid_o,
   input     logic                               snax_pready_i,
-  output    tcdm_req_t  [SnaxLocalMemPorts-1:0] snax_tcdm_req_o,
-  input     tcdm_rsp_t  [SnaxLocalMemPorts-1:0] snax_tcdm_rsp_i
+  output    tcdm_req_t  [SnaxTcdmPorts-1:0] snax_tcdm_req_o,
+  input     tcdm_rsp_t  [SnaxTcdmPorts-1:0] snax_tcdm_rsp_i
 );
   //------------------------------
   // HWPE control interface
@@ -36,7 +36,7 @@ module snax_mac # (
       .clk ( clk_i )
   );
 
-  hwpe_stream_intf_tcdm snax_tcdm [SnaxLocalMemPorts-1:0] (
+  hwpe_stream_intf_tcdm snax_tcdm [SnaxTcdmPorts-1:0] (
       .clk ( clk_i )
   );
 
@@ -48,16 +48,16 @@ module snax_mac # (
   typedef logic [ 3:0] mem_strb_t;
 
   typedef struct packed {
-    logic           [SnaxLocalMemPorts-1:0]  req;
-    logic           [SnaxLocalMemPorts-1:0]  gnt;
-    hwpe_mem_addr_t [SnaxLocalMemPorts-1:0]  add;
-    logic           [SnaxLocalMemPorts-1:0]  wen;
-    mem_strb_t      [SnaxLocalMemPorts-1:0]  be;
-    mem_data_t      [SnaxLocalMemPorts-1:0]  data;
-    mem_data_t      [SnaxLocalMemPorts-1:0]  r_data;
-    logic           [SnaxLocalMemPorts-1:0]  r_valid;
-    logic                                    r_opc;
-    logic                                    r_user;
+    logic           [SnaxTcdmPorts-1:0]  req;
+    logic           [SnaxTcdmPorts-1:0]  gnt;
+    hwpe_mem_addr_t [SnaxTcdmPorts-1:0]  add;
+    logic           [SnaxTcdmPorts-1:0]  wen;
+    mem_strb_t      [SnaxTcdmPorts-1:0]  be;
+    mem_data_t      [SnaxTcdmPorts-1:0]  data;
+    mem_data_t      [SnaxTcdmPorts-1:0]  r_data;
+    logic           [SnaxTcdmPorts-1:0]  r_valid;
+    logic                                r_opc;
+    logic                                r_user;
   } loc_mem_t;
 
   loc_mem_t snax_mem;
@@ -87,9 +87,9 @@ module snax_mac # (
   // Main MAC engine
   //------------------------------
   mac_top_wrap #(
-      .N_CORES      ( 1                ),
-      .MP           ( SnaxLocalMemPorts  ),
-      .ID           ( 5                )
+      .N_CORES      ( 1                   ),
+      .MP           ( SnaxTcdmPorts       ),
+      .ID           ( 5                   )
   ) i_mac_top (
     .clk_i          ( clk_i               ),
     .rst_ni         ( rst_ni              ),
@@ -122,7 +122,7 @@ module snax_mac # (
   //------------------------------
   genvar i;
 
-  for (i = 0; i < SnaxLocalMemPorts; i++) begin: gen_map_translate
+  for (i = 0; i < SnaxTcdmPorts; i++) begin: gen_map_translate
 
     assign snax_tcdm       [i].req  = snax_mem.req [i];
     assign snax_mem.gnt    [i]      = snax_tcdm    [i].gnt;
@@ -156,9 +156,9 @@ endmodule
 
 snax_mac # (
   .DataWidth          ( DataWidth         ),
-  .SnaxLocalMemPorts  ( SnaxLocalMemPorts ),
+  .SnaxTcdmPorts      ( SnaxTcdmPorts     ),
   .acc_req_t          ( acc_req_t         ),
-  .acc_rsp_t          ( acc_rsp_t        )
+  .acc_rsp_t          ( acc_rsp_t         )
   .tcdm_req_t         ( tcdm_req_t        ),
   .tcdm_rsp_t         ( tcdm_rsp_t        )
 ) i_snax_mac (
