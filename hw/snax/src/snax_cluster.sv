@@ -252,6 +252,9 @@ module snax_cluster
     return n;
   endfunction
 
+  // SNAX TCDM
+  localparam int unsigned SnaxLocalMemPorts = 4;
+
   localparam int unsigned NrTCDMPortsCores = get_tcdm_port_offs(NrCores);
   localparam int unsigned NumTCDMIn = NrTCDMPortsCores + 1;
   localparam logic [PhysicalAddrWidth-1:0] TCDMMask = ~(TCDMSize-1);
@@ -793,7 +796,7 @@ module snax_cluster
 
   for (genvar i = 0; i < NrCores; i++) begin : gen_core
 
-    localparam int unsigned TcdmPorts = get_tcdm_ports(i);
+    localparam int unsigned TcdmPorts     = get_tcdm_ports(i);
     localparam int unsigned TcdmPortsOffs = get_tcdm_port_offs(i);
 
     axi_mst_dma_req_t   axi_dma_req;
@@ -809,96 +812,149 @@ module snax_cluster
       i_sync_mtip  (.clk_i, .rst_ni, .serial_i (mtip_i[i]), .serial_o (irq.mtip));
     sync #(.STAGES (2))
       i_sync_msip  (.clk_i, .rst_ni, .serial_i (msip_i[i]), .serial_o (irq.msip));
+
     assign irq.mcip = cl_interrupt[i];
 
     tcdm_req_t [TcdmPorts-1:0] tcdm_req_wo_user;
 
+    // Snax related wiring
+    acc_req_t 	snax_req;
+		logic 			snax_qvalid;
+		logic 			snax_qready;
+		acc_rsp_t 	snax_resp;
+		logic 			snax_pvalid;
+		logic 			snax_pready;
+
     snax_cc #(
-      .AddrWidth (PhysicalAddrWidth),
-      .DataWidth (NarrowDataWidth),
-      .DMADataWidth (WideDataWidth),
-      .DMAIdWidth (WideIdWidthIn),
-      .SnitchPMACfg (SnitchPMACfg),
-      .DMAAxiReqFifoDepth (DMAAxiReqFifoDepth),
-      .DMAReqFifoDepth (DMAReqFifoDepth),
-      .dreq_t (reqrsp_req_t),
-      .drsp_t (reqrsp_rsp_t),
-      .tcdm_req_t (tcdm_req_t),
-      .tcdm_rsp_t (tcdm_rsp_t),
-      .tcdm_user_t (tcdm_user_t),
-      .axi_req_t (axi_mst_dma_req_t),
-      .axi_rsp_t (axi_mst_dma_resp_t),
-      .hive_req_t (hive_req_t),
-      .hive_rsp_t (hive_rsp_t),
-      .acc_req_t (acc_req_t),
-      .acc_resp_t (acc_resp_t),
-      .dma_events_t (dma_events_t),
-      .BootAddr (BootAddr),
-      .RVE (RVE[i]),
-      .RVF (RVF[i]),
-      .RVD (RVD[i]),
-      .XDivSqrt (XDivSqrt[i]),
-      .XF16 (XF16[i]),
-      .XF16ALT (XF16ALT[i]),
-      .XF8 (XF8[i]),
-      .XF8ALT (XF8ALT[i]),
-      .XFVEC (XFVEC[i]),
-      .XFDOTP (XFDOTP[i]),
-      .Xdma (Xdma[i]),
-      .IsoCrossing (IsoCrossing),
-      .Xfrep (Xfrep[i]),
-      .Xssr (Xssr[i]),
-      .Xipu (1'b0),
-      .VMSupport (VMSupport),
-      .NumIntOutstandingLoads (NumIntOutstandingLoads[i]),
-      .NumIntOutstandingMem (NumIntOutstandingMem[i]),
-      .NumFPOutstandingLoads (NumFPOutstandingLoads[i]),
-      .NumFPOutstandingMem (NumFPOutstandingMem[i]),
-      .FPUImplementation (FPUImplementation[i]),
-      .NumDTLBEntries (NumDTLBEntries[i]),
-      .NumITLBEntries (NumITLBEntries[i]),
-      .NumSequencerInstr (NumSequencerInstr[i]),
-      .NumSsrs (NumSsrs[i]),
-      .SsrMuxRespDepth (SsrMuxRespDepth[i]),
-      .SsrCfgs (SsrCfgs[i][NumSsrs[i]-1:0]),
-      .SsrRegs (SsrRegs[i][NumSsrs[i]-1:0]),
-      .RegisterOffloadReq (RegisterOffloadReq),
-      .RegisterOffloadRsp (RegisterOffloadRsp),
-      .RegisterCoreReq (RegisterCoreReq),
-      .RegisterCoreRsp (RegisterCoreRsp),
-      .RegisterFPUReq (RegisterFPUReq),
-      .RegisterSequencer (RegisterSequencer),
-      .RegisterFPUIn (RegisterFPUIn),
-      .RegisterFPUOut (RegisterFPUOut),
-      .TCDMAddrWidth (TCDMAddrWidth)
+      .AddrWidth              ( PhysicalAddrWidth                  ),
+      .DataWidth              ( NarrowDataWidth                    ),
+      .DMADataWidth           ( WideDataWidth                      ),
+      .DMAIdWidth             ( WideIdWidthIn                      ),
+      .SnitchPMACfg           ( SnitchPMACfg                       ),
+      .DMAAxiReqFifoDepth     ( DMAAxiReqFifoDepth                 ),
+      .DMAReqFifoDepth        ( DMAReqFifoDepth                    ),
+      .dreq_t                 ( reqrsp_req_t                       ),
+      .drsp_t                 ( reqrsp_rsp_t                       ),
+      .tcdm_req_t             ( tcdm_req_t                         ),
+      .tcdm_rsp_t             ( tcdm_rsp_t                         ),
+      .tcdm_user_t            ( tcdm_user_t                        ),
+      .axi_req_t              ( axi_mst_dma_req_t                  ),
+      .axi_rsp_t              ( axi_mst_dma_resp_t                 ),
+      .hive_req_t             ( hive_req_t                         ),
+      .hive_rsp_t             ( hive_rsp_t                         ),
+      .acc_req_t              ( acc_req_t                          ),
+      .acc_resp_t             ( acc_resp_t                         ),
+      .dma_events_t           ( dma_events_t                       ),
+      .BootAddr               ( BootAddr                           ),
+      .RVE                    ( RVE[i]                             ),
+      .RVF                    ( RVF[i]                             ),
+      .RVD                    ( RVD[i]                             ),
+      .XDivSqrt               ( XDivSqrt[i]                        ),
+      .XF16                   ( XF16[i]                            ),
+      .XF16ALT                ( XF16ALT[i]                         ),
+      .XF8                    ( XF8[i]                             ),
+      .XF8ALT                 ( XF8ALT[i]                          ),
+      .XFVEC                  ( XFVEC[i]                           ),
+      .XFDOTP                 ( XFDOTP[i]                          ),
+      .Xdma                   ( Xdma[i]                            ),
+      .IsoCrossing            ( IsoCrossing                        ),
+      .Xfrep                  ( Xfrep[i]                           ),
+      .Xssr                   ( Xssr[i]                            ),
+      .Xipu                   ( 1'b0                               ),
+      .VMSupport              ( VMSupport                          ),
+      .NumIntOutstandingLoads ( NumIntOutstandingLoads[i]          ),
+      .NumIntOutstandingMem   ( NumIntOutstandingMem[i]            ),
+      .NumFPOutstandingLoads  ( NumFPOutstandingLoads[i]           ),
+      .NumFPOutstandingMem    ( NumFPOutstandingMem[i]             ),
+      .FPUImplementation      ( FPUImplementation[i]               ),
+      .NumDTLBEntries         ( NumDTLBEntries[i]                  ),
+      .NumITLBEntries         ( NumITLBEntries[i]                  ),
+      .NumSequencerInstr      ( NumSequencerInstr[i]               ),
+      .NumSsrs                ( NumSsrs[i]                         ),
+      .SsrMuxRespDepth        ( SsrMuxRespDepth[i]                 ),
+      .SsrCfgs                ( SsrCfgs[i][NumSsrs[i]-1:0]         ),
+      .SsrRegs                ( SsrRegs[i][NumSsrs[i]-1:0]         ),
+      .RegisterOffloadReq     ( RegisterOffloadReq                 ),
+      .RegisterOffloadRsp     ( RegisterOffloadRsp                 ),
+      .RegisterCoreReq        ( RegisterCoreReq                    ),
+      .RegisterCoreRsp        ( RegisterCoreRsp                    ),
+      .RegisterFPUReq         ( RegisterFPUReq                     ),
+      .RegisterSequencer      ( RegisterSequencer                  ),
+      .RegisterFPUIn          ( RegisterFPUIn                      ),
+      .RegisterFPUOut         ( RegisterFPUOut                     ),
+      .TCDMAddrWidth          ( TCDMAddrWidth                      )
     ) i_snax_cc (
-      .clk_i,
-      .clk_d2_i (clk_d2),
-      .rst_ni,
-      .rst_int_ss_ni (1'b1),
-      .rst_fp_ss_ni (1'b1),
-      .hart_id_i (hart_base_id_i + i),
-      .hive_req_o (hive_req[i]),
-      .hive_rsp_i (hive_rsp[i]),
-      .irq_i (irq),
-      .data_req_o (core_req[i]),
-      .data_rsp_i (core_rsp[i]),
-      .tcdm_req_o (tcdm_req_wo_user),
-      .tcdm_rsp_i (tcdm_rsp[TcdmPortsOffs+:TcdmPorts]),
-      .axi_dma_req_o (axi_dma_req),
-      .axi_dma_res_i (axi_dma_res),
-      .axi_dma_busy_o (),
-      .axi_dma_perf_o (),
-      .axi_dma_events_o (dma_core_events),
-      .snax_req_o     (),           // SNAX ports
-      .snax_qvalid_o  (),        // SNAX ports
-      .snax_qready_i  ('0),        // SNAX ports
-      .snax_resp_i    ('0),          // SNAX ports
-      .snax_pvalid_i  ('0),        // SNAX ports
-      .snax_pready_o  (),        // SNAX ports
-      .core_events_o  (core_events[i]),
-      .tcdm_addr_base_i (tcdm_start_address)
+      .clk_i                  ( clk_i                              ),
+      .clk_d2_i               ( clk_d2                             ),
+      .rst_ni                 ( rst_ni                             ),
+      .rst_int_ss_ni          ( 1'b1                               ),
+      .rst_fp_ss_ni           ( 1'b1                               ),
+      .hart_id_i              ( hart_base_id_i + i                 ),
+      .hive_req_o             ( hive_req[i]                        ),
+      .hive_rsp_i             ( hive_rsp[i]                        ),
+      .irq_i                  ( irq                                ),
+      .data_req_o             ( core_req[i]                        ),
+      .data_rsp_i             ( core_rsp[i]                        ),
+      .tcdm_req_o             ( tcdm_req_wo_user                   ),
+      .tcdm_rsp_i             ( tcdm_rsp[TcdmPortsOffs+:TcdmPorts] ),
+      .axi_dma_req_o          ( axi_dma_req                        ),
+      .axi_dma_res_i          ( axi_dma_res                        ),
+      .axi_dma_busy_o         (                                    ),
+      .axi_dma_perf_o         (                                    ),
+      .axi_dma_events_o       ( dma_core_events                    ),
+      .snax_req_o             ( snax_req                           ),
+      .snax_qvalid_o          ( snax_qvalid                        ),
+      .snax_qready_i          ( snax_qready                        ),
+      .snax_resp_i            ( snax_resp                          ),
+      .snax_pvalid_i          ( snax_pvalid                        ),
+      .snax_pready_o          ( snax_pready                        ),
+      .core_events_o          ( core_events[i]                     ),
+      .tcdm_addr_base_i       ( tcdm_start_address                 )
     );
+
+    //---------------------------------------------
+    // MAC engine
+    // For now let's make the MAC engine a generated module
+    // Moreover, for now let's assume that it's coupled with the snax_cluster
+    //---------------------------------------------
+    if(SNAX) begin: gen_yes_mac
+
+      // Generation of SNAX wires
+      tcdm_req_t 	[SnaxLocalMemPorts-1:0 ] snax_tcdm_req;
+      tcdm_rsp_t 	[SnaxLocalMemPorts-1:0 ] snax_tcdm_rsp;
+
+      snax_mac # (
+        .DataWidth          ( 32         				),
+        .SnaxLocalMemPorts  ( SnaxLocalMemPorts	),
+        .acc_req_t          ( acc_req_t       	),
+        .acc_rsp_t         	( acc_rsp_t      		),
+        .tcdm_req_t         ( tcdm_req_t      	),
+        .tcdm_rsp_t         ( tcdm_rsp_t      	)
+      ) i_snax_mac (
+        .clk_i              ( clk_i           	),
+        .rst_ni             ( rst_ni          	),
+        .snax_req_i         ( snax_req        	),
+        .snax_qvalid_i      ( snax_qvalid     	),
+        .snax_qready_o      ( snax_qready     	),
+        .snax_resp_o        ( snax_resp       	),
+        .snax_pvalid_o      ( snax_pvalid     	),
+        .snax_pready_i      ( snax_pready     	),
+        .snax_tcdm_req_o    ( snax_tcdm_req   	),
+        .snax_tcdm_rsp_i    ( snax_tcdm_rsp   	)
+      );
+
+      // TODO: Fix me later but tie to zero for now
+      assign snax_tcdm_rsp = '0;
+
+    end else begin: gen_no_mac
+
+      // Tie these signal to low when no MAC is present
+      assign snax_qready = '0;
+      assign snax_resp   = '0;
+      assign snax_pvalid = '0;
+
+    end
+    
 
     for (genvar j = 0; j < TcdmPorts; j++) begin : gen_tcdm_user
       always_comb begin
