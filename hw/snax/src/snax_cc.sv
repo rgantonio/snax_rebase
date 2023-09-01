@@ -337,6 +337,10 @@ module snax_cc #(
     .oup_ready_i  ( {snax_qready, ssr_qready, ipu_qready, dma_qready, hive_rsp_i.acc_qready, acc_qready} )
   );
 
+  assign snax_req_o    = acc_snitch_demux_q;
+  assign snax_qvalid_o = snax_qvalid;
+  assign snax_qready   = snax_qready_i;
+
   //-------------------------------
   // To shared muldiv
   //-------------------------------
@@ -356,6 +360,10 @@ module snax_cc #(
     .oup_valid_o ( acc_demux_snitch_valid_q ),
     .oup_ready_i ( acc_demux_snitch_ready_q )
   );
+
+  assign snax_resp     = snax_resp_i;
+  assign snax_pvalid   = snax_pvalid_i;
+  assign snax_pready_o = snax_pready;
 
   if (Xdma) begin : gen_dma
 
