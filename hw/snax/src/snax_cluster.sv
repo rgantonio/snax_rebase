@@ -917,7 +917,7 @@ module snax_cluster
     // For now let's make the MAC engine a generated module
     // Moreover, for now let's assume that it's coupled with the snax_cluster
     //---------------------------------------------
-    if(SNAX) begin: gen_yes_mac
+    if(SNAX[i]) begin: gen_yes_mac
 
       // Generation of SNAX wires
       tcdm_req_t 	[SnaxTcdmPorts-1:0 ] snax_tcdm_req;
