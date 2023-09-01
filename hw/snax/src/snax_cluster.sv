@@ -254,6 +254,7 @@ module snax_cluster
 
   // SNAX TCDM
   localparam int unsigned SnaxTcdmPorts = 4;
+  localparam int unsigned TotalSnaxTcdmPorts = SnaxTcdmPorts*NrCores;
 
   localparam int unsigned NrTCDMPortsCores = get_tcdm_port_offs(NrCores);
   localparam int unsigned NumTCDMIn = NrTCDMPortsCores + 1;
@@ -485,6 +486,10 @@ module snax_cluster
   // AXI Ports into TCDM (from SoC).
   tcdm_req_t axi_soc_req;
   tcdm_rsp_t axi_soc_rsp;
+
+  // Generation of SNAX wires
+  tcdm_req_t 	[NrCores-1:0] [SnaxTcdmPorts-1:0 ] snax_tcdm_req;
+  tcdm_rsp_t 	[NrCores-1:0] [SnaxTcdmPorts-1:0 ] snax_tcdm_rsp;
 
   tcdm_req_t [NrTCDMPortsCores-1:0] tcdm_req;
   tcdm_rsp_t [NrTCDMPortsCores-1:0] tcdm_rsp;
@@ -756,8 +761,9 @@ module snax_cluster
     end
   end
 
+  //TotalSnaxTcdmPorts
   snitch_tcdm_interconnect #(
-    .NumInp (NumTCDMIn),
+    .NumInp (NumTCDMIn + TotalSnaxTcdmPorts),
     .NumOut (NrBanks),
     .tcdm_req_t (tcdm_req_t),
     .tcdm_rsp_t (tcdm_rsp_t),
@@ -772,8 +778,8 @@ module snax_cluster
   ) i_tcdm_interconnect (
     .clk_i,
     .rst_ni,
-    .req_i ({axi_soc_req, tcdm_req}),
-    .rsp_o ({axi_soc_rsp, tcdm_rsp}),
+    .req_i ({axi_soc_req, tcdm_req, snax_tcdm_req}),
+    .rsp_o ({axi_soc_rsp, tcdm_rsp, snax_tcdm_rsp}),
     .mem_req_o (ic_req),
     .mem_rsp_i (ic_rsp)
   );
@@ -919,10 +925,6 @@ module snax_cluster
     //---------------------------------------------
     if(SNAX[i]) begin: gen_yes_mac
 
-      // Generation of SNAX wires
-      tcdm_req_t 	[SnaxTcdmPorts-1:0 ] snax_tcdm_req;
-      tcdm_rsp_t 	[SnaxTcdmPorts-1:0 ] snax_tcdm_rsp;
-
       snax_mac # (
         .DataWidth          ( 32         				),
         .SnaxTcdmPorts      ( SnaxTcdmPorts	    ),
@@ -939,12 +941,12 @@ module snax_cluster
         .snax_resp_o        ( snax_resp       	),
         .snax_pvalid_o      ( snax_pvalid     	),
         .snax_pready_i      ( snax_pready     	),
-        .snax_tcdm_req_o    ( snax_tcdm_req   	),
-        .snax_tcdm_rsp_i    ( snax_tcdm_rsp   	)
+        .snax_tcdm_req_o    ( snax_tcdm_req[i] 	),
+        .snax_tcdm_rsp_i    ( snax_tcdm_rsp[i] 	)
       );
 
       // TODO: Fix me later but tie to zero for now
-      assign snax_tcdm_rsp = '0;
+      //assign snax_tcdm_rsp[i] = '0;
 
     end else begin: gen_no_mac
 
@@ -952,6 +954,8 @@ module snax_cluster
       assign snax_qready = '0;
       assign snax_resp   = '0;
       assign snax_pvalid = '0;
+      assign snax_tcdm_req[i] = '0;
+      //assign snax_tcdm_rsp[i] = '0;
 
     end
     
