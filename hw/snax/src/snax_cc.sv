@@ -107,7 +107,7 @@ module snax_cc #(
   input  logic                               rst_int_ss_ni,
   input  logic                               rst_fp_ss_ni,
   input  logic [31:0]                        hart_id_i,
-  input  snax_snitch_pkg::interrupts_t       irq_i,
+  input  snitch_pkg::interrupts_t       irq_i,
   output hive_req_t                          hive_req_o,           // Hive ports, this is where icache is connected
   input  hive_rsp_t                          hive_rsp_i,           // Hive ports, this is where icache is connected
   output dreq_t                              data_req_o,           // Core data ports
@@ -125,7 +125,7 @@ module snax_cc #(
   input  acc_resp_t                          snax_resp_i,          // SNAX ports
   input  logic                               snax_pvalid_i,        // SNAX ports
   output logic                               snax_pready_o,        // SNAX ports
-  output snax_snitch_pkg::core_events_t      core_events_o,        // Core event strobes
+  output snitch_pkg::core_events_t      core_events_o,        // Core event strobes
   input  addr_t                              tcdm_addr_base_i      // Base address for slicing global TCDM when Snitch accesses memory
 );
 
@@ -194,8 +194,8 @@ module snax_cc #(
   fpnew_pkg::fmt_mode_t  fpu_fmt_mode;
   fpnew_pkg::status_t    fpu_status;
 
-  snax_snitch_pkg::core_events_t snitch_events;
-  snax_snitch_pkg::core_events_t fpu_events;
+  snitch_pkg::core_events_t snitch_events;
+  snitch_pkg::core_events_t fpu_events;
 
   // Snitch Integer Core
   dreq_t snitch_dreq_d, snitch_dreq_q, merged_dreq;
@@ -463,8 +463,8 @@ module snax_cc #(
   end
 
   // pragma translate_off
-  snax_snitch_pkg::fpu_trace_port_t           fpu_trace;
-  snax_snitch_pkg::fpu_sequencer_trace_port_t fpu_sequencer_trace;
+  snitch_pkg::fpu_trace_port_t           fpu_trace;
+  snitch_pkg::fpu_sequencer_trace_port_t fpu_sequencer_trace;
   // pragma translate_on
 
   logic  [2:0][4:0] ssr_raddr;
@@ -482,7 +482,7 @@ module snax_cc #(
   logic             ssr_streamctl_ready;
 
   if (FPEn) begin : gen_fpu
-    snax_snitch_pkg::core_events_t fp_ss_core_events;
+    snitch_pkg::core_events_t fp_ss_core_events;
 
     dreq_t fpu_dreq;
     drsp_t fpu_drsp;
@@ -919,14 +919,14 @@ module snax_cc #(
     
     automatic string trace_entry;
     automatic string extras_str;
-    automatic snax_snitch_pkg::snitch_trace_port_t extras_snitch;
-    automatic snax_snitch_pkg::fpu_trace_port_t extras_fpu;
-    automatic snax_snitch_pkg::fpu_sequencer_trace_port_t extras_fpu_seq_out;
+    automatic snitch_pkg::snitch_trace_port_t extras_snitch;
+    automatic snitch_pkg::fpu_trace_port_t extras_fpu;
+    automatic snitch_pkg::fpu_sequencer_trace_port_t extras_fpu_seq_out;
 
     if (rst_ni) begin
       extras_snitch = '{
         // State
-        source:       snax_snitch_pkg::SrcSnitch,
+        source:       snitch_pkg::SrcSnitch,
         stall:        i_snax_snitch.stall,
         exception:    i_snax_snitch.exception,
         // Decoding
@@ -982,7 +982,7 @@ module snax_cc #(
       ) begin
         $sformat(trace_entry, "%t %1d %8d 0x%h DASM(%h) #; %s\n",
             $time, cycle, i_snax_snitch.priv_lvl_q, i_snax_snitch.pc_q, i_snax_snitch.inst_data_i,
-            snax_snitch_pkg::print_snitch_trace(extras_snitch));
+            snitch_pkg::print_snitch_trace(extras_snitch));
         $fwrite(f, trace_entry);
       end
       if (FPEn) begin
@@ -995,7 +995,7 @@ module snax_cc #(
         || extras_fpu.lsu_q_hs || extras_fpu.fpr_we) begin
           $sformat(trace_entry, "%t %1d %8d 0x%h DASM(%h) #; %s\n",
               $time, cycle, i_snax_snitch.priv_lvl_q, 32'hz, extras_fpu.op_in,
-              snax_snitch_pkg::print_fpu_trace(extras_fpu));
+              snitch_pkg::print_fpu_trace(extras_fpu));
           $fwrite(f, trace_entry);
         end
         // sequencer instructions
@@ -1003,7 +1003,7 @@ module snax_cc #(
           if (extras_fpu_seq_out.cbuf_push) begin
             $sformat(trace_entry, "%t %1d %8d 0x%h DASM(%h) #; %s\n",
                 $time, cycle, i_snax_snitch.priv_lvl_q, 32'hz, 64'hz,
-                snax_snitch_pkg::print_fpu_sequencer_trace(extras_fpu_seq_out));
+                snitch_pkg::print_fpu_sequencer_trace(extras_fpu_seq_out));
             $fwrite(f, trace_entry);
           end
         end

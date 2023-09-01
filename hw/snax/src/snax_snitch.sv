@@ -24,7 +24,7 @@
 //---------------------------------------------
 // Main Snitch Integer Core
 //---------------------------------------------
-module snax_snitch import snax_snitch_pkg::*; import snax_riscv_instr::*; #(
+module snax_snitch import snitch_pkg::*; import snax_riscv_instr::*; #(
   /// Boot address of core.
   parameter logic [31:0] BootAddr  = 32'h0000_1000,
   /// Physical Address width of the core.
@@ -116,7 +116,7 @@ module snax_snitch import snax_snitch_pkg::*; import snax_riscv_instr::*; #(
   output fpnew_pkg::fmt_mode_t      fpu_fmt_mode_o,
   input  fpnew_pkg::status_t        fpu_status_i,
   // Core events for performance counters
-  output snax_snitch_pkg::core_events_t  core_events_o
+  output snitch_pkg::core_events_t  core_events_o
 );
 
   //---------------------------------------------
@@ -271,7 +271,7 @@ module snax_snitch import snax_snitch_pkg::*; import snax_riscv_instr::*; #(
   logic [0:0][ 4:0] cause_d, cause_q;
   logic [0:0]       cause_irq_d, cause_irq_q;
   logic             spp_d, spp_q;
-  snax_snitch_pkg::priv_lvl_t mpp_d, mpp_q;
+  snitch_pkg::priv_lvl_t mpp_d, mpp_q;
   logic [0:0]       ie_d, ie_q;
   logic [0:0]       pie_d, pie_q;
   
@@ -284,7 +284,7 @@ module snax_snitch import snax_snitch_pkg::*; import snax_riscv_instr::*; #(
   logic       stip_d, stip_q;
   logic       ssip_d, ssip_q;
   logic       scip_d, scip_q;
-  snax_snitch_pkg::priv_lvl_t priv_lvl_d, priv_lvl_q;
+  snitch_pkg::priv_lvl_t priv_lvl_d, priv_lvl_q;
 
   typedef struct packed {
     logic        mode;
@@ -308,8 +308,8 @@ module snax_snitch import snax_snitch_pkg::*; import snax_riscv_instr::*; #(
   `FFNR(     satp_q,      satp_d, clk_i)
   `FFAR(    cause_q,     cause_d,    '0, clk_i, rst_i)
   `FFAR(cause_irq_q, cause_irq_d,    '0, clk_i, rst_i)
-  `FFAR( priv_lvl_q,  priv_lvl_d, snax_snitch_pkg::PrivLvlM, clk_i, rst_i)
-  `FFAR(      mpp_q,       mpp_d, snax_snitch_pkg::PrivLvlU, clk_i, rst_i)
+  `FFAR( priv_lvl_q,  priv_lvl_d, snitch_pkg::PrivLvlM, clk_i, rst_i)
+  `FFAR(      mpp_q,       mpp_d, snitch_pkg::PrivLvlU, clk_i, rst_i)
   `FFAR(      spp_q,       spp_d,  1'b0, clk_i, rst_i)
   `FFAR(       ie_q,        ie_d,    '0, clk_i, rst_i)
   `FFAR(      pie_q,       pie_d,    '0, clk_i, rst_i)
@@ -963,12 +963,12 @@ module snax_snitch import snax_snitch_pkg::*; import snax_riscv_instr::*; #(
       // Environment return
       SRET: begin
         write_rd = 1'b0;
-        if (priv_lvl_q inside {snax_snitch_pkg::PrivLvlM, snax_snitch_pkg::PrivLvlS}) next_pc = SRet;
+        if (priv_lvl_q inside {snitch_pkg::PrivLvlM, snitch_pkg::PrivLvlS}) next_pc = SRet;
         else illegal_inst = 1'b1;
       end
       MRET: begin
         write_rd = 1'b0;
-        if (priv_lvl_q inside {snax_snitch_pkg::PrivLvlM}) next_pc = MRet;
+        if (priv_lvl_q inside {snitch_pkg::PrivLvlM}) next_pc = MRet;
         else illegal_inst = 1'b1;
       end
       DRET: begin
@@ -2585,10 +2585,10 @@ module snax_snitch import snax_snitch_pkg::*; import snax_riscv_instr::*; #(
           // Privleged Extension:
           //---------------------------------------------
           CSR_MSTATUS: begin
-            automatic snax_snitch_pkg::status_rv32_t mstatus, mstatus_d;
+            automatic snitch_pkg::status_rv32_t mstatus, mstatus_d;
             mstatus = '0;
             if (FP_EN) begin
-              mstatus.fs = snax_snitch_pkg::XDirty;
+              mstatus.fs = snitch_pkg::XDirty;
               mstatus.sd = 1'b1;
             end
             mstatus.mpp = mpp_q;
@@ -2597,7 +2597,7 @@ module snax_snitch import snax_snitch_pkg::*; import snax_riscv_instr::*; #(
             mstatus.mpie = pie_q[M];
             csr_rvalue = mstatus;
             if (!exception) begin
-              mstatus_d = snax_snitch_pkg::status_rv32_t'(alu_result);
+              mstatus_d = snitch_pkg::status_rv32_t'(alu_result);
               mpp_d = mstatus_d.mpp;
               spp_d = mstatus_d.spp;
               ie_d[M] = mstatus_d.mie;
@@ -2663,7 +2663,7 @@ module snax_snitch import snax_snitch_pkg::*; import snax_riscv_instr::*; #(
           end
           CSR_MEDELEG:; // we currently don't support delegation
           CSR_SSTATUS: begin
-            automatic snax_snitch_pkg::status_rv32_t mstatus;
+            automatic snitch_pkg::status_rv32_t mstatus;
             mstatus = '0;
             mstatus.spp = spp_q;
             csr_rvalue = mstatus;
@@ -2777,11 +2777,11 @@ module snax_snitch import snax_snitch_pkg::*; import snax_riscv_instr::*; #(
         priv_lvl_d = mpp_q;
         ie_d[M] = pie_q[M];
         pie_d[M] = 1'b1;
-        mpp_d = snax_snitch_pkg::PrivLvlU; // set default back to U-Mode
+        mpp_d = snitch_pkg::PrivLvlU; // set default back to U-Mode
       end
 
       if (inst_data_i == snax_riscv_instr::SRET) begin
-        priv_lvl_d = snax_snitch_pkg::priv_lvl_t'({1'b0, spp_q});
+        priv_lvl_d = snitch_pkg::priv_lvl_t'({1'b0, spp_q});
         spp_d = 1'b0;
       end
     end
