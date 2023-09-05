@@ -230,6 +230,7 @@ sources:
   - files:
       # Level 0
       - hw/snax_hwpe_mac/src/snax_hwpe_ctrl.sv
+      - hw/snax_hwpe_mac/src/snax_hwpe_unbuff_ctrl.sv
       - hw/snax_hwpe_mac/src/snax_hwpe_to_reqrsp.sv
       - hw/snax_hwpe_mac/src/snax_remodel_mac_stream.sv
       # Level 1
