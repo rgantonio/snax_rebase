@@ -92,7 +92,7 @@ module snax_hwpe_unbuff_ctrl #(
   // Need to use unique casez to ignore `?` bits
   always_comb begin
     unique casez (req_i.data_op)
-      SNAX_RD_ACC, CSRRS, CSRRSI, CSRRC, CSRRCI: begin
+      CSRRS, CSRRSI, CSRRC, CSRRCI: begin
         wen = 1'b1;
       end
       default: begin
