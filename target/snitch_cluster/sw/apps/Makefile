@@ -17,6 +17,9 @@ SUBDIRS += dnn/layernorm
 SUBDIRS += dnn/linear
 SUBDIRS += dnn/maxpool
 SUBDIRS += dnn/softmax
+SUBDIRS += dummy/adds
+SUBDIRS += dummy/mac
+SUBDIRS += csr-test
 
 .PHONY: all clean $(SUBDIRS)
 
