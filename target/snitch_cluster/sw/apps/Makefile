@@ -20,6 +20,7 @@ SUBDIRS += dnn/softmax
 SUBDIRS += dummy/adds
 SUBDIRS += dummy/mac
 SUBDIRS += csr-test
+SUBDIRS += csr-manual-load
 
 .PHONY: all clean $(SUBDIRS)
 
