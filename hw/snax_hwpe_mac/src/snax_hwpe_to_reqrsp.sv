@@ -121,9 +121,32 @@ module snax_hwpe_to_reqrsp #(
   );
 
   //---------------------------------------------
+  // FIFO queue for tranasctions from HWPE to TCDM
+  //---------------------------------------------
+  typedef logic [31:0] fifo_addr_buffer_t;
+  fifo_addr_buffer_t fifo_addr_out;
+
+  fifo_v3 #(
+    .dtype      ( fifo_addr_buffer_t          ), // Sum of address and 
+    .DEPTH      ( 8                           )  // Arbitrarily chosen
+  ) i_fifo_addr_buffer (
+    .clk_i      ( clk_i                       ),
+    .rst_ni     ( rst_ni                      ),
+    .flush_i    ( 1'b0                        ),
+    .testmode_i ( 1'b0                        ),
+    .full_o     (                             ),
+    .empty_o    (                             ),
+    .usage_o    ( /*unused*/                  ),
+    .data_i     ( fifo_hwpe_tcdm_data_out.add ),
+    .push_i     ( push_hwpe_tcdm              ),
+    .data_o     ( fifo_addr_out               ),
+    .pop_i      ( tcdm_rsp_i.p_valid          )
+  );
+
+  //---------------------------------------------
   // We just directly map the tcdm_rsp_i to the HWPE ports
   //---------------------------------------------
-  assign hwpe_tcdm_slave.r_data  = tcdm_rsp_i.p.data;
+  assign hwpe_tcdm_slave.r_data  = (fifo_addr_out[2]) ? tcdm_rsp_i.p.data[31:0] : tcdm_rsp_i.p.data[63:32];
   assign hwpe_tcdm_slave.r_valid = tcdm_rsp_i.p_valid;
 
   //---------------------------------------------
@@ -134,7 +157,7 @@ module snax_hwpe_to_reqrsp #(
   assign tcdm_req_o.q.data = {{31{1'b0}},unpack_data};
   assign tcdm_req_o.q.amo  = AMONone;
   assign tcdm_req_o.q.strb = {StrbWidth{strb}};
-  assign tcdm_req_o.q.user   = '0;
+  assign tcdm_req_o.q.user = '0;
 
 // verilog_lint: waive-stop line-length
 // verilog_lint: waive-stop no-trailing-spaces
