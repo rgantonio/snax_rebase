@@ -56,10 +56,27 @@ static inline void update_csr(
     return;
 };
 
+static inline uint32_t extract_csr(
+    uint16_t csr_number
+){
+    uint32_t result;
+    
+    asm volatile(
+        "csrr %[result], %[csr]"
+        : [result] "=r" (result)
+        : [csr] "i" (csr_number)
+    );
+
+    return result;
+};
+
 int main() {
 
+    // Set err value for checking
+    int err = 0;
+
     uint32_t working_reg;
-    uint32_t tcdm_addr_start_upper;
+    uint32_t tcdm_addr_start;
     uint32_t tcdm_addr;
     uint32_t global_addr;
     uint32_t tcdm_A_addr;
@@ -76,53 +93,43 @@ int main() {
         // This marks the start of the accelerator style of MAC operation
         uint32_t pre_load = snrt_mcycle();
 
-        tcdm_addr_start_upper = 0x10000;
-
-        asm volatile ("lui %0, %1"
-                      : "=r" (tcdm_addr)
-                      : "i"  (tcdm_addr_start_upper)
-                      );
-
-        // Do for A
+        // Transfer data from global memory A to local memory (tcdm)
+        // TODO: Change me to DMA transfers later
+        tcdm_addr_start = 0x10000000;
         global_addr = get_array_addr(A);
-        tcdm_addr = tcdm_addr + (0x00000FFF & global_addr);
-        tcdm_A_addr = tcdm_addr;
+        tcdm_A_addr = tcdm_addr_start;
 
         for (uint32_t i = 0; i < 20; i++){
-            // Just read data from vanila MAC output
             working_reg = lw_reg(global_addr, i*4);
-            sw_reg(working_reg,tcdm_addr,i*4);
+            sw_reg(working_reg,tcdm_A_addr,i*4);
         };
         
-        // Do for B
+        // Transfer data from global memory B to local memory (tcdm)
         global_addr = get_array_addr(B);
-        tcdm_addr = tcdm_addr + (0x00000FFF & global_addr);
-        tcdm_B_addr = tcdm_addr;
+        tcdm_B_addr = tcdm_addr_start + 80;
 
         for (uint32_t i = 0; i < 20; i++){
             // Just read data from vanila MAC output
             working_reg = lw_reg(global_addr, i*4);
-            sw_reg(working_reg,tcdm_addr,i*4);
+            sw_reg(working_reg,tcdm_B_addr,i*4);
         };
 
-        // Do for C
+        // Transfer single byte from global memory C to local memory (tcdm)
+        // This asm volatile extracts address of a single variable only
         asm volatile ("la %0, %1"
                       : "=r" (global_addr)
                       : "i" (&C)
                       );
-        tcdm_addr = tcdm_addr + (0x00000FFF & global_addr);
-        tcdm_C_addr = tcdm_addr;
+
+        tcdm_C_addr = tcdm_addr_start + 160;
+
         working_reg = lw_reg(global_addr, 0);
-        sw_reg(working_reg,tcdm_addr,0);
+        sw_reg(working_reg,tcdm_C_addr,0);
 
         // Get address of final output
-        asm volatile ("la %0, %1"
-                      : "=r" (global_addr)
-                      : "i" (&OUT)
-                      );
-        tcdm_addr = tcdm_addr + (0x00000FFF & global_addr);
-        tcdm_OUT_addr = tcdm_addr;
+        tcdm_OUT_addr = tcdm_addr_start + 164;
 
+        // Start of csr setup
         uint32_t csr_setup = snrt_mcycle();
 
         // Set addresses
@@ -130,43 +137,44 @@ int main() {
         update_csr(0x3d1, tcdm_B_addr);
         update_csr(0x3d2, tcdm_C_addr);
         update_csr(0x3d3, tcdm_OUT_addr);
-        update_csr(0x3d4, 0);
         
         // Set configs
-        update_csr(0x3d4, 1);
-        update_csr(0x3d5, 1);
+        update_csr(0x3d4, 1);   // Number of iterations
+        update_csr(0x3d5, 19);  // Vector length
 
         // CSR start
         update_csr(0x3c0, 0);
         
+        // Start of CSR start and poll until accelerator finishes
         uint32_t mac_csr_start = snrt_mcycle();
+        uint32_t break_poll;
 
-        asm volatile(
-            "poll_loop:\n"
-            "csrrs t2, 0x3c3, zero\n"
-            "bne t2, zero, poll_loop\n"
-        );
-
-        final_output = lw_reg(tcdm_OUT_addr, 0);
-
-        // Read the mcycle CSR
-        uint32_t end_simulation = snrt_mcycle();
-
-        // For scanning purposes
-        for (uint32_t i = 0; i < 20; i++){
-            final_output = lw_reg(tcdm_A_addr, i*4);
+        while(1){
+            // 0x3c3 is the CSR address for accelerator status
+            break_poll = extract_csr(0x3c3);
+            if(break_poll == 0){
+                break;
+            };
         };
 
-        for (uint32_t i = 0; i < 20; i++){
-            final_output = lw_reg(tcdm_B_addr, i*4);
+        uint32_t accelerator_end = snrt_mcycle();
+
+        // Data memory is 64-bits per access, hence it is double word addressable
+        // But HWPE accelerator and snitch cores are 32-bits (word) addressable
+        // If output address is divisble by 8, we read normally
+        // Otherwise, we get the lower 32-bits (get the lower word address)
+        if(tcdm_OUT_addr % 8){
+            final_output = lw_reg(tcdm_OUT_addr-4, 0);
+        }else {
+            final_output = lw_reg(tcdm_OUT_addr, 0);
         };
 
-        final_output = lw_reg(tcdm_C_addr, 0);
-
-        final_output = lw_reg(tcdm_OUT_addr, 0);
-
+        if(final_output != 54763){
+            err = 1;
+        }
         
+        uint32_t end_simulation = snrt_mcycle();
     };
 
-    
+    return err;
 }
