@@ -1,33 +1,6 @@
 #include "snrt.h"
 #include "data.h"
 
-static inline void update_csr(
-    uint16_t csr_number,
-    uint32_t new_value
-){
-    asm volatile(
-        "csrw %[csr], %[new_value]"
-        :
-        : [csr] "i" (csr_number), [new_value] "r" (new_value)
-    );
-
-    return;
-};
-
-static inline uint32_t extract_csr(
-    uint16_t csr_number
-){
-    uint32_t result;
-    
-    asm volatile(
-        "csrr %[result], %[csr]"
-        : [result] "=r" (result)
-        : [csr] "i" (csr_number)
-    );
-
-    return result;
-};
-
 int main() {
 
     // Set err value for checking
@@ -68,17 +41,17 @@ int main() {
         uint32_t csr_setup = snrt_mcycle();
 
         // Set addresses
-        update_csr(0x3d0, (uint32_t)local_a);
-        update_csr(0x3d1, (uint32_t)local_b);
-        update_csr(0x3d2, (uint32_t)local_c);
-        update_csr(0x3d3, (uint32_t)local_o);
+        write_csr(0x3d0, (uint32_t)local_a);
+        write_csr(0x3d1, (uint32_t)local_b);
+        write_csr(0x3d2, (uint32_t)local_c);
+        write_csr(0x3d3, (uint32_t)local_o);
         
         // Set configs
-        update_csr(0x3d4, 1);   // Number of iterations
-        update_csr(0x3d5, 19);  // Vector length
+        write_csr(0x3d4, 1);   // Number of iterations
+        write_csr(0x3d5, 19);  // Vector length
 
         // CSR start
-        update_csr(0x3c0, 0);
+        write_csr(0x3c0, 0);
         
         // Start of CSR start and poll until accelerator finishes
         uint32_t mac_csr_start = snrt_mcycle();
@@ -87,7 +60,7 @@ int main() {
 
         while(1){
             // 0x3c3 is the CSR address for accelerator status
-            break_poll = extract_csr(0x3c3);
+            break_poll = read_csr(0x3c3);
             if(break_poll == 0){
                 break;
             };
