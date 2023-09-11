@@ -35,10 +35,7 @@ int main() {
     if(snrt_is_compute_core()){
 
         // This marks the start of the accelerator style of MAC operation
-        uint32_t pre_load = snrt_mcycle();
-
-        // Start of csr setup
-        uint32_t csr_setup = snrt_mcycle();
+        uint32_t csr_set = snrt_mcycle();
 
         // Set addresses
         write_csr(0x3d0, (uint32_t)local_a);
@@ -54,9 +51,9 @@ int main() {
         write_csr(0x3c0, 0);
         
         // Start of CSR start and poll until accelerator finishes
-        uint32_t mac_csr_start = snrt_mcycle();
-        uint32_t break_poll;
+        uint32_t mac_start = snrt_mcycle();
 
+        uint32_t break_poll;
 
         while(1){
             // 0x3c3 is the CSR address for accelerator status
@@ -66,7 +63,7 @@ int main() {
             };
         };
 
-        uint32_t accelerator_end = snrt_mcycle();
+        uint32_t mac_end = snrt_mcycle();
 
         // Data memory is 64-bits per access, hence it is double word addressable
         // But HWPE accelerator and snitch cores are 32-bits (word) addressable
@@ -82,7 +79,7 @@ int main() {
             err = 1;
         }
         
-        uint32_t end_of_computation = snrt_mcycle();
+        uint32_t end_of_check = snrt_mcycle();
     };
 
     snrt_cluster_hw_barrier();
