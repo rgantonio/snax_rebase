@@ -36,18 +36,12 @@ int main() {
 
         uint32_t acc_val = 0;
 
-        uint32_t addr_a;
-        uint32_t addr_b;
-        uint32_t op_a;
-        uint32_t op_b;
-
+        // Accumulat MAC
         for(int32_t i = 0; i < VEC_LEN; i++){
-
             acc_val += local_a[i] * local_b[i];
         };
 
-
-
+        // Add bias
         final_output = acc_val + *local_c;
 
         uint32_t mac_end = snrt_mcycle();
