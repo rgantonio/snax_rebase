@@ -33,14 +33,6 @@ int main() {
     // Set err value for checking
     int err = 0;
 
-    uint32_t working_reg;
-    uint32_t tcdm_addr_start;
-    uint32_t tcdm_addr;
-    uint32_t global_addr;
-    uint32_t tcdm_A_addr;
-    uint32_t tcdm_B_addr;
-    uint32_t tcdm_C_addr;
-    uint32_t tcdm_OUT_addr;
     uint32_t final_output;
 
     uint32_t *local_a, *local_b, *local_c, *local_o;
@@ -108,7 +100,7 @@ int main() {
         // If output address is divisble by 8, we read normally
         // Otherwise, we get the lower 32-bits (get the lower word address)
         if(((uint32_t)local_o) % 8){
-            final_output = *(local_o-4);
+            final_output = *(local_o-1);
         }else {
             final_output = *local_o;
         };
