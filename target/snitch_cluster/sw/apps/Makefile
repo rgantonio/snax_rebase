@@ -21,6 +21,8 @@ SUBDIRS += dummy/adds
 SUBDIRS += dummy/mac
 SUBDIRS += csr-test
 SUBDIRS += csr-manual-load
+SUBDIRS += csr-complete
+SUBDIRS += mac-long
 
 .PHONY: all clean $(SUBDIRS)
 
