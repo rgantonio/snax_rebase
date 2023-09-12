@@ -24,7 +24,7 @@
 //---------------------------------------------
 // Main Snitch Integer Core
 //---------------------------------------------
-module snax_snitch import snitch_pkg::*; import riscv_instr::*; import snax_riscv_instr::*; #(
+module snax_snitch import snitch_pkg::*; import riscv_instr::*; import snax_riscv_def::*; #(
   /// Boot address of core.
   parameter logic [31:0] BootAddr  = 32'h0000_1000,
   /// Physical Address width of the core.
