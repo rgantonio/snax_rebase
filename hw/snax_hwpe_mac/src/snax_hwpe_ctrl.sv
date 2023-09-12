@@ -43,14 +43,6 @@ module snax_hwpe_ctrl #(
   // Registers and wires
   //---------------------------------------------
 
-  // FIFO full signals
-  logic fifo_sn_hwpe_full;
-  logic fifo_hwpe_sn_full;
-
-  // FIFO empty signals
-  logic fifo_sn_hwpe_empty;
-  logic fifo_hwpe_sn_empty;
-
   // These signals are decoded and come from
   // the acc_reqrsp signals
   logic       req;
@@ -73,18 +65,7 @@ module snax_hwpe_ctrl #(
     logic [31:0] r_data;
   } tcdm_hwpe_t;
 
-  // Pack and unpack signals
-  hwpe_tcdm_t fifo_sn_hwpe_in;
-  hwpe_tcdm_t fifo_sn_hwpe_out;
-
-  tcdm_hwpe_t fifo_hwpe_sn_in;
-  tcdm_hwpe_t fifo_hwpe_sn_out;
-
-  // Push and pop signals, the latter 2 labels indicate direction
-  logic push_sn_hwpe;
-  logic pop_sn_hwpe;
-  logic push_hwpe_sn;
-  logic pop_hwpe_sn;
+  hwpe_tcdm_t sn_hwpe_reg;
 
   // This is just a necessary wiring to re-map the data going
   // back to acc_reqrsp to 64 bits or anything beyond 32 bits
@@ -93,11 +74,18 @@ module snax_hwpe_ctrl #(
   //---------------------------------------------
   // Combinational logic and wiring assignments
   // for SN to HWPE FIFO direction
+  // In this control we do a 1-step register buffer
   //---------------------------------------------
+  logic transaction_start;
+  logic transaction_end;
+  logic is_write;
+  logic is_read;
 
   // A transaction is valid when both ready and valid signal for requestor are valid
-  logic transaction_valid;
-  assign transaction_valid = req_valid_i & req_ready_o;
+  assign transaction_start = req_valid_i & req_ready_o;
+  assign transaction_end   = periph.req & periph.gnt;
+  assign is_write          = transaction_start & !wen;
+  assign is_read           = transaction_start &  wen;
 
   // wen = 1'b1 whenever we read. wen = 1'b0 whenever we write
   // decode this based on the instruction given
@@ -129,77 +117,67 @@ module snax_hwpe_ctrl #(
   end
 
   // Byte enable always only when we need to write
-  assign be  = (transaction_valid & !wen) ? 4'hF : 4'h0;
- 
-  // Pack
-  assign fifo_sn_hwpe_in.id   = req_i.id;
-  assign fifo_sn_hwpe_in.req  = transaction_valid;
-  // assign fifo_sn_hwpe_in.add  = req_i.data_arga[31:0];
-  assign fifo_sn_hwpe_in.add  = address_in;
-  assign fifo_sn_hwpe_in.wen  = wen;
-  assign fifo_sn_hwpe_in.be   = be;
-  assign fifo_sn_hwpe_in.data = req_i.data_argb[31:0];
+  assign be  = (is_write) ? 4'hF : 4'h0;
 
-  // Unpack
-  assign periph.id   = fifo_sn_hwpe_out.id;
-  assign periph.req  = fifo_sn_hwpe_out.req;
-  assign periph.add  = fifo_sn_hwpe_out.add;
-  assign periph.wen  = fifo_sn_hwpe_out.wen;
-  assign periph.be   = fifo_sn_hwpe_out.be;
-  assign periph.data = fifo_sn_hwpe_out.data;
 
-  // Push into SN to HWPE FIFO queue if transaction is valid and for HWPE ACC
-  assign push_sn_hwpe = transaction_valid;
+  // States
+  typedef enum logic [2:0] {
+    WAIT,
+    WRITE,
+    READ
+  } ctrl_states_t;
 
-  // POP SN to HWPE FIFO queue when the HWPE transaction is valid
-  assign pop_sn_hwpe  = periph.gnt & periph.req & !fifo_sn_hwpe_empty;
+  
+  ctrl_states_t cstate, nstate;
 
-  // As long as FIFO is not full, we are always ready to take in data
-  // from the snitch's acc_reqrsp ports
-  assign req_ready_o = !fifo_sn_hwpe_full;
+  // Changing states
+  always_ff @ (posedge clk_i or negedge rst_ni) begin
+    if (!rst_ni) begin
+      cstate <= WAIT;
+    end else begin
+      cstate <= nstate;
+    end
+  end
 
-  //---------------------------------------------
-  // FIFO queue for tranasctions from Snitch to HWPE
-  //---------------------------------------------
-  fifo_v3 #(
-    .dtype      ( hwpe_tcdm_t         ), // Sum of address and 
-    .DEPTH      ( 8                   )  // Arbitrarily chosen
-  ) i_sn_hwpe_fifo (
-    .clk_i      ( clk_i               ),
-    .rst_ni     ( rst_ni              ),
-    .flush_i    ( 1'b0                ),
-    .testmode_i ( 1'b0                ),
-    .full_o     ( fifo_sn_hwpe_full   ),
-    .empty_o    ( fifo_sn_hwpe_empty  ),
-    .usage_o    ( /*unused*/          ),
-    .data_i     ( fifo_sn_hwpe_in     ),
-    .push_i     ( push_sn_hwpe        ),
-    .data_o     ( fifo_sn_hwpe_out    ),
-    .pop_i      (  pop_sn_hwpe        )
-  );
+  // Next state changes
+  // No default because we cover all 4 states already
+  always_comb begin
+    case(cstate)
+      WAIT: begin
+        if (is_write) begin
+          nstate = WRITE;
+        end else if (is_read) begin
+          nstate = READ;
+        end else begin
+          nstate = WAIT;
+        end
+      end 
+      WRITE: begin
+        if (transaction_end) begin 
+          nstate = WAIT; 
+        end else begin
+          nstate = WRITE; 
+        end
+      end
+      READ: begin
+        if (periph.r_valid) begin 
+          nstate = WAIT; 
+        end else begin
+          nstate = READ; 
+        end
+      end
+      default: begin
+        nstate = WAIT;
+      end
+    endcase
+
+  end
 
   //---------------------------------------------
   // Combinational logic and wiring assignments
   // for HWPE to SN FIFO queue
   //---------------------------------------------
 
-  // Pack
-  assign fifo_hwpe_sn_in.r_id    = periph.r_id;
-  assign fifo_hwpe_sn_in.r_valid = periph.r_valid;
-  assign fifo_hwpe_sn_in.r_data  = periph.r_data;
-  
-  // Unpack
-  assign resp_o.id     = fifo_hwpe_sn_out.r_id;
-  assign resp_valid_o  = fifo_hwpe_sn_out.r_valid & !fifo_hwpe_sn_empty;
-  assign unpacked_data = fifo_hwpe_sn_out.r_data;
-
-  // The only signal we get from HWPE is the r_valid to indicate valid read data
-  // Push HWPE to SN FIFO queue when r_valid is asserted
-  assign push_hwpe_sn = periph.r_valid;
-
-  // Pop HWPE to SN FIFO queue when acc_resp transaction is valid
-  // And also if the transaction is not a base register
-  assign pop_hwpe_sn = resp_ready_i & resp_valid_o & !fifo_hwpe_sn_empty;
 
   // Simply extending the unpacked_data to 64 bits
   // At the same time wiring it to the resp_o.data value
@@ -207,38 +185,102 @@ module snax_hwpe_ctrl #(
   if (FillBits > 0) begin: gen_fill_bits
 
     // Fill upper bits with 0s
-    assign resp_o.data = {{FillBits{1'b0}},unpacked_data};
+    assign unpacked_data = {{FillBits{1'b0}},periph.r_data};
 
   end else begin: gen_no_fill_bits
 
     // This automatically truncates the upper bits
     // if the resp_o.data is more than 32 bits.
-    assign resp_o.data = unpacked_data;
+    assign unpacked_data = periph.r_data;
 
   end
+ 
+  // Remake of the controller
+  always_ff @ (posedge clk_i or negedge rst_ni) begin
+    if(!rst_ni) begin
+      req_ready_o   <= 1'b1;
+      periph.id     <= '0;
+      periph.req    <= '0;
+      periph.add    <= '0;
+      periph.wen    <= '0;
+      periph.be     <= '0;
+      periph.data   <= '0;
+    end else begin
 
-  // No need for error signal
-  assign resp_o.error = '0;
+      case (cstate)
+        WAIT: begin
+          if (is_write || is_read) begin 
+            req_ready_o <= 1'b0;
+            periph.id   <= req_i.id;
+            periph.req  <= 1'b1;
+            periph.add  <= address_in;
+            periph.wen  <= wen;
+            periph.be   <= be;
+            periph.data <= req_i.data_argb[31:0];
+          end
+        end 
+        WRITE: begin 
+          if (transaction_end) begin 
+            req_ready_o <= 1'b1;
+            periph.id   <= '0;
+            periph.req  <= '0;
+            periph.add  <= '0;
+            periph.wen  <= '0;
+            periph.be   <= '0;
+            periph.data <= '0;
+          end
+        end
+        READ: begin
+          if (periph.r_valid) begin
+            req_ready_o <= 1'b1;
+            periph.id   <= '0;
+            periph.req  <= '0;
+            periph.add  <= '0;
+            periph.wen  <= '0;
+            periph.be   <= '0;
+            periph.data <= '0;
+          end
+        end
+        default: begin
+          req_ready_o   <= 1'b1;
+          periph.id     <= '0;
+          periph.req    <= '0;
+          periph.add    <= '0;
+          periph.wen    <= '0;
+          periph.be     <= '0;
+          periph.data   <= '0;
+        end
+      endcase
+    end
+  end
   
-  //---------------------------------------------
-  // FIFO queue for valid reads from HWPE to Snitch
-  //---------------------------------------------
-  fifo_v3 #(
-    .dtype      ( tcdm_hwpe_t        ), // Sum of address and 
-    .DEPTH      ( 8                  )  // Arbitrarily chosen
-  ) i_hwpe_sn_fifo (
-    .clk_i      ( clk_i              ),
-    .rst_ni     ( rst_ni             ),
-    .flush_i    ( 1'b0               ),
-    .testmode_i ( 1'b0               ),
-    .full_o     ( fifo_hwpe_sn_full  ), //WARNING: for now the signal is here but it's usage is unclear. Will see what happens later.
-    .empty_o    ( fifo_hwpe_sn_empty ),
-    .usage_o    ( /*unused*/         ),
-    .data_i     ( fifo_hwpe_sn_in    ),
-    .push_i     ( push_hwpe_sn       ),
-    .data_o     ( fifo_hwpe_sn_out   ),
-    .pop_i      (  pop_hwpe_sn       )
-  );
+  // Response port
+  always_ff @ (posedge clk_i or negedge rst_ni) begin
+    if(!rst_ni) begin
+      resp_o.id     <= '0;
+      resp_o.error  <= '0;
+      resp_o.data   <= '0;
+      resp_valid_o  <= 1'b0;
+    end else begin
+
+      case (cstate)
+        READ: begin
+          if (periph.r_valid) begin 
+            resp_o.id     <= periph.r_id;
+            resp_o.error  <= '0;
+            resp_o.data   <= unpacked_data;
+            resp_valid_o  <= 1'b1;
+          end
+        end 
+        default: begin
+          resp_o.id     <= '0;
+          resp_o.error  <= '0;
+          resp_o.data   <= '0;
+          resp_valid_o  <= 1'b0;
+        end
+      endcase
+    end
+  end
 
 // verilog_lint: waive-stop line-length
 // verilog_lint: waive-stop no-trailing-spaces
