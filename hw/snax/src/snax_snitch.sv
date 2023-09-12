@@ -24,7 +24,7 @@
 //---------------------------------------------
 // Main Snitch Integer Core
 //---------------------------------------------
-module snax_snitch import snitch_pkg::*; import snax_riscv_instr::*; #(
+module snax_snitch import snitch_pkg::*; import riscv_instr::*; import snax_riscv_instr::*; #(
   /// Boot address of core.
   parameter logic [31:0] BootAddr  = 32'h0000_1000,
   /// Physical Address width of the core.
@@ -2773,14 +2773,14 @@ module snax_snitch import snitch_pkg::*; import snax_riscv_instr::*; #(
       end
 
       // Return from Environment.
-      if (inst_data_i == snax_riscv_instr::MRET) begin
+      if (inst_data_i == riscv_instr::MRET) begin
         priv_lvl_d = mpp_q;
         ie_d[M] = pie_q[M];
         pie_d[M] = 1'b1;
         mpp_d = snitch_pkg::PrivLvlU; // set default back to U-Mode
       end
 
-      if (inst_data_i == snax_riscv_instr::SRET) begin
+      if (inst_data_i == riscv_instr::SRET) begin
         priv_lvl_d = snitch_pkg::priv_lvl_t'({1'b0, spp_q});
         spp_d = 1'b0;
       end

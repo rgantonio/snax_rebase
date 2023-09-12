@@ -125,7 +125,7 @@ module snax_cc #(
   input  acc_resp_t                          snax_resp_i,          // SNAX ports
   input  logic                               snax_pvalid_i,        // SNAX ports
   output logic                               snax_pready_o,        // SNAX ports
-  output snitch_pkg::core_events_t      core_events_o,        // Core event strobes
+  output snitch_pkg::core_events_t           core_events_o,        // Core event strobes
   input  addr_t                              tcdm_addr_base_i      // Base address for slicing global TCDM when Snitch accesses memory
 );
 
@@ -711,7 +711,7 @@ module snax_cc #(
     //-------------------------------
     always_comb begin
 
-      import snax_riscv_instr::*;
+      import riscv_instr::*;
 
       automatic logic [11:0] addr;
       automatic logic [ 4:0] addr_dm;
