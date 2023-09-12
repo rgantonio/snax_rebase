@@ -138,6 +138,7 @@ sources:
       # Level 0
       - hw/snitch/src/snitch_pma_pkg.sv
       - hw/snitch/src/riscv_instr.sv
+      - hw/snax/src/snax_riscv_def.sv
       # Level 1
       - hw/snitch/src/snitch_pkg.sv
       # Level 2
@@ -149,6 +150,7 @@ sources:
       SNITCH_ENABLE_PERF:
     files:
       - hw/snitch/src/snitch.sv
+      - hw/snax/src/snax_snitch.sv
   # Disable the performance monitoring counters to save area.
   - target: disable_pmcs
     files:
@@ -239,10 +241,12 @@ sources:
       # Level 2
       - hw/snitch_cluster/src/snitch_cc.sv
       - hw/snitch_cluster/src/snitch_clkdiv2.sv
+      - hw/snax/src/snax_cc.sv
       # Level 3
       - hw/snitch_cluster/src/snitch_hive.sv
       # Level 4
       - hw/snitch_cluster/src/snitch_cluster.sv
+      - hw/snax/src/snax_cluster.sv
   - target: test
     files:
       - hw/snitch_cluster/test/snitch_tcdm_interconnect_tb.sv
