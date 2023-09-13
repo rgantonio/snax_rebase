@@ -108,10 +108,10 @@ module snax_hwpe_ctrl #(
     unique casez (req_i.data_op)
       CSRRW, CSRRWI, CSRRS, CSRRSI, CSRRC, CSRRCI: begin
         //Offset due to start of address CSR and << 2 due to "byte" addressable of registers
-        address_in = (req_i.data_arga[31:0] - 32'd960) << 2; 
+        address_in = (req_i.data_argb[31:0] - 32'd960) << 2; 
       end
       default: begin
-        address_in = req_i.data_arga[31:0];
+        address_in = req_i.data_argb[31:0];
       end
     endcase
   end
@@ -216,7 +216,7 @@ module snax_hwpe_ctrl #(
             periph.add  <= address_in;
             periph.wen  <= wen;
             periph.be   <= be;
-            periph.data <= req_i.data_argb[31:0];
+            periph.data <= req_i.data_arga[31:0];
           end
         end 
         WRITE: begin 

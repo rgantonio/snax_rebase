@@ -843,8 +843,8 @@ module snax_snitch import snitch_pkg::*; import riscv_instr::*; import snax_risc
       CSRRW: begin // Atomic Read/Write CSR
         if((csrimm >= CSR_SNAX_BEGIN) && ((csrimm <= CSR_SNAX_END))) begin
           acc_qvalid_o    = valid_instr;
-          opa_select      = CSRAddrImmediate;
-          opb_select      = CSRrs1;
+          opa_select      = Reg;
+          opb_select      = CSRAddrImmediate;
           acc_qreq_o.addr = SNAX_CSR;
         end else begin
           opa_select      = Reg;
@@ -858,8 +858,8 @@ module snax_snitch import snitch_pkg::*; import riscv_instr::*; import snax_risc
       CSRRWI: begin
         if((csrimm >= CSR_SNAX_BEGIN) && ((csrimm <= CSR_SNAX_END))) begin
           acc_qvalid_o    = valid_instr;
-          opa_select      = CSRAddrImmediate;
-          opb_select      = CSRImmmediate;
+          opa_select      = CSRImmmediate;
+          opb_select      = CSRAddrImmediate;
           acc_qreq_o.addr = SNAX_CSR;
         end else begin
           opa_select      = CSRImmmediate;
@@ -875,8 +875,8 @@ module snax_snitch import snitch_pkg::*; import riscv_instr::*; import snax_risc
           write_rd        = 1'b0;
           uses_rd         = 1'b1;
           acc_qvalid_o    = valid_instr;
-          opa_select      = CSRAddrImmediate;
-          opb_select      = None; // Just reading so nothing to write
+          opa_select      = None;
+          opb_select      = CSRAddrImmediate; // Just reading so nothing to write
           acc_register_rd = 1'b1;
           acc_qreq_o.addr = SNAX_CSR;
         end else begin
@@ -895,8 +895,8 @@ module snax_snitch import snitch_pkg::*; import riscv_instr::*; import snax_risc
           write_rd        = 1'b0;
           uses_rd         = 1'b1;
           acc_qvalid_o    = valid_instr;
-          opa_select      = CSRAddrImmediate;
-          opb_select      = None; // Just reading so nothing to write
+          opa_select      = None;
+          opb_select      = CSRAddrImmediate; // Just reading so nothing to write
           acc_register_rd = 1'b1;
           acc_qreq_o.addr = SNAX_CSR;
 
@@ -918,8 +918,8 @@ module snax_snitch import snitch_pkg::*; import riscv_instr::*; import snax_risc
           write_rd        = 1'b0;
           uses_rd         = 1'b1;
           acc_qvalid_o    = valid_instr;
-          opa_select      = CSRAddrImmediate;
-          opb_select      = None; // Just reading so nothing to write
+          opa_select      = None;
+          opb_select      = CSRAddrImmediate; // Just reading so nothing to write
           acc_register_rd = 1'b1;
           acc_qreq_o.addr = SNAX_CSR;
         end else begin
@@ -937,8 +937,8 @@ module snax_snitch import snitch_pkg::*; import riscv_instr::*; import snax_risc
           write_rd        = 1'b0;
           uses_rd         = 1'b1;
           acc_qvalid_o    = valid_instr;
-          opa_select      = CSRAddrImmediate;
-          opb_select      = None; // Just reading so nothing to write
+          opa_select      = None;
+          opb_select      = CSRAddrImmediate; // Just reading so nothing to write
           acc_register_rd = 1'b1;
           acc_qreq_o.addr = SNAX_CSR;
         end else if (inst_data_i[31:20] != CSR_SSR) begin
@@ -2834,7 +2834,6 @@ module snax_snitch import snitch_pkg::*; import riscv_instr::*; import snax_risc
       UImmediate:       opa = uimm;
       JImmediate:       opa = jimm;
       CSRImmmediate:    opa = {{{32-RegWidth}{1'b0}}, rs1};
-      CSRAddrImmediate: opa = csrimm; // Use opa to use the immediate field for CSR SNAX addressing
       default:          opa = '0;
     endcase
 
@@ -2848,9 +2847,8 @@ module snax_snitch import snitch_pkg::*; import riscv_instr::*; import snax_risc
       IImmediate:              opb = iimm;
       SFImmediate, SImmediate: opb = simm;
       PC:                      opb = pc_q;
-      CSRrs1:                  opb = gpr_rdata[0];  // Use opb to read from rs1 for CSR SNAX instructions
-      CSRImmmediate:           opb = {{{32-RegWidth}{1'b0}}, rs1};
       CSR:                     opb = csr_rvalue;
+      CSRAddrImmediate:        opb = csrimm;
       default:                 opb = '0;
     endcase
     
