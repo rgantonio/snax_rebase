@@ -28,6 +28,8 @@ int main() {
 
     snrt_cluster_hw_barrier();
 
+    uint32_t dma_done = snrt_mcycle();
+
     
     if(snrt_is_compute_core()){
 
