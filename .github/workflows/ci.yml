@@ -43,7 +43,7 @@ jobs:
         # The makefile looks for lru.hjson
         # Need to copy-paste default or snax config to lru.hjson
         run: |
-          cp target/snitch_cluster/cfg/${{ matrix.configs }} lru.hjson
+          cp target/snitch_cluster/cfg/${{ matrix.configs }} target/snitch_cluster/cfg/lru.hjson
       - name: Build Hardware
         run: |
           make -C target/snitch_cluster bin/snitch_cluster.vlt
