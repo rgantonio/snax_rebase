@@ -46,6 +46,33 @@ jobs:
           ./sw/tests/run.py sw/tests/run.yaml --simulator verilator
           ./sw/apps/run.py sw/apps/run.yaml --simulator verilator
 
+  sw-snax-cluster-vlt:
+    name: Simulate SW on SNAX Cluster w/ Verilator
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/pulp-platform/snitch_cluster:ipc-verification
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Load Architecture
+        # The build makefile looks for lru.hjson
+        # Need to copy-paste default or snax config to lru.hjson
+        run: |
+          cp target/snitch_cluster/cfg/snax.hjson \
+          target/snitch_cluster/cfg/lru.hjson
+      - name: Build Hardware
+        run: |
+          make -C target/snitch_cluster bin/snitch_cluster.vlt
+      - name: Build Software
+        run: |
+          make -C target/snitch_cluster sw
+      - name: Run Tests
+        working-directory: target/snitch_cluster
+        run: |-
+          ./sw/tests/run.py sw/tests/snax-run.yaml --simulator verilator
+          ./sw/apps/run.py sw/apps/run.yaml --simulator verilator
+
   ############################################
   # Build SW on Snitch Cluster w/ Banshee #
   ############################################
