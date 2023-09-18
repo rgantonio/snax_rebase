@@ -44,7 +44,7 @@ jobs:
           make -C target/snitch_cluster sw
       - name: Generate Architecture
         run: |
-          ./util/clustergen.py -c ./target/snitch_clustercfg/${{ matrix.configs }}\
+          ./util/clustergen.py -c ./target/snitch_cluster/cfg/${{ matrix.configs }}\
            -o ./target/snitch_cluster/generated --wrapper
       - name: Build Hardware
         run: |
