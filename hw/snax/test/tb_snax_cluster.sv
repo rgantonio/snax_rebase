@@ -312,7 +312,7 @@ module tb_snax_cluster;
     .SsrCfgs (snitch_cluster_pkg::SsrCfgs),
     .NumSequencerInstr (NumSequencerInstr),
     .Hive (snitch_cluster_pkg::Hive),
-    .Topology (snax_snitch_pkg::LogarithmicInterconnect),
+    .Topology (snitch_pkg::LogarithmicInterconnect),
     .Radix (2),
     .RegisterOffloadReq (0),
     .RegisterOffloadRsp (0),
