@@ -39,12 +39,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-      - name: Generate Architecture
+      - name: Load Architecture
+        # The makefile looks for lru.hjson
+        # Need to copy-paste default or snax config to lru.hjson
         run: |
-          mkdir -p target/snitch_cluster/generated
-          ./util/clustergen.py \
-          -c target/snitch_cluster/cfg/${{ matrix.configs }} \
-          -o target/snitch_cluster/generated --wrapper
+          cp target/snitch_cluster/cfg/${{ matrix.configs }} lru.hjson
       - name: Build Hardware
         run: |
           make -C target/snitch_cluster bin/snitch_cluster.vlt
