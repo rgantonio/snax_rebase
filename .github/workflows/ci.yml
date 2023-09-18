@@ -39,15 +39,15 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-      - name: Build Software
-        run: |
-          make -C target/snitch_cluster sw
       - name: Generate Architecture
         run: |
           ./util/clustergen.py -c ./target/snitch_cluster/cfg/${{ matrix.configs }} -o ./target/snitch_cluster/generated --wrapper
       - name: Build Hardware
         run: |
           make -C target/snitch_cluster bin/snitch_cluster.vlt
+      - name: Build Software
+        run: |
+          make -C target/snitch_cluster sw
       - name: Run Tests
         working-directory: target/snitch_cluster
         run: |-
