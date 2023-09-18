@@ -28,6 +28,11 @@ jobs:
   sw-snitch-cluster-vlt:
     name: Simulate SW on Snitch Cluster w/ Verilator
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        configs:
+          - lru.hjson
+          - snax.hjson
     container:
       image: ghcr.io/pulp-platform/snitch_cluster:ipc-verification
     steps:
@@ -37,6 +42,9 @@ jobs:
       - name: Build Software
         run: |
           make -C target/snitch_cluster sw
+      - name: Generate Architecture
+        run: |
+          ./util/clustergen.py -c ./target/snitch_clustercfg/${{ matrix.configs }} -o ./target/snitch_cluster/generated --wrapper
       - name: Build Hardware
         run: |
           make -C target/snitch_cluster bin/snitch_cluster.vlt
