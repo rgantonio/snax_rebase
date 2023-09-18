@@ -419,7 +419,7 @@
                                 "snax": {
                                     "type": "boolean",
                                     "title": "SNAX Extension",
-                                    "description": "Enable SNAX acceelerator extension",
+                                    "description": "Enable Snitch Accelerator eXtension (SNAX)",
                                     "default": false
                                 },
                                 "num_int_outstanding_loads": {
