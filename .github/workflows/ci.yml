@@ -55,15 +55,9 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-      - name: Load Architecture
-        # The build makefile looks for lru.hjson
-        # Need to copy-paste default or snax config to lru.hjson
-        run: |
-          cp target/snitch_cluster/cfg/snax.hjson \
-          target/snitch_cluster/cfg/lru.hjson
       - name: Build Hardware
         run: |
-          make -C target/snitch_cluster bin/snitch_cluster.vlt
+          make CFG_OVERRIDE=target/snitch_cluster/cfg/snax.hjson -C target/snitch_cluster bin/snitch_cluster.vlt
       - name: Build Software
         run: |
           make -C target/snitch_cluster sw
