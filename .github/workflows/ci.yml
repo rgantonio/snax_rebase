@@ -57,7 +57,8 @@ jobs:
           submodules: 'recursive'
       - name: Build Hardware
         run: |
-          make CFG_OVERRIDE=target/snitch_cluster/cfg/snax.hjson -C target/snitch_cluster bin/snitch_cluster.vlt
+          make CFG_OVERRIDE=target/snitch_cluster/cfg/snax.hjson \
+          -C target/snitch_cluster bin/snitch_cluster.vlt
       - name: Build Software
         run: |
           make -C target/snitch_cluster sw
