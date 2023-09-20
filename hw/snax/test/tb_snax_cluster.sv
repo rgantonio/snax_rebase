@@ -366,7 +366,7 @@ module tb_snax_cluster;
   
 
 
-  initial begin $readmemh("./mem/inst/csr_mac_test.txt", inst_mem); end
+  initial begin $readmemh("./mem/inst/csr_hard_test.txt", inst_mem); end
 
   // Dirty fix to offset the instruction memory since boot starts at 4096
   always_comb begin
