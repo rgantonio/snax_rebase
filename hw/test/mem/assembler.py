@@ -172,7 +172,7 @@ def decode(entry):
         op = '1110011'
         machine_inst = imm+rs1+f3+rd+op
         hex_code = hex_fix(machine_inst)
-    elif(entry[0] == 'lui'):
+    elif (entry[0] == 'lui'):
         imm = ext_type(entry[2].strip(','), 'uimm')
         rd = ext_type(int(entry[1].strip('x').strip(',')), 'reg')
         op = '0110111'
