@@ -178,6 +178,22 @@ def decode(entry):
         op = '0110111'
         machine_inst = imm+rd+op
         hex_code = hex_fix(machine_inst)
+    elif (entry[0] == 'slli'):
+        imm = ext_type(entry[3], 'imm')
+        rs1 = ext_type(int(entry[2].strip('x').strip(',')), 'reg')
+        f3 = '001'
+        rd = ext_type(int(entry[1].strip('x').strip(',')), 'reg')
+        op = '0010011'
+        machine_inst = imm+rs1+f3+rd+op
+        hex_code = hex_fix(machine_inst)
+    elif (entry[0] == 'srli'):
+        imm = ext_type(entry[3], 'imm')
+        rs1 = ext_type(int(entry[2].strip('x').strip(',')), 'reg')
+        f3 = '101'
+        rd = ext_type(int(entry[1].strip('x').strip(',')), 'reg')
+        op = '0010011'
+        machine_inst = imm+rs1+f3+rd+op
+        hex_code = hex_fix(machine_inst)
     elif (entry[0] == '#'):
         pass
     else:
