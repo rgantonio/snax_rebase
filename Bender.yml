@@ -166,6 +166,12 @@ sources:
       - hw/snax_hwpe_mac/src/snax_hwpe_to_reqrsp.sv
       - hw/snax_hwpe_mac/src/snax_mac.sv
 
+  # sanx gemm
+  - files:
+      # Level 0
+      - hw/snax_gemm/src/gemm.sv
+      - hw/snax_gemm/src/snax_gemm.sv
+
   # snitch_vm
   - files:
       - hw/snitch_vm/src/snitch_ptw.sv
