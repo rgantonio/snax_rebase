@@ -103,3 +103,19 @@ add wave -position insertpoint  \
 {sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_tcdm_req_o_q_valid} \
 {sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/cstate} \
 {sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/nstate}
+add wave -position insertpoint  \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/DataWidth} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/SnaxTcdmPorts} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/acc_req_t} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/acc_rsp_t} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/tcdm_req_t} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/tcdm_rsp_t} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/reg_num} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/csr_addr_offset}
+add wave -position insertpoint  \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/req_write_data}
+add wave -position insertpoint  \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/half_half_c_addr} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/half_c_addr}
+add wave -position insertpoint  \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/req_write_data_test}

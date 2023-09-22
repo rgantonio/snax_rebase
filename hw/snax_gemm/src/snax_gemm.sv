@@ -235,6 +235,12 @@ module snax_gemm # (
   logic io_data_out_valid;
   logic [2047:0] io_c_io_out;
   reg [2047:0] io_c_io_out_reg;
+  reg [DataWidth - 1:0] req_write_data [SnaxTcdmPorts - 1:0] ;
+  reg [DataWidth - 1:0] req_write_data_test;
+  localparam half_half_c_addr = 1024 / 2 / 8;
+  localparam half_c_addr = 1024 / 8;
+  localparam half_half_c = 1024 / 2;
+  localparam half_c = 1024;
 
   Gemm inst_gemm(
     .clock(clk_i),	// <stdin>:9016:11
@@ -340,6 +346,14 @@ module snax_gemm # (
           snax_tcdm_req_o[i].q.data = {DataWidth{1'b0}};
           snax_tcdm_req_o[i].q.strb = {(DataWidth / 8){1'b0}};
           snax_tcdm_req_o[i].q.user = '0;
+
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q_valid = 1'b0;
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.addr = 17'b0;
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.write = 1'b0;
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.amo = reqrsp_pkg::AMONone;
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.data = {DataWidth{1'b0}};
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.strb = {(DataWidth / 8){1'b0}};
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.user = '0;          
         end
         else if(read_tcdm) begin
           snax_tcdm_req_o[i].q_valid = 1'b1;
@@ -368,27 +382,27 @@ module snax_gemm # (
           snax_tcdm_req_o[i].q.user = '0;
 
           snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q_valid = 1'b1;
-          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.addr = CSRs[2] + i * 8 + 1024 / 2 / 8;
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.addr = CSRs[2] + i * 8 + half_half_c_addr;
           snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.write = 1'b1;
           snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.amo = reqrsp_pkg::AMONone;
-          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.data = io_c_io_out_reg[i * DataWidth + 1024 / 2 / 8 +: DataWidth];
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.data = io_c_io_out_reg[(i * DataWidth + half_half_c) +: DataWidth];
           snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.strb = {(DataWidth / 8){1'b1}};
           snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.user = '0;                    
         end  
         else if(write_tcdm_2) begin
           snax_tcdm_req_o[i].q_valid = 1'b1;
-          snax_tcdm_req_o[i].q.addr = CSRs[2] + i * 8 + 1024 / 8;
+          snax_tcdm_req_o[i].q.addr = CSRs[2] + i * 8 + half_c_addr;
           snax_tcdm_req_o[i].q.write = 1'b1;
           snax_tcdm_req_o[i].q.amo = reqrsp_pkg::AMONone;
-          snax_tcdm_req_o[i].q.data = io_c_io_out_reg[i * DataWidth + 1024 / 8 +: DataWidth];
+          snax_tcdm_req_o[i].q.data = io_c_io_out_reg[(i * DataWidth + half_c) +: DataWidth];
           snax_tcdm_req_o[i].q.strb = {(DataWidth / 8){1'b1}};
           snax_tcdm_req_o[i].q.user = '0;
 
           snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q_valid = 1'b1;
-          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.addr = CSRs[2] + i * 8 + 1024 / 8 + 1024 / 2 / 8;
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.addr = CSRs[2] + i * 8 + half_c_addr + half_half_c_addr;
           snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.write = 1'b1;
           snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.amo = reqrsp_pkg::AMONone;
-          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.data = io_c_io_out_reg[i * DataWidth + 1024 / 2 / 8 + 1024 / 8 +: DataWidth];
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.data = io_c_io_out_reg[(i * DataWidth + half_c + half_half_c) +: DataWidth];
           snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.strb = {(DataWidth / 8){1'b1}};
           snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.user = '0;                    
         end              
@@ -399,10 +413,41 @@ module snax_gemm # (
           snax_tcdm_req_o[i].q.amo = reqrsp_pkg::AMONone;
           snax_tcdm_req_o[i].q.data = {DataWidth{1'b0}};
           snax_tcdm_req_o[i].q.strb = {(DataWidth / 8){1'b0}};
-          snax_tcdm_req_o[i].q.user = '0;               
+          snax_tcdm_req_o[i].q.user = '0;        
+
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q_valid = 1'b0;
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.addr = 17'b0;
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.write = 1'b0;
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.amo = reqrsp_pkg::AMONone;
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.data = {DataWidth{1'b0}};
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.strb = {(DataWidth / 8){1'b0}};
+          snax_tcdm_req_o[i + SnaxTcdmPorts / 2].q.user = '0;                  
         end 
       end
   end 
+
+  always_comb begin
+    for (int i = 0; i < SnaxTcdmPorts / 2; i++) begin
+      if (!rst_ni) begin
+        req_write_data[i] = 0;
+        req_write_data[i + SnaxTcdmPorts / 2] = 0;
+      end
+      else if(write_tcdm_1) begin
+        req_write_data[i] = io_c_io_out_reg[i * DataWidth +: DataWidth];
+        req_write_data[i + SnaxTcdmPorts / 2] = io_c_io_out_reg[(i * DataWidth + half_half_c) +: DataWidth];       
+      end
+      else if(write_tcdm_2) begin
+        req_write_data[i] = io_c_io_out_reg[(i * DataWidth + half_c) +: DataWidth];
+        req_write_data[i + SnaxTcdmPorts / 2] = io_c_io_out_reg[(i * DataWidth + half_c + half_half_c) +: DataWidth];       
+      end
+      else begin
+        req_write_data[i] = 0;
+        req_write_data[i + SnaxTcdmPorts / 2] = 0;                
+      end
+    end
+  end
+  // assign req_write_data_test = io_c_io_out_reg['h40+64 : 'h40];
+  assign req_write_data_test = io_c_io_out_reg[2047 : 'h40];
 
   always_comb begin
     if (!rst_ni) begin
