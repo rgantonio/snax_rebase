@@ -252,6 +252,7 @@ module tb_snax_cluster;
   localparam int unsigned NumSequencerInstr [2] = '{16, 16};
   localparam int unsigned NumSsrs [2] = '{3, 1};
   localparam int unsigned SsrMuxRespDepth [2] = '{4, 4};
+  localparam SnaxTcdmPorts = 16;
 
   // SNAX cluster under test.
   snitch_cluster #(
@@ -333,7 +334,8 @@ module tb_snax_cluster;
     .NarrowMaxMstTrans (4),
     .NarrowMaxSlvTrans (4),
     .sram_cfg_t (snitch_cluster_pkg::sram_cfg_t),
-    .sram_cfgs_t (snitch_cluster_pkg::sram_cfgs_t)
+    .sram_cfgs_t (snitch_cluster_pkg::sram_cfgs_t),
+    .SnaxTcdmPorts (SnaxTcdmPorts)
   ) i_cluster (
     .clk_i,
     .rst_ni,
@@ -366,7 +368,8 @@ module tb_snax_cluster;
   
 
 
-  initial begin $readmemh("../mem/inst/snax-mac-test.txt", inst_mem); end
+  // initial begin $readmemh("../mem/inst/snax-mac-test.txt", inst_mem); end
+  initial begin $readmemh("../mem/inst/snax-gemm-test.txt", inst_mem); end
 
   // Dirty fix to offset the instruction memory since boot starts at 4096
   always_comb begin

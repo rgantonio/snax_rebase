@@ -954,15 +954,45 @@ module snitch_cluster
         assign dma_events = dma_core_events;
       end
 
-      if(SNAX[i]) begin: gen_yes_mac
-        snax_mac # (
-          .DataWidth          ( 32               ),
+      // if(SNAX[i]) begin: gen_yes_mac
+      //   snax_mac # (
+      //     .DataWidth          ( 32               ),
+      //     .SnaxTcdmPorts      ( SnaxTcdmPorts    ),
+      //     .acc_req_t          ( acc_req_t        ),
+      //     .acc_rsp_t          ( acc_resp_t       ),
+      //     .tcdm_req_t         ( tcdm_req_t       ),
+      //     .tcdm_rsp_t         ( tcdm_rsp_t       )
+      //   ) i_snax_mac (
+      //     .clk_i              ( clk_i            ),
+      //     .rst_ni             ( rst_ni           ),
+      //     .snax_req_i         ( snax_req         ),
+      //     .snax_qvalid_i      ( snax_qvalid      ),
+      //     .snax_qready_o      ( snax_qready      ),
+      //     .snax_resp_o        ( snax_resp        ),
+      //     .snax_pvalid_o      ( snax_pvalid      ),
+      //     .snax_pready_i      ( snax_pready      ),
+      //     .snax_tcdm_req_o    ( snax_tcdm_req[i] ),
+      //     .snax_tcdm_rsp_i    ( snax_tcdm_rsp[i] )
+      //   );
+
+      // end else begin: gen_no_mac
+      //   // Tie these signal to low when no SNAX accelerator is present
+      //   assign snax_qready = '0;
+      //   assign snax_resp   = '0;
+      //   assign snax_pvalid = '0;
+      //   assign snax_tcdm_req[i] = '0;
+      // end
+
+      // Add the Gemm Accelerator!
+      if(SNAX[i]) begin: gen_yes_gemm
+        snax_gemm # (
+          .DataWidth          ( NarrowDataWidth  ),
           .SnaxTcdmPorts      ( SnaxTcdmPorts    ),
           .acc_req_t          ( acc_req_t        ),
           .acc_rsp_t          ( acc_resp_t       ),
           .tcdm_req_t         ( tcdm_req_t       ),
           .tcdm_rsp_t         ( tcdm_rsp_t       )
-        ) i_snax_mac (
+        ) i_snax_gemm (
           .clk_i              ( clk_i            ),
           .rst_ni             ( rst_ni           ),
           .snax_req_i         ( snax_req         ),
@@ -975,7 +1005,7 @@ module snitch_cluster
           .snax_tcdm_rsp_i    ( snax_tcdm_rsp[i] )
         );
 
-      end else begin: gen_no_mac
+      end else begin: gen_no_gemm
         // Tie these signal to low when no SNAX accelerator is present
         assign snax_qready = '0;
         assign snax_resp   = '0;

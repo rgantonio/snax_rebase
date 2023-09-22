@@ -47,3 +47,59 @@ configure wave -timeline 0
 configure wave -timelineunits ns
 update
 WaveRestoreZoom {0 ns} {5250 ns}
+add wave -position insertpoint  \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/clk_i} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/rst_ni} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_qvalid_i} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_qready_o} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_req_i} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_resp_o} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_pvalid_o} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_pready_i} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_tcdm_req_o} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_tcdm_rsp_i}
+add wave -position insertpoint  \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/csr_cstate} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/csr_nstate}
+add wave -position insertpoint  \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/cstate} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/nstate}
+add wave -position insertpoint  \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/csr_addr}
+add wave -position insertpoint  \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/clk_i} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/rst_ni} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_qvalid_i} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_qready_o} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_req_i} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_resp_o} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_pvalid_o} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_pready_i} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_tcdm_req_o} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_tcdm_rsp_i} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/CSRs} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/write_csr} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/read_csr} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/csr_read_done} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/csr_write_done} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/csr_addr} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/csr_cstate} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/csr_nstate} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/io_start_do} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/io_data_in_valid} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/io_a_io_in} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/io_b_io_in} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/io_data_out_valid} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/io_c_io_out} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/io_c_io_out_reg} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/read_tcdm} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/write_tcdm_1} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/write_tcdm_2} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/read_tcdm_done} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/write_tcdm_done} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/write_tcdm_done_1} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/write_tcdm_done_2} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_tcdm_rsp_i_p_valid} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/snax_tcdm_req_o_q_valid} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/cstate} \
+{sim:/tb_snax_cluster/i_cluster/gen_core[0]/gen_yes_gemm/i_snax_gemm/nstate}

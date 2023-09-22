@@ -256,6 +256,14 @@
 ../../../hw/snax_hwpe_mac/src/snax_mac.sv
 
 #--------------------------------------------
+# SNAX Gemm Accelerator
+#--------------------------------------------
+
+../../../hw/snax_gemm/src/gemm.sv
+../../../hw/snax_gemm/src/snax_gemm.sv
+
+#--------------------------------------------
 # Working testbench
 #--------------------------------------------
 ../../../hw/test/tb/tb_snitch_cluster.sv
+
