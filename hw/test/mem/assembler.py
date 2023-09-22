@@ -15,10 +15,9 @@ def ext_type(value, mode='reg'):
     # Dumb way is just to zero pad long
     # Then just get the lower 12 bits for imm extension
     # Get lower 5 bits for reg extension
-    
-    if((mode != 'reg')):
-        if((value[0:2]=='0x')):
-            value = int(value[2:],16)
+    if ((mode != 'reg')):
+        if ((value[0:2] == '0x')):
+            value = int(value[2:], 16)
 
     zero_padd = '00000000000000000000000000000000'
     zero_padded = zero_padd + str(format(int(value), 'b'))
