@@ -25,6 +25,7 @@
         dma_data_width: 512,
         dma_axi_req_fifo_depth: 3,
         dma_req_fifo_depth: 3,
+        SnaxTcdmPorts: 16,
         // Timing parameters
         timing: {
             lat_comp_fp32: 3,
