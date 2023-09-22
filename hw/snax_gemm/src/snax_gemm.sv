@@ -467,19 +467,19 @@ module snax_gemm # (
     end
   end  
 
-  always_comb begin
-      for (int i = 0; i < SnaxTcdmPorts; i++) begin
-        if(!rst_ni) begin
-          snax_tcdm_rsp_i[i].q_ready = 1'b0;
-        end
-        else if(tcdm_not_ready) begin
-          snax_tcdm_rsp_i[i].q_ready = 1'b0;
-        end
-        else begin
-          snax_tcdm_rsp_i[i].q_ready = 1'b1;                
-        end 
-      end
-  end 
+  // always_comb begin
+  //     for (int i = 0; i < SnaxTcdmPorts; i++) begin
+  //       if(!rst_ni) begin
+  //         snax_tcdm_rsp_i[i].q_ready = 1'b0;
+  //       end
+  //       else if(tcdm_not_ready) begin
+  //         snax_tcdm_rsp_i[i].q_ready = 1'b0;
+  //       end
+  //       else begin
+  //         snax_tcdm_rsp_i[i].q_ready = 1'b1;                
+  //       end 
+  //     end
+  // end 
 
   always_comb begin
       for (int i = 0; i < SnaxTcdmPorts; i++) begin
