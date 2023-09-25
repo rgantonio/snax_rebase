@@ -16,7 +16,7 @@ def ext_type(value, mode='reg'):
     # Then just get the lower 12 bits for imm extension
     # Get lower 5 bits for reg extension
     if ((mode != 'reg')):
-        if (not isinstance(value,int)):
+        if (not isinstance(value, int)):
             if ((value[0:2] == '0x')):
                 value = int(value[2:], 16)
 
