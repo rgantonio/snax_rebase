@@ -29,10 +29,18 @@ add wave -noupdate {/tb_snax_cluster/i_cluster/gen_core[0]/i_snitch_cc/i_snitch/
 add wave -noupdate {/tb_snax_cluster/i_cluster/gen_core[0]/i_snitch_cc/i_snitch/fpu_fmt_mode_o}
 add wave -noupdate {/tb_snax_cluster/i_cluster/gen_core[0]/i_snitch_cc/i_snitch/fpu_status_i}
 add wave -noupdate {/tb_snax_cluster/i_cluster/gen_core[0]/i_snitch_cc/i_snitch/core_events_o}
+add wave -noupdate -divider <NULL>
+add wave -noupdate -expand -subitemconfig {{/tb_snax_cluster/i_cluster/snax_tcdm_req[0]} -expand {/tb_snax_cluster/i_cluster/snax_tcdm_req[0][3]} -expand {/tb_snax_cluster/i_cluster/snax_tcdm_req[0][3].q} {-childformat {{addr -radix unsigned} {data -radix unsigned}} -expand} {/tb_snax_cluster/i_cluster/snax_tcdm_req[0][3].q.addr} {-radix unsigned} {/tb_snax_cluster/i_cluster/snax_tcdm_req[0][3].q.data} {-radix unsigned} {/tb_snax_cluster/i_cluster/snax_tcdm_req[0][2]} -expand {/tb_snax_cluster/i_cluster/snax_tcdm_req[0][2].q} -expand {/tb_snax_cluster/i_cluster/snax_tcdm_req[0][1]} -expand {/tb_snax_cluster/i_cluster/snax_tcdm_req[0][0]} -expand {/tb_snax_cluster/i_cluster/snax_tcdm_req[0][0].q} -expand} /tb_snax_cluster/i_cluster/snax_tcdm_req
+add wave -noupdate -expand -subitemconfig {{/tb_snax_cluster/i_cluster/snax_tcdm_rsp[0]} -expand} /tb_snax_cluster/i_cluster/snax_tcdm_rsp
+add wave -noupdate -divider <NULL>
+add wave -noupdate -divider <NULL>
+add wave -noupdate -divider <NULL>
+add wave -noupdate -divider <NULL>
+add wave -noupdate -divider <NULL>
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {2210 ns} 0}
+WaveRestoreCursors {{Cursor 1} {3729 ns} 0}
 quietly wave cursor active 1
-configure wave -namecolwidth 523
+configure wave -namecolwidth 590
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
 configure wave -signalnamewidth 0
@@ -46,4 +54,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {0 ns} {5250 ns}
+WaveRestoreZoom {3598 ns} {3780 ns}
