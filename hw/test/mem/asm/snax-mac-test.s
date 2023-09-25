@@ -14,84 +14,132 @@ lui x1, 65536
 addi x1, x1, 0
 addi x2, x0, 1
 sw x2, 0(x1)
+sw x0, 4(x1)
 addi x2, x0, 2
-sw x2, 4(x1)
+sw x2, 8(x1)
+sw x0, 12(x1)
 addi x2, x0, 3
-sw x2, 8(x1)
+sw x2, 16(x1)
+sw x0, 20(x1)
 addi x2, x0, 4
-sw x2, 12(x1)
+sw x2, 24(x1)
+sw x0, 28(x1)
 addi x2, x0, 5
-sw x2, 16(x1)
+sw x2, 32(x1)
+sw x0, 36(x1)
 addi x2, x0, 6
-sw x2, 20(x1)
+sw x2, 40(x1)
+sw x0, 44(x1)
 addi x2, x0, 7
-sw x2, 24(x1)
+sw x2, 48(x1)
+sw x0, 52(x1)
 addi x2, x0, 8
-sw x2, 28(x1)
+sw x2, 56(x1)
+sw x0, 60(x1)
 addi x2, x0, 9
-sw x2, 32(x1)
+sw x2, 64(x1)
+sw x0, 68(x1)
 addi x2, x0, 10
-sw x2, 36(x1)
+sw x2, 72(x1)
+sw x0, 76(x1)
 addi x2, x0, 11
-sw x2, 40(x1)
+sw x2, 80(x1)
+sw x0, 84(x1)
 addi x2, x0, 12
-sw x2, 44(x1)
+sw x2, 88(x1)
+sw x0, 92(x1)
 addi x2, x0, 13
-sw x2, 48(x1)
+sw x2, 96(x1)
+sw x0, 100(x1)
 addi x2, x0, 14
-sw x2, 52(x1)
+sw x2, 104(x1)
+sw x0, 108(x1)
 addi x2, x0, 15
-sw x2, 56(x1)
+sw x2, 112(x1)
+sw x0, 116(x1)
 addi x2, x0, 16
-sw x2, 60(x1)
+sw x2, 120(x1)
+sw x0, 124(x1)
 addi x2, x0, 17
-sw x2, 64(x1)
+sw x2, 128(x1)
+sw x0, 132(x1)
 addi x2, x0, 18
-sw x2, 68(x1)
+sw x2, 136(x1)
+sw x0, 140(x1)
 addi x2, x0, 19
-sw x2, 72(x1)
+sw x2, 144(x1)
+sw x0, 148(x1)
 addi x2, x0, 20
-sw x2, 76(x1)
+sw x2, 152(x1)
+sw x0, 156(x1)
 nop
 nop
-addi x1, x0, 0
-lui x1, 65536
-addi x1, x1, 80
-addi x2, x0, 1
-sw x2, 0(x1)
-sw x2, 4(x1)
-sw x2, 8(x1)
-sw x2, 12(x1)
-sw x2, 16(x1)
-sw x2, 20(x1)
-sw x2, 24(x1)
-sw x2, 28(x1)
-sw x2, 32(x1)
-sw x2, 36(x1)
-sw x2, 40(x1)
-sw x2, 44(x1)
-sw x2, 48(x1)
-sw x2, 52(x1)
-sw x2, 56(x1)
-sw x2, 60(x1)
-sw x2, 64(x1)
-sw x2, 68(x1)
-sw x2, 72(x1)
-sw x2, 76(x1)
+nop
 nop
 nop
 addi x1, x0, 0
 lui x1, 65536
 addi x1, x1, 160
-addi x2, x0, 55
+addi x2, x0, 1
 sw x2, 0(x1)
+sw x0, 4(x1)
+sw x2, 8(x1)
+sw x0, 12(x1)
+sw x2, 16(x1)
+sw x0, 20(x1)
+sw x2, 24(x1)
+sw x0, 28(x1)
+sw x2, 32(x1)
+sw x0, 36(x1)
+sw x2, 40(x1)
+sw x0, 44(x1)
+sw x2, 48(x1)
+sw x0, 52(x1)
+sw x2, 56(x1)
+sw x0, 60(x1)
+sw x2, 64(x1)
+sw x0, 68(x1)
+sw x2, 72(x1)
+sw x0, 76(x1)
+sw x2, 80(x1)
+sw x0, 84(x1)
+sw x2, 88(x1)
+sw x0, 92(x1)
+sw x2, 96(x1)
+sw x0, 100(x1)
+sw x2, 104(x1)
+sw x0, 108(x1)
+sw x2, 112(x1)
+sw x0, 116(x1)
+sw x2, 120(x1)
+sw x0, 124(x1)
+sw x2, 128(x1)
+sw x0, 132(x1)
+sw x2, 136(x1)
+sw x0, 140(x1)
+sw x2, 144(x1)
+sw x0, 148(x1)
+sw x2, 152(x1)
+sw x0, 156(x1)
+nop
+nop
+nop
 nop
 nop
 addi x1, x0, 0
 lui x1, 65536
-addi x1, x1, 168
+addi x1, x1, 320
+addi x2, x0, 55
+sw x2, 0(x1)
+sw x0, 4(x1)
+nop
+nop
+addi x1, x0, 0
+lui x1, 65536
+addi x1, x1, 328
 addi x2, x0, 0
 sw x2, 0(x1)
+sw x0, 4(x1)
 nop
 nop
 addi x1, x0, 0
@@ -99,19 +147,19 @@ lui x1, 65536
 addi x1, x1, 0
 csrrw x0, 976, x1 # offset = 960, addr = 16 for REG_ADDR_A = 0
 lui x1, 65536
-addi x1, x1, 80
+addi x1, x1, 160
 csrrw x0, 977, x1 # offset = 960, addr = 17 for REG_ADDR_B = 80
 lui x1, 65536
-addi x1, x1, 160  
+addi x1, x1, 320  
 csrrw x0, 978, x1 # offset = 960, addr = 18 for REG_ADDR_C = 160
 lui x1, 65536
-addi x1, x1, 168  
+addi x1, x1, 328  
 csrrw x0, 979, x1 # offset = 960, addr = 19 for REG_ADDR_D = 168
 addi x6, x0, 1  
 csrrw x0, 980, x6 # offset = 960, addr = 20 for REG_NB_ITER = 1
 addi x6, x0, 19  
 csrrw x0, 981, x6 # offset = 960, addr = 21 for REG_LEN_ITER = 9 + 1 (the + 1 is always there)
-addi x6, x0, 0 
+addi x6, x0, 1 
 csrrw x0, 982, x6 # offset = 960, addr = 22 for simple mult
 nop
 nop
