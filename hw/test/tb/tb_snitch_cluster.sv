@@ -252,6 +252,7 @@ module tb_snax_cluster;
   localparam int unsigned NumSequencerInstr [2] = '{16, 16};
   localparam int unsigned NumSsrs [2] = '{3, 1};
   localparam int unsigned SsrMuxRespDepth [2] = '{4, 4};
+  localparam int unsigned SnaxTcdmPorts [2] = '{4,0};
 
   // SNAX cluster under test.
   snitch_cluster #(
@@ -283,6 +284,7 @@ module tb_snax_cluster;
     .ICacheLineCount (snitch_cluster_pkg::ICacheLineCount),
     .ICacheSets (snitch_cluster_pkg::ICacheSets),
     .SNAX(2'b01),
+    .SnaxTcdmPorts(SnaxTcdmPorts),
     .VMSupport (1),
     .RVE (2'b00),
     .RVF (2'b11),
