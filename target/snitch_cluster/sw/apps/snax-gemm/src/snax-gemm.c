@@ -36,16 +36,17 @@ int main(){
             }
         }
 
-        for(int i = 0 ; i < m ; i++){
-            for(int j = 0 ; j < n ; j++){
-                printf("C_golden[%d][%d] = %d\n",i,j,C_golden[i * n + j]);
-            }
-        }   
-
-    };
+        // for(int i = 0 ; i < m ; i++){
+        //     for(int j = 0 ; j < n ; j++){
+        //         printf("C_golden[%d][%d] = %d\n",i,j,C_golden[i * n + j]);
+        //     }
+        // }   
 
     // Read the mcycle CSR
     uint32_t end_cycle = snrt_mcycle();
+    printf("cycle number for CPU to do matrix multiply: %d \n", end_cycle - start_cycle);
+
+    };
 
     // uint32_t final_output;
 
@@ -66,7 +67,7 @@ int main(){
 
     snrt_cluster_hw_barrier();
 
-    // // Read the mcycle CSR (this is our way to mark/delimit a specific code region for benchmarking)
+    // Read the mcycle CSR (this is our way to mark/delimit a specific code region for benchmarking)
     uint32_t pre_is_compute_core = snrt_mcycle();
     
     if(snrt_is_compute_core()){
@@ -83,7 +84,7 @@ int main(){
         write_csr(0x3c3, 0);
         
         // Start of CSR start and poll until accelerator finishes
-        uint32_t mac_start = snrt_mcycle();
+        uint32_t gemm_start = snrt_mcycle();
 
         uint32_t break_poll;
 
@@ -95,13 +96,15 @@ int main(){
         //     };
         // };
 
-        uint32_t mac_end = snrt_mcycle();
+        uint32_t gemm_end = snrt_mcycle();
 
-        for(int i = 0 ; i < m ; i++){
-            for(int j = 0 ; j < n ; j++){
-                printf("C[%d][%d] = %d\n",i,j,*(local_c + (i * n + j)));
-            }
-        }  
+        printf("cycle number for Gemm to do matrix multiply: %d \n", gemm_end - dma_pre_load);
+
+        // for(int i = 0 ; i < m ; i++){
+        //     for(int j = 0 ; j < n ; j++){
+        //         printf("C[%d][%d] = %d\n",i,j,*(local_c + (i * n + j)));
+        //     }
+        // }  
 
         uint32_t end_of_check = snrt_mcycle();
     };
