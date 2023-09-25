@@ -4,30 +4,30 @@
 
 int main(){
     // Read the mcycle CSR (this is our way to mark/delimit a specific code region for benchmarking)
-    // uint32_t start_cycle = snrt_mcycle();
+    uint32_t start_cycle = snrt_mcycle();
 
-    // if(snrt_is_compute_core()){
+    if(snrt_is_compute_core()){
 
-    //     for(int i = 0 ; i < m ; i++){
-    //         for(int j = 0 ; j < n ; j++){
-    //             C_golden[i * m + j] = 0;
-    //             for(int s = 0 ; s < k ; s++){
-    //                 C_golden[i * m + j] = C_golden[i * m + j] + A[i * m + s] * B[s + j * n];
-    //                 // snrt_cluster_hw_barrier();
-    //             }
-    //         }
-    //     }
+        for(int i = 0 ; i < m ; i++){
+            for(int j = 0 ; j < n ; j++){
+                C_golden[i * m + j] = 0;
+                for(int s = 0 ; s < k ; s++){
+                    C_golden[i * m + j] = C_golden[i * m + j] + A[i * m + s] * B[s + j * n];
+                    // snrt_cluster_hw_barrier();
+                }
+            }
+        }
 
-    //     for(int i = 0 ; i < m ; i++){
-    //         for(int j = 0 ; j < n ; j++){
-    //             printf("C_golden[%d][%d] = %d\n",i,j,C_golden[i * m + j]);
-    //         }
-    //     }   
+        for(int i = 0 ; i < m ; i++){
+            for(int j = 0 ; j < n ; j++){
+                printf("C_golden[%d][%d] = %d\n",i,j,C_golden[i * m + j]);
+            }
+        }   
 
-    // };
+    };
 
-    // // Read the mcycle CSR
-    // uint32_t end_cycle = snrt_mcycle();
+    // Read the mcycle CSR
+    uint32_t end_cycle = snrt_mcycle();
 
 
     // Set err value for checking
