@@ -3,6 +3,24 @@
 #include "snrt.h"
 
 int main(){
+
+    // Set err value for checking
+    int err = 0;
+
+    // if(snrt_is_compute_core()){
+    //     for(int i = 0 ; i < m ; i++){
+    //         for(int s = 0 ; s < k ; s++){
+    //             printf("A[%d] = %d \n", i * k + s, A[i * k + s]);
+    //         }
+    //     }  
+
+    //     for(int s = 0 ; s < k ; s++){
+    //         for(int j = 0 ; j < n ; j++){
+    //             printf("B[%d] = %d \n", s * n + j, B[s * n + j]);
+    //         }      
+    //     }
+    // }
+
     // Read the mcycle CSR (this is our way to mark/delimit a specific code region for benchmarking)
     uint32_t start_cycle = snrt_mcycle();
 
@@ -10,9 +28,9 @@ int main(){
 
         for(int i = 0 ; i < m ; i++){
             for(int j = 0 ; j < n ; j++){
-                C_golden[i * m + j] = 0;
+                C_golden[i * k + j] = 0;
                 for(int s = 0 ; s < k ; s++){
-                    C_golden[i * m + j] = C_golden[i * m + j] + A[i * m + s] * B[s + j * n];
+                    C_golden[i * k + j] = C_golden[i * k + j] + (uint32_t)A[i * k + s] * (uint32_t)B[s + j * k];
                     // snrt_cluster_hw_barrier();
                 }
             }
@@ -20,7 +38,7 @@ int main(){
 
         for(int i = 0 ; i < m ; i++){
             for(int j = 0 ; j < n ; j++){
-                printf("C_golden[%d][%d] = %d\n",i,j,C_golden[i * m + j]);
+                printf("C_golden[%d][%d] = %d\n",i,j,C_golden[i * n + j]);
             }
         }   
 
@@ -29,31 +47,27 @@ int main(){
     // Read the mcycle CSR
     uint32_t end_cycle = snrt_mcycle();
 
-
-    // Set err value for checking
-    int err = 0;
-
     // uint32_t final_output;
 
-    uint32_t *local_a, *local_b, *local_c;
+    uint8_t *local_a, *local_b;
+    uint32_t *local_c;
 
     // // Allocate space in TCDM
-    local_a   = (uint32_t *)snrt_l1_next();
-    local_b   = local_a + m * k * sizeof(unsigned char);
-    local_c   = local_b + n * k * sizeof(unsigned char);
+    local_a   = (uint8_t *)snrt_l1_next();
+    local_b   = local_a + m * k * sizeof(uint8_t);
+    local_c   = (uint32_t *)(local_b + n * k * sizeof(uint8_t));
 
     uint32_t dma_pre_load = snrt_mcycle();
 
     if (snrt_is_dm_core()) {
-        snrt_dma_start_1d(local_a, A, m * k * sizeof(unsigned char));
-        snrt_dma_start_1d(local_b, B, n * k * sizeof(unsigned char));
+        snrt_dma_start_1d(local_a, A, m * k * sizeof(uint8_t));
+        snrt_dma_start_1d(local_b, B, n * k * sizeof(uint8_t));
     }
 
     snrt_cluster_hw_barrier();
 
     // // Read the mcycle CSR (this is our way to mark/delimit a specific code region for benchmarking)
     uint32_t pre_is_compute_core = snrt_mcycle();
-
     
     if(snrt_is_compute_core()){
 
@@ -73,26 +87,27 @@ int main(){
 
         uint32_t break_poll;
 
-        while(1){
-            // 0x3c3 is the CSR address for accelerator status
-            break_poll = read_csr(0x3c4);
-            if(break_poll == 1){
-                break;
-            };
-        };
+        // while(1){
+        //     // 0x3c4 is the CSR address for accelerator status
+        //     break_poll = read_csr(0x3c4);
+        //     if(break_poll == 1){
+        //         break;
+        //     };
+        // };
 
         uint32_t mac_end = snrt_mcycle();
-        
+
+        for(int i = 0 ; i < m ; i++){
+            for(int j = 0 ; j < n ; j++){
+                printf("C[%d][%d] = %d\n",i,j,*(local_c + (i * n + j)));
+            }
+        }  
+
         uint32_t end_of_check = snrt_mcycle();
     };
 
-    for(int i = 0 ; i < m ; i++){
-        for(int j = 0 ; j < n ; j++){
-            printf("C[%d][%d] = %d\n",i,j,*(local_c + (i * m + j) * 4));
-        }
-    }  
 
-    snrt_cluster_hw_barrier();
+    // snrt_cluster_hw_barrier();
 
     return err;
 
