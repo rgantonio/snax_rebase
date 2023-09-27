@@ -78,7 +78,7 @@ module snax_gemm # (
   // write CSRs
   always_ff @ (posedge clk_i or negedge rst_ni) begin
     if (!rst_ni) begin
-      for (int i=0; i<reg_num; i++) begin
+      for (int i=0; i < reg_num; i++) begin
         CSRs[i] <= 32'b0;
       end     
     end else begin
