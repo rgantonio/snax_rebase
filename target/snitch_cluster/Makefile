@@ -81,7 +81,8 @@ VLOG_FLAGS += -suppress 2583
 VLOG_FLAGS += -suppress 13314
 VLOG_FLAGS += ${VLOG_64BIT}
 
-VLT_FLAGS  += --trace
+VLT_FLAGS  += --trace 
+VLT_FLAGS  += --trace-structs
 
 ###############
 # C testbench #

@@ -100,11 +100,11 @@ int main(){
 
         printf("cycle number for Gemm to do matrix multiply: %d \n", gemm_end - dma_pre_load);
 
-        // for(int i = 0 ; i < m ; i++){
-        //     for(int j = 0 ; j < n ; j++){
-        //         printf("C[%d][%d] = %d\n",i,j,*(local_c + (i * n + j)));
-        //     }
-        // }  
+        for(int i = 0 ; i < m ; i++){
+            for(int j = 0 ; j < n ; j++){
+                printf("C[%d][%d] = %d\n",i,j,*(local_c + (i * n + j)));
+            }
+        }  
 
         uint32_t end_of_check = snrt_mcycle();
     };
