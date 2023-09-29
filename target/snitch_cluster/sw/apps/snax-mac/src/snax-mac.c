@@ -10,55 +10,56 @@ int main() {
     // Set err value for checking
     int err = 0;
 
-    uint64_t final_output;
-
-    uint64_t *local_a, *local_b, *local_c, *local_o;
+    uint64_t *local_a, *local_b, *local_c, *local_o_mac;
 
     // Allocate space in TCDM
     local_a = (uint64_t *)snrt_l1_next();
     local_b = local_a + VEC_LEN;
     local_c = local_b + VEC_LEN;
-    local_o = local_c + 1;
+    local_o_mac = local_c + 1;
 
-    uint32_t dma_pre_load = snrt_mcycle();
+    size_t vector_size = VEC_LEN * sizeof(uint64_t);
+    size_t scale_size = 1 * sizeof(uint64_t);
+
+    uint32_t start_dma, end_dma;
+    uint32_t start_csr, start_mac, end_mac;
+    uint32_t break_poll;
 
     // Use data mover core to bring data from L3 to TCDM
     if (snrt_is_dm_core()) {
-        size_t vector_size = VEC_LEN * sizeof(uint64_t);
-        size_t scale_size = 1 * sizeof(uint64_t);
+
+        start_dma = snrt_mcycle();
         snrt_dma_start_1d(local_a, A, vector_size);
         snrt_dma_start_1d(local_b, B, vector_size);
         snrt_dma_start_1d(local_c, &C, scale_size);
+        end_dma = snrt_mcycle();
+
+        printf("DMA cycles: %d \n", (end_dma - start_dma));
     }
 
     // Wait until DMA transfer is done
     snrt_cluster_hw_barrier();
 
-    // Read the mcycle CSR (this is our way to mark/delimit a specific
-    // code region for benchmarking)
-    uint32_t pre_is_compute_core = snrt_mcycle();
-
     if (snrt_is_compute_core()) {
+
         // This marks the start of the accelerator style of MAC operation
-        uint32_t csr_set = snrt_mcycle();
+        start_csr = snrt_mcycle();
 
         // Set addresses
         write_csr(0x3d0, (uint64_t)local_a);
         write_csr(0x3d1, (uint64_t)local_b);
         write_csr(0x3d2, (uint64_t)local_c);
-        write_csr(0x3d3, (uint64_t)local_o);
+        write_csr(0x3d3, (uint64_t)local_o_mac);
 
         // Set configs
         write_csr(0x3d4, 1);   // Number of iterations
-        write_csr(0x3d5, 19);  // Vector length
+        write_csr(0x3d5, 99);  // Vector length
 
         // Write start CSR to launch accelerator
         write_csr(0x3c0, 0);
 
         // Start of CSR start and poll until accelerator finishes
-        uint32_t mac_start = snrt_mcycle();
-
-        uint32_t break_poll;
+        start_mac = snrt_mcycle();
 
         while (1) {
             // 0x3c3 is the CSR address for accelerator status
@@ -68,15 +69,14 @@ int main() {
             };
         };
 
-        uint32_t mac_end = snrt_mcycle();
+        end_mac = snrt_mcycle();
 
-        final_output = *local_o;
-
-        if (final_output != 54763) {
-            err = 1;
+        if (*local_o_mac != 244977) {
+            err += 1;
         }
+        printf("CSR cycles: %d \n", (start_mac - start_csr));
+        printf("MAC cycles: %d \n", (end_mac - start_mac));
 
-        uint32_t end_of_check = snrt_mcycle();
     };
 
     return err;
