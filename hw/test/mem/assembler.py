@@ -215,7 +215,7 @@ if __name__ == '__main__':
     inst_dir = "./inst/"
 
     asm_file = asm_dir + target_name + ".s"
-    inst_file = inst_dir + target_name + ".txt"
+    inst_file = inst_dir + "inst_mem.txt"
 
     inst_list = []
 
