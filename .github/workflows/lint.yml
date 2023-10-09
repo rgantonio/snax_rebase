@@ -57,6 +57,7 @@ jobs:
         with:
           message: Found differences, please update all opcode
 
+  # yamllint disable rule:line-length
   #################
   # Check License #
   #################
@@ -93,7 +94,8 @@ jobs:
   #           target/snitch_cluster/sw/apps/snax-mac-simple/*
   #           target/snitch_cluster/sw/apps/snax-gemm-base/*
   #           target/snitch_cluster/sw/apps/snax-gemm-engine/*
-
+  # yamllint enable rule:line-length
+  
   ##################
   # Lint YML Files #
   ##################
