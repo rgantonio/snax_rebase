@@ -35,7 +35,8 @@
 ../../../.bender/git/checkouts/common_cells-02aa01ee4a3b2e52/src/stream_arbiter_flushable.sv
 ../../../.bender/git/checkouts/common_cells-02aa01ee4a3b2e52/src/rr_arb_tree.sv
 ../../../.bender/git/checkouts/common_cells-02aa01ee4a3b2e52/src/stream_fifo.sv
-../../../.bender/git/checkouts/common_cells-02aa01ee4a3b2e52/src/stream_fifo.sv
+../../../.bender/git/checkouts/common_cells-02aa01ee4a3b2e52/src/stream_join_dynamic.sv
+../../../.bender/git/checkouts/common_cells-02aa01ee4a3b2e52/src/addr_decode_dync.sv
 ../../../.bender/git/checkouts/common_cells-02aa01ee4a3b2e52/src/addr_decode_napot.sv
 ../../../.bender/git/checkouts/common_cells-02aa01ee4a3b2e52/src/addr_decode.sv
 ../../../.bender/git/checkouts/common_cells-02aa01ee4a3b2e52/src/cc_onehot.sv
