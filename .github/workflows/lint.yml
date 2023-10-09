@@ -95,7 +95,7 @@ jobs:
   #           target/snitch_cluster/sw/apps/snax-gemm-base/*
   #           target/snitch_cluster/sw/apps/snax-gemm-engine/*
   # yamllint enable rule:line-length
-  
+
   ##################
   # Lint YML Files #
   ##################
