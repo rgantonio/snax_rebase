@@ -230,10 +230,12 @@ module tb_snax_cluster;
 
   logic                                   clk_i;
   logic                                   rst_ni;
+
   logic [snitch_cluster_pkg::NrCores-1:0] debug_req_i;
   logic [snitch_cluster_pkg::NrCores-1:0] meip_i;
   logic [snitch_cluster_pkg::NrCores-1:0] mtip_i;
   logic [snitch_cluster_pkg::NrCores-1:0] msip_i;
+  
   snitch_cluster_pkg::narrow_in_req_t     narrow_in_req_i;
   snitch_cluster_pkg::narrow_in_resp_t    narrow_in_resp_o;
   snitch_cluster_pkg::narrow_out_req_t    narrow_out_req_o;
@@ -252,6 +254,8 @@ module tb_snax_cluster;
   localparam int unsigned NumSequencerInstr [2] = '{16, 16};
   localparam int unsigned NumSsrs [2] = '{3, 1};
   localparam int unsigned SsrMuxRespDepth [2] = '{4, 4};
+  localparam int unsigned SNAX [2] = '{1, 0};
+  localparam int unsigned SnaxTcdmPorts [2] = '{4, 0};
 
   // SNAX cluster under test.
   snitch_cluster #(
@@ -282,7 +286,8 @@ module tb_snax_cluster;
     .ICacheLineWidth (snitch_cluster_pkg::ICacheLineWidth),
     .ICacheLineCount (snitch_cluster_pkg::ICacheLineCount),
     .ICacheSets (snitch_cluster_pkg::ICacheSets),
-    .SNAX(2'b01),
+    .SNAX(SNAX),
+    .SnaxTcdmPorts(SnaxTcdmPorts),
     .VMSupport (1),
     .RVE (2'b00),
     .RVF (2'b11),
