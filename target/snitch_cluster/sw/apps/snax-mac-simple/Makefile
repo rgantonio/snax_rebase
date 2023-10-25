@@ -13,8 +13,8 @@ INCDIRS += $(SRC_DIR)
 
 SRCS     = $(realpath $(SRC_DIR)/$(APP).c)
 
-LENGTH ?= 512
-TILE_SIZE ?= 32
+LENGTH ?= 20
+TILE_SIZE ?= 4
 
 DATA_H = $(SRC_DIR)/data.h
 

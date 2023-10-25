@@ -45,7 +45,7 @@ int main() {
 
         // Set configs
         write_csr(0x3d4, 1);   // Number of iterations
-        write_csr(0x3d5, 19);  // Vector length
+        write_csr(0x3d5, VEC_LEN);  // Vector length
         write_csr(0x3d6, 1);   // Set simple multiplication
 
         // Write start CSR to launch accelerator

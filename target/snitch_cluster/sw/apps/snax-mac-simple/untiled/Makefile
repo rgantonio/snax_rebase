@@ -4,8 +4,9 @@
 #
 # Ryan Antonio <ryan.antonio@esat.kuleuven.be>
 
-APP     = snax-mac-simple
-SRCS    = src/snax-mac-simple.c
-INCDIRS = data
+APP     = untiled
 
 include ../../common.mk
+include ../Makefile
+
+$(DEP): $(DATA_H)
