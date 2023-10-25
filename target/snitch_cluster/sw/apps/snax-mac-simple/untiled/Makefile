@@ -8,4 +8,4 @@ APP     = snax-mac-simple
 SRCS    = src/snax-mac-simple.c
 INCDIRS = data
 
-include ../common.mk
+include ../../common.mk

@@ -29,7 +29,6 @@ clean-data:
 
 clean: clean-data
 
-include ../common.mk
+include ../../common.mk
 
 $(DEP): $(DATA_H)
-
