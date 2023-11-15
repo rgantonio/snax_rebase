@@ -59,9 +59,9 @@
 #--------------------------------------------
 # Snitch TCDM Wrapper
 #--------------------------------------------
-../wrappers/snitch_tcdm_wrapper.sv
+../wrappers/snitch_tcdm_split_io_wrapper.sv
 
 #--------------------------------------------
 # Snitch TCDM TB
 #--------------------------------------------
-../tb/tb_snitch_tcdm.sv
+../tb/tb_snitch_tcdm_split_io.sv

@@ -8,8 +8,8 @@
 package snitch_tcdm_pkg;
 
   // Top-level parameters for the snitch tcdm interconnect
-  localparam int unsigned       NumInp                = 1;
-  localparam int unsigned       NumOut                = 4;
+  localparam int unsigned       NumInp                = 64;
+  localparam int unsigned       NumOut                = 64;
   localparam int unsigned       MemAddrWidth          = 10;
   localparam int unsigned       PhysicalAddrWidth     = 48;
   localparam int unsigned       DataWidth             = 64;
