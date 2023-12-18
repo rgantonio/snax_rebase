@@ -489,7 +489,7 @@ module tb_snax_cluster;
   // Due to SystemVerilog's limitations during compilation
   // First we map out the names in the concatenation
 
-  snax_mac # (
+  snax_mac_wrapper # (
     .DataWidth ( snitch_cluster_pkg::NarrowDataWidth ),
     .SnaxTcdmPorts ( SnaxTcdmPorts[0] ),
     .acc_req_t ( snitch_cluster_pkg::acc_req_t ),
@@ -509,7 +509,7 @@ module tb_snax_cluster;
     .snax_tcdm_rsp_i ( snax_tcdm_rsp[3:0] )
   );
 
-  snax_mac # (
+  snax_mac_wrapper # (
     .DataWidth ( snitch_cluster_pkg::NarrowDataWidth ),
     .SnaxTcdmPorts ( SnaxTcdmPorts[1] ),
     .acc_req_t ( snitch_cluster_pkg::acc_req_t ),
