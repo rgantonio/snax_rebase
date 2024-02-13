@@ -25,6 +25,3 @@ prettytable
 pyelftools
 psutil
 pyflexfloat
-
--r docs/requirements.txt
--r sw/dnn/requirements.txt
