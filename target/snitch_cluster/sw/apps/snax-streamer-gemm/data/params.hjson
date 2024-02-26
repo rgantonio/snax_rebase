@@ -25,29 +25,8 @@
     tileSize: 8,
     meshRow: 8,
     meshCol: 8,
-    delta_local_a: 64,
-    delta_local_b: 1024
+    delta_local_a: 0,
+    delta_local_b: 64,
+    delta_local_c: 1024
 }
 
-// matrix multiplication for cpu 64,64,64
-// {
-//     Batch: 1
-//     M: 16,
-//     K: 16,
-//     N: 16,
-//     strideInnermostA: 64,
-//     strideInnermostB: 64,
-//     strideInnermostC: 256,
-//     strideHalfC: 128,
-//     ldA: 1024,
-//     ldB: 1024,
-//     ldC: 4096,
-//     strideA: 0,
-//     strideB: 0,
-//     strideC: 0,
-//     tileSize: 8,
-//     meshRow: 8,
-//     meshCol: 8,
-//     delta_local_a: 16384,
-//     delta_local_b: 16384
-// }

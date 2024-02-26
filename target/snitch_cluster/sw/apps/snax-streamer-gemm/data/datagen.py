@@ -122,7 +122,12 @@ def emit_gemm_data(**kwargs):
             "int32_t", "delta_local_b", kwargs["delta_local_b"]
         )
     ]
-
+    data_str += [
+        format_scalar_definition(
+            "int32_t", "delta_local_c", kwargs["delta_local_c"]
+        )
+    ]
+    
     # Generating random 8 integer a and b for subtraction
     # subtraction_a = np.random.randint(MIN, MAX)
     # subtraction_b = np.random.randint(MIN, MAX)

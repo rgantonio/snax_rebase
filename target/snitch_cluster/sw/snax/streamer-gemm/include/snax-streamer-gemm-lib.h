@@ -22,4 +22,5 @@ void set_block_gemm_csr();
 // Set CSR to start GEMM
 void set_block_gemm_start();
 
+// Poll until Streamer and GEMM accelerator finish
 void wait_streamer_gemm();
