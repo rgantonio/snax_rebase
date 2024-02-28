@@ -27,6 +27,6 @@ jobs:
           context: .
           file: util/container/Dockerfile
           push: true
-          tags: ghcr.io/kuleuven-micas/snax:latest
+          tags: ghcr.io/kuleuven-micas/snax:ubuntu20
           build-args: |-
             SNITCH_LLVM_VERSION=latest
