@@ -5,7 +5,7 @@
 # Docker container for Snitch development.
 
 # 1. Stage
-FROM ubuntu:18.04 AS builder
+FROM ubuntu:22.04 AS builder
 ARG CMAKE_VERSION=3.19.4
 
 COPY apt-requirements.txt /tmp/apt-requirements.txt
