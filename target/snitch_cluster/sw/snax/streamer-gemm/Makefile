@@ -46,7 +46,7 @@ INCDIRS += $(ROOT)/target/snitch_cluster/sw/runtime/$(RUNTIME_DIR)/include
 ## Outputs #
 ############
 
-OBJS        = $(BUILDDIR)/streamer-gemm.o
+OBJS        = $(BUILDDIR)/snax-streamer-gemm-lib.o
 ALL_OUTPUTS = $(OBJS)
 
 
