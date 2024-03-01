@@ -12,7 +12,7 @@ INCDIRS += ../../snax/streamer-gemm/include
 INCDIRS += ../../snax/gemm/include
 
 # Include this binary in the final build
-RISCV_LDFLAGS += ../../snax/streamer-gemm/build/streamer-gemm.o
+RISCV_LDFLAGS += ../../snax/streamer-gemm/build/snax-streamer-gemm-lib.o
 RISCV_LDFLAGS += ../../snax/gemm/build/snax-gemm-lib.o
 
 SRCS    = src/snax-streamer-gemm.c
