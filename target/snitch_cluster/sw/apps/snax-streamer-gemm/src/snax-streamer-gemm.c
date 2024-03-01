@@ -56,7 +56,7 @@ int main() {
 
         // Compare SNAX GEMM result with golden model
         err += check_result(local_c, C_golden, Batch, M, N, strideInnermostC,
-                            strideHalfC, ldC, strideC, false);
+                            ldC, strideC);
     };
 
     return err;
