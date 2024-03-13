@@ -1,0 +1,11 @@
+{
+    tempLoop0: 2,
+    tempLoop1: 2,
+    tempStride0_in: 256,
+    tempStride1_in: 512,
+    tempStride0_out: 64,
+    tempStride1_out: 256,
+    delta_local_in: 0,
+    delta_local_out: 1024,
+    vec_len: 64
+}
