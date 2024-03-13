@@ -18,6 +18,10 @@
 
 `include "snitch_vm/typedef.svh"
 
+`ifndef TARGET_SYNTHESIS
+`include "mem_def/mem_def.svh"
+`endif
+
 /// Snitch many-core cluster with improved TCDM interconnect.
 /// Snitch Cluster Top-Level.
 module snitch_cluster
@@ -815,25 +819,30 @@ module snitch_cluster
       strb_t mem_be;
       data_t mem_rdata, mem_wdata;
 
-      tc_sram_impl #(
-        .NumWords (TCDMDepth),
-        .DataWidth (NarrowDataWidth),
-        .ByteWidth (8),
-        .NumPorts (1),
-        .Latency (1),
-        .impl_in_t (sram_cfg_t)
-      ) i_data_mem (
-        .clk_i,
-        .rst_ni,
-        .impl_i (sram_cfgs_i.tcdm),
-        .impl_o (  ),
-        .req_i (mem_cs),
-        .we_i (mem_wen),
-        .addr_i (mem_add),
-        .wdata_i (mem_wdata),
-        .be_i (mem_be),
-        .rdata_o (mem_rdata)
-      );
+      `ifndef TARGET_SYNTHESIS
+        tc_sram_impl #(
+          .NumWords (TCDMDepth),
+          .DataWidth (NarrowDataWidth),
+          .ByteWidth (8),
+          .NumPorts (1),
+          .Latency (1),
+          .impl_in_t (sram_cfg_t)
+        ) i_data_mem (
+          .clk_i,
+          .rst_ni,
+          .impl_i (sram_cfgs_i.tcdm),
+          .impl_o (  ),
+          .req_i (mem_cs),
+          .we_i (mem_wen),
+          .addr_i (mem_add),
+          .wdata_i (mem_wdata),
+          .be_i (mem_be),
+          .rdata_o (mem_rdata)
+        );
+      `else
+        // memory implementation for syntesis
+        `TC_SRAM_IMPL (TCDMDepth, NarrowDataWidth)
+      `endif
 
       data_t amo_rdata_local;
 
