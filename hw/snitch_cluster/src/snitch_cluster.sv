@@ -18,7 +18,7 @@
 
 `include "snitch_vm/typedef.svh"
 
-`ifndef TARGET_SYNTHESIS
+`ifdef TARGET_SYNTHESIS
 `include "mem_def/mem_def.svh"
 `endif
 
