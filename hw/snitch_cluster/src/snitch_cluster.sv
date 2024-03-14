@@ -837,7 +837,18 @@ module snitch_cluster
         );
       `else
         // memory implementation for syntesis
+        parameter widthPerBank = 64;
+        logic [widthPerBank - 1 : 0] bit_en;
+ 
+        always_comb begin
+          for (int i = 0; i < widthPerBank / 8; i = i + 1) begin
+            bit_en[i*8+:8] = {8{mem_be[i]}};
+          end
+        end
+
+        // tech memory macro
         `TC_SRAM_IMPL (TCDMDepth, NarrowDataWidth)
+
       `endif
 
       data_t amo_rdata_local;

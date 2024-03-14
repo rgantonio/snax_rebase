@@ -33,6 +33,7 @@ dependencies:
   snax-streamer-gemm-dev: { git: https://github.com/KULeuven-MICAS/snax-dev.git,     rev: snax-streamer-gemm-dev }
   mem_def:              { git: https://github.com/KULeuven-MICAS/mem_def.git,         rev: main }
 
+
 vendor_package:
   - name: musl
     target_dir: sw/math
