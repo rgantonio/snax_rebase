@@ -280,7 +280,7 @@ sources:
       - hw/snitch_cluster/src/snitch_hive.sv
       # Level 4
       - hw/snitch_cluster/src/snitch_cluster.sv
-  
+
   # SNAX components
   - files:
       - hw/snax/src/snax_acc_mux_demux.sv
