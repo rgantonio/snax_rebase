@@ -15,12 +15,11 @@
 // explicitly stated due to the # stringitized arguments
 //----------------------------------
 
-#include "snrt.h"
 #include "data.h"
 #include "mac.h"
+#include "snrt.h"
 
 int main() {
-
     // Set err value for checking
     int err = 0;
 
@@ -29,7 +28,7 @@ int main() {
     uint32_t *local_a_acc_2, *local_b_acc_2, *local_o_acc_2;
     uint32_t *local_a_acc_3, *local_b_acc_3, *local_o_acc_3;
 
-    uint32_t SLICE_LEN = VEC_LEN/ACC_NUM;
+    uint32_t SLICE_LEN = VEC_LEN / ACC_NUM;
 
     // Calculate base addresses
     local_a_acc_0 = (uint32_t *)snrt_l1_next();
@@ -40,13 +39,13 @@ int main() {
     local_b_acc_1 = local_b_acc_0 + SLICE_LEN;
     local_o_acc_1 = local_o_acc_0 + SLICE_LEN;
 
-    local_a_acc_2 = local_a_acc_0 + 2*SLICE_LEN;
-    local_b_acc_2 = local_b_acc_0 + 2*SLICE_LEN;
-    local_o_acc_2 = local_o_acc_0 + 2*SLICE_LEN;
+    local_a_acc_2 = local_a_acc_0 + 2 * SLICE_LEN;
+    local_b_acc_2 = local_b_acc_0 + 2 * SLICE_LEN;
+    local_o_acc_2 = local_o_acc_0 + 2 * SLICE_LEN;
 
-    local_a_acc_3 = local_a_acc_0 + 3*SLICE_LEN;
-    local_b_acc_3 = local_b_acc_0 + 3*SLICE_LEN;
-    local_o_acc_3 = local_o_acc_0 + 3*SLICE_LEN;
+    local_a_acc_3 = local_a_acc_0 + 3 * SLICE_LEN;
+    local_b_acc_3 = local_b_acc_0 + 3 * SLICE_LEN;
+    local_o_acc_3 = local_o_acc_0 + 3 * SLICE_LEN;
 
     // Manual declaration to optimize the part
     // Where the compiler has to fetch the VEC_LEN
@@ -68,7 +67,6 @@ int main() {
 
     // Control all cores at this point
     if (snrt_is_compute_core()) {
-
         // Get start setup cycle
         uint32_t tic_setup_mcycle = snrt_mcycle();
 
@@ -77,10 +75,10 @@ int main() {
         write_csr(977, (uint32_t)local_b_acc_0);
         write_csr(979, (uint32_t)local_o_acc_0);
 
-        write_csr(980, 1);                  // Number of iterations
-        write_csr(981, vec_len);            // Vector length
-        write_csr(982, simple_mult_mode);   // Set simple multiplication
-        
+        write_csr(980, 1);                 // Number of iterations
+        write_csr(981, vec_len);           // Vector length
+        write_csr(982, simple_mult_mode);  // Set simple multiplication
+
         // Set for 2nd addresses
         write_csr(1000, (uint32_t)local_a_acc_1);
         write_csr(1001, (uint32_t)local_b_acc_1);
@@ -126,7 +124,7 @@ int main() {
         uint32_t toc_end_mcycle = snrt_mcycle();
 
         // Check values
-        err = check_simple_mult(local_o_acc_0,OUT,VEC_LEN);
+        err = check_simple_mult(local_o_acc_0, OUT, VEC_LEN);
     }
 
     return err;
