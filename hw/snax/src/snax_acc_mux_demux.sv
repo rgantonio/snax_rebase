@@ -1,8 +1,8 @@
-// Copyright 2023 KU Leuven
+// Copyright 2020 KU Leuven.
 // Solderpad Hardware License, Version 0.51, see LICENSE for details.
 // SPDX-License-Identifier: SHL-0.51
-//
-// Author: Ryan Antonio (ryan.antonio@kuleuven.be)
+
+// Ryan Antonio <ryan.antonio@esat.kuleuven.be>
 
 // verilog_lint: waive-start line-length
 // verilog_lint: waive-start no-trailing-spaces
