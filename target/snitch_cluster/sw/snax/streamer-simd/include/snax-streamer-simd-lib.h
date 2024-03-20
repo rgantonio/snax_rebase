@@ -35,7 +35,7 @@ void set_streamer_simd_csr(int tempLoop0, int tempLoop1, int tempStride0_in,
 void start_streamer_simd();
 
 // set the configuration for the SIMD
-void set_simd_csr(uint32_t csr0, uint32_t csr1, uint32_t csr2);
+void set_simd_csr(uint32_t csr0, uint32_t csr1, uint32_t csr2, uint32_t temporal_loop_bound);
 
 // start the SIMD
 void start_simd();
@@ -47,6 +47,12 @@ void wait_streamer_simd();
 void load_simd_test_data(int tempLoop0, int tempLoop1, int tempStride0,
                          int tempStride1, int32_t* base_ptr_local,
                          int32_t* base_ptr_l2);
+
+// c specification of the post processing
+int8_t scale_quant_clamp_c_spec(int32_t input, int8_t input_zp, int8_t output_zp,
+                         int32_t multiplier,
+                         int8_t shift, // values between 0-63
+                         int8_t max_int, int8_t min_int, bool double_round);
 
 // check the result of the SIMD
 uint32_t check_simd_result(int tempLoop0, int tempLoop1, int tempStride0,

@@ -24,40 +24,51 @@ int32_t gen_csr2_config(uint32_t multiplier_i) { return multiplier_i; }
 void set_streamer_simd_csr(int tempLoop0, int tempLoop1, int tempStride0_in,
                        int tempStride1_in, int tempStride0_out,
                        int tempStride1_out, int32_t delta_local_in, int32_t delta_local_out) {
-    // loop bounds, from innermost to outermost
-    write_csr(0, tempLoop0);
-    write_csr(1, tempLoop1);
 
-    // temporal strides
-    write_csr(2, tempStride0_in);
-    write_csr(3, tempStride1_in);
+    // temporal loop bounds, from innermost to outermost
+    write_csr(960+0, tempLoop0);
+    write_csr(960+1, tempLoop1);
 
-    write_csr(4, tempStride0_out);
-    write_csr(5, tempStride1_out);
+    // temporal strides for data reader (In)
+    write_csr(960+2, tempStride0_in);
+    write_csr(960+3, tempStride1_in);
 
-    // 6 7 leave for parfor strides
+    // temporal strides for data writer (Out)
+    write_csr(960+4, tempStride0_out);
+    write_csr(960+5, tempStride1_out);
 
-    // base ptr for In
-    write_csr(8, (uint32_t)(base_ptr_i + snrt_l1_next()));
+    // fixed spatial strides for data reader (In)
+    write_csr(960+6, 4);
+    write_csr(960+7, 32);
 
-    // base ptr for Out
-    write_csr(9, (uint32_t)(base_ptr_o + snrt_l1_next()));
+    // fixed spatial strides for data writer (Out)
+    write_csr(960+8, 1);
+    write_csr(960+9, 8);
+
+    // base ptr for data reader (In)
+    write_csr(960+10, (uint32_t)(delta_local_in + snrt_l1_next()));
+
+    // base ptr for data writer (Out)
+    write_csr(960+11, (uint32_t)(delta_local_out + snrt_l1_next()));
 }
 
-void start_streamer_simd() { write_csr(10, 1); }
+void start_streamer_simd() { write_csr(960+12, 1); }
 
-void set_simd_csr(uint32_t csr0, uint32_t csr1, uint32_t csr2) {
+void set_simd_csr(uint32_t csr0, uint32_t csr1, uint32_t csr2, uint32_t temporal_loop_bound) {
     // set the constants for the SIMD unit
-    write_csr(11, csr0);
-    write_csr(12, csr1);
-    write_csr(13, csr2);
+    write_csr(960+13, csr0);
+    write_csr(960+14, csr1);
+    write_csr(960+15, csr2);
+
+    // set the temporal loop bound
+    write_csr(960+16, temporal_loop_bound);
 }
 
-void start_simd() { write_csr(14, 1); }
+void start_simd() { write_csr(960+17, 1); }
 
 void wait_streamer_simd() {
-    write_csr(10, 0);
-    write_csr(14, 0);
+    write_csr(960+12, 0);
+    write_csr(960+17, 0);
 }
 
 void load_simd_test_data(int tempLoop0, int tempLoop1, int tempStride0,
@@ -77,6 +88,41 @@ void load_simd_test_data(int tempLoop0, int tempLoop1, int tempStride0,
     }
 }
 
+int8_t scale_quant_clamp_c_spec(int32_t input, int8_t input_zp, int8_t output_zp,
+                         int32_t multiplier,
+                         int8_t shift, // values between 0-63
+                         int8_t max_int, int8_t min_int, bool double_round) {
+
+  // input zero-point adjustment
+  input = input - input_zp;
+
+  // multiplication
+  int64_t var0 = (int64_t)input * (int64_t)multiplier;
+
+  // shift & round
+  int32_t var1 = var0 >> (shift - 1);
+
+  if (double_round) {
+    if (var1 >= 0)
+      var1 += 1;
+    else
+      var1 -= 1;
+  }
+  var1 = var1 >> 1;
+
+  // output zero-point adjustment
+  var1 = var1 + output_zp;
+
+  // clamping
+  if (var1 > max_int)
+    var1 = max_int;
+  if (var1 < min_int)
+    var1 = min_int;
+
+  int8_t result = (int8_t)var1;
+  return result;
+}
+
 uint32_t check_simd_result(int tempLoop0, int tempLoop1, int tempStride0,
                            int tempStride1, int8_t* base_ptr_local,
                            int8_t* base_ptr_l2) {
@@ -86,12 +132,12 @@ uint32_t check_simd_result(int tempLoop0, int tempLoop1, int tempStride0,
 
     for (int loop1 = 0; loop1 < tempLoop1; loop1++) {
         for (int loop0 = 0; loop0 < tempLoop0; loop0++) {
-            addr_out =
-                base_ptr_local + (loop1 * tempStride1 + loop0 * tempStride0) / sizeof(int32_t);
-            addr_Out =
-                base_ptr_l2 + loop1 * tempLoop0 * vec_len + loop0 * vec_len;
             for (int i = 0; i < vec_len; i++) {
-                if (addr_out[i] != addr_Out[i]) {
+                addr_out =
+                    base_ptr_local + (loop1 * tempStride1 + loop0 * tempStride0) + i;
+                addr_Out =
+                    base_ptr_l2 + loop1 * tempLoop0 * vec_len + loop0 * vec_len + i;
+                if ((int8_t)*addr_out != (int8_t)*addr_Out) {
                     error++;
                 }
             }
