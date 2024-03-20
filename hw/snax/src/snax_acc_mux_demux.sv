@@ -53,14 +53,26 @@ module snax_acc_mux_demux #(
   //------------------------------------------
   logic [AccNumBitWidth-1:0] snax_req_sel;
 
+  logic [31:0] internal_addr_sel;
+
+  assign internal_addr_sel = snax_req_i.data_argb - 32'd960;
+
   always_comb begin
     for ( int i = 0; i < NumAcc; i ++ ) begin
-      if((snax_req_i.q.addr >= i*NumCsrs) && (snax_req_i.q.addr < (i+1)*NumCsrs - 1)) begin
+      // This one is for setting the control signals for the demuxer
+      if((internal_addr_sel >= i*NumCsrs) && (internal_addr_sel < (i+1)*NumCsrs - 1)) begin
         snax_req_sel = i;
       end
+
+      // This one broadcasts the control to all request ports
+      snax_split_req_o[i].addr      = snax_req_i.addr;
+      snax_split_req_o[i].data_arga = snax_req_i.data_arga;
+      snax_split_req_o[i].data_argb = snax_req_i.data_argb - i*NumCsrs;
+      snax_split_req_o[i].data_argc = snax_req_i.data_argc;
+      snax_split_req_o[i].data_op   = snax_req_i.data_op;
+      snax_split_req_o[i].id        = snax_req_i.id;
     end
   end
-
 
   stream_demux #(
     .N_OUP        ( NumAcc              )
@@ -71,6 +83,7 @@ module snax_acc_mux_demux #(
     .oup_valid_o  ( snax_split_qvalid_o ),
     .oup_ready_i  ( snax_split_qready_i )
   );
+
 
   //------------------------------------------
   // Accelerator MUX Port
