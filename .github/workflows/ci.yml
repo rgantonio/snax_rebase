@@ -210,7 +210,8 @@ jobs:
         working-directory: target/snitch_cluster
         run: |-
           ./run.py --simulator verilator \
-          sw/runtime.yaml sw/standard-fp.yaml sw/snax-mac-run.yaml sw/snax-mac-mult-run.yaml -j
+          sw/runtime.yaml sw/standard-fp.yaml sw/snax-mac-run.yaml \
+          sw/snax-mac-mult-run.yaml -j
 
   ############################################
   # Build SW on Snitch Cluster w/ Banshee #
