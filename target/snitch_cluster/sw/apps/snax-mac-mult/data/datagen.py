@@ -21,11 +21,13 @@ from data_utils import format_scalar_definition, \
 MIN = 0
 MAX = 100
 
+
 def golden_model(a, b, c, mode):
-    if(mode):
-        return np.dot(a,b)+c
+    if (mode):
+        return np.dot(a, b) + c
     else:
         return a*b
+
 
 def main():
 
@@ -64,18 +66,21 @@ def main():
     b_str = format_vector_definition('uint32_t', 'B', b)
     acc_num_str = format_scalar_definition('uint32_t', 'ACC_NUM', acc_num)
     csr_num_str = format_scalar_definition('uint8_t', 'CSR_NUM', csr_num)
-    
-    if(mode):
+
+    if (mode):
         out_str = format_scalar_definition('uint32_t', 'OUT', out)
         c_str = format_scalar_definition('uint32_t', 'C', c)
-        f_str = '\n\n'.join([l_str, a_str, b_str, c_str, out_str, acc_num_str, csr_num_str])
+        f_str = '\n\n'.join([l_str, a_str, b_str, c_str, out_str,
+                            acc_num_str, csr_num_str])
     else:
         out_str = format_vector_definition('uint32_t', 'OUT', out)
-        f_str = '\n\n'.join([l_str, a_str, b_str, out_str, acc_num_str, csr_num_str])
-        
+        f_str = '\n\n'.join([l_str, a_str, b_str, out_str,
+                            acc_num_str, csr_num_str])
+
     f_str += '\n'
 
     print(f_str)
+
 
 if __name__ == '__main__':
     sys.exit(main())
