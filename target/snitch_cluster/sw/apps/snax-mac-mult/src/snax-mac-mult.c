@@ -15,9 +15,9 @@
 // explicitly stated due to the # stringitized arguments
 //----------------------------------
 
+#include "snrt.h"
 #include "data.h"
 #include "mac.h"
-#include "snrt.h"
 
 int main() {
     // Set err value for checking
