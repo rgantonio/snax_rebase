@@ -76,7 +76,7 @@ int main() {
         write_csr(979, (uint32_t)local_o_acc_0);
 
         write_csr(980, 1);                 // Number of iterations
-        write_csr(981, SLICE_LEN);           // Vector length
+        write_csr(981, SLICE_LEN);          // Vector length
         write_csr(982, simple_mult_mode);  // Set simple multiplication
 
         // Set for 2nd addresses
@@ -85,7 +85,7 @@ int main() {
         write_csr(1003, (uint32_t)local_o_acc_1);
 
         write_csr(1004, 1);                 // Number of iterations
-        write_csr(1005, SLICE_LEN);           // Vector length
+        write_csr(1005, SLICE_LEN);         // Vector length
         write_csr(1006, simple_mult_mode);  // Set simple multiplication
 
         // Set for 3rd addresses
@@ -94,7 +94,7 @@ int main() {
         write_csr(1027, (uint32_t)local_o_acc_2);
 
         write_csr(1028, 1);                 // Number of iterations
-        write_csr(1029, SLICE_LEN);           // Vector length
+        write_csr(1029, SLICE_LEN);         // Vector length
         write_csr(1030, simple_mult_mode);  // Set simple multiplication
 
         // Set for 4th addresses
@@ -103,7 +103,7 @@ int main() {
         write_csr(1051, (uint32_t)local_o_acc_3);
 
         write_csr(1052, 1);                 // Number of iterations
-        write_csr(1053, SLICE_LEN);           // Vector length
+        write_csr(1053, SLICE_LEN);         // Vector length
         write_csr(1054, simple_mult_mode);  // Set simple multiplication
 
         // Get start setup cycle
