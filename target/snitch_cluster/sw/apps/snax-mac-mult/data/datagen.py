@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+
+# Copyright 2023 KU Leuven.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Ryan Antonio <ryan.antonio@esat.kuleuven.be>
+
 import sys
 import argparse
 import numpy as np
@@ -67,8 +75,7 @@ def main():
         
     f_str += '\n'
 
-    with open("data.h", 'w') as file:
-        file.write(f_str)
+    print(f_str)
 
 if __name__ == '__main__':
     sys.exit(main())
