@@ -110,9 +110,8 @@ int main() {
 
         uint32_t toc_start_mcycle = snrt_mcycle();
 
-        // Poll or read the last accelerator
-        while (read_csr(1035)) {
-        };
+        // Poll or read each accelerator's status
+        while(read_csr(963) | read_csr(987) | read_csr(1011) | read_csr(1035));
 
         uint32_t toc_end_mcycle = snrt_mcycle();
 
