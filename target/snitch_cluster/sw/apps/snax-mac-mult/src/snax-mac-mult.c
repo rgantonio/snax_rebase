@@ -48,13 +48,6 @@ int main() {
     local_b_acc_3 = local_b_acc_0 + 3 * SLICE_LEN;
     local_o_acc_3 = local_o_acc_0 + 3 * SLICE_LEN;
 
-    // Manual declaration to optimize the part
-    // Where the compiler has to fetch the VEC_LEN
-    // From memory if we plug it directly into the
-    // csr_write functions. Adding this line
-    // pre-computes and does not need to do
-    // unnecessary lw or li instructions during csr setup
-
     // Use data mover core to bring data from L3 to TCDM
     if (snrt_is_dm_core()) {
         size_t vector_size = VEC_LEN * sizeof(uint32_t);
@@ -76,7 +69,7 @@ int main() {
         write_csr(979, (uint32_t)local_o_acc_0);
 
         write_csr(980, 1);                 // Number of iterations
-        write_csr(981, SLICE_LEN);          // Vector length
+        write_csr(981, SLICE_LEN);         // Vector length
         write_csr(982, simple_mult_mode);  // Set simple multiplication
 
         // Set for 2nd addresses
