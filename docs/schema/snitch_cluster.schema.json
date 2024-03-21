@@ -423,14 +423,14 @@
                                     "properties": {
                                         "snax_module": {
                                             "type": "string",
-                                            "title": "SNAX Accelerator Extension",
-                                            "description": "Enable specific Snitch Accelerator eXtension (SNAX). Simply put the string name of the accelerator wrapper.",
+                                            "title": "Accelerator module name",
+                                            "description": "Specify in this tag the accelerator's top module name. E.g., snax_mac_wrapper.",
                                             "default": "none"
                                         },
                                         "snax_num_csr": {
                                             "type": "number",
                                             "title": "Number of CSR Registers",
-                                            "description": "Number of CSR registers of the accelerator.",
+                                            "description": "Number of CSR registers required for one instance of this accelerator.",
                                             "default": 1
                                         },
                                         "snax_num_acc": {

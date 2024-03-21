@@ -330,7 +330,7 @@ for i in range(len(cfg['cores'])):
   prefix_snax_count = 0
 
   # If an accelerator setting exists
-  # Layout all possible accelerator configuratiosn
+  # Layout all possible accelerator configurations
   # Per snitch cluster core
   if ('snax_acc_set' in cfg['cores'][i]):
     snax_acc_flag = True
