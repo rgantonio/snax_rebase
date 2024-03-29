@@ -845,10 +845,10 @@ module snitch_cluster
             bit_en[i*8+:8] = {8{mem_be[i]}};
           end
         end
-
-        // tech memory macro
-        `TC_SRAM_IMPL (TCDMDepth, NarrowDataWidth)
-
+        // tech memory macro "M" Means Multi-Bank
+        `TC_SRAM_IMPL ("i_data_mem", "M", TCDMDepth, NarrowDataWidth)
+        // tech memory macro "S" Means Single-Bank
+        // `TC_SRAM_IMPL ("i_data_mem", "S", TCDMDepth, NarrowDataWidth)
       `endif
 
       data_t amo_rdata_local;
