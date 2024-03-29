@@ -3,6 +3,11 @@
 // SPDX-License-Identifier: SHL-0.51
 
 // Fabian Schuiki <fschuiki@iis.ee.ethz.ch>
+// Guilherme Paim <gppaim@ieee.org>
+
+`ifdef TARGET_SYNTHESIS
+`include "mem_def/mem_def.svh"
+`endif
 
 /// An actual cache lookup.
 module snitch_icache_lookup #(
@@ -145,6 +150,8 @@ module snitch_icache_lookup #(
 
     // Instantiate the RAM sets.
     for (genvar i = 0; i < CFG.SET_COUNT; i++) begin : g_sets
+
+    `ifndef TARGET_SYNTHESIS
         tc_sram_impl #(
           .NumWords (CFG.LINE_COUNT),
           .DataWidth (CFG.TAG_WIDTH+2),
@@ -185,6 +192,10 @@ module snitch_icache_lookup #(
           .rdata_o (ram_rdata[i])
         );
     end
+    `else
+        `TC_SRAM_IMPL_TAG(CFG.LINE_COUNT, CFG.TAG_WIDTH+2)
+        `TC_SRAM_IMPL_CACHE(CFG.LINE_COUNT, CFG.LINE_WIDTH)
+    `endif
 
     // Determine which RAM line hit, and multiplex that data to the output.
     logic [CFG.TAG_WIDTH-1:0] required_tag;
