@@ -97,7 +97,13 @@ module snitch_cluster
   parameter fpnew_pkg::fpu_implementation_t FPUImplementation [NrCores] =
     '{default: fpnew_pkg::fpu_implementation_t'(0)},
   /// Total Number of SNAX TCDM ports
-  parameter int unsigned TotalSnaxTcdmPorts = 0,
+  parameter int unsigned SnaxNarrowForWidePorts = 0,
+  parameter int unsigned SnaxNarrowPorts = 0,
+  parameter int unsigned TotalSnaxTcdmPorts = SnaxNarrowForWidePorts + SnaxNarrowPorts,
+  parameter int unsigned SnaxNarrowStartIdx [NrCores] = '{default: 0},
+  parameter int unsigned SnaxNarrowEndIdx   [NrCores] = '{default: 0},
+  parameter int unsigned SnaxWideStartIdx   [NrCores] = '{default: 0},
+  parameter int unsigned SnaxWideEndIdx     [NrCores] = '{default: 0},
   /// SNAX Acc Narrow Wide Selection
   parameter bit [NrCores-1:0] ConnectSnaxAccWide = 0,
   /// Physical Memory Attribute Configuration
