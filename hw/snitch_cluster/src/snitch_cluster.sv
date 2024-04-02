@@ -97,9 +97,11 @@ module snitch_cluster
   parameter fpnew_pkg::fpu_implementation_t FPUImplementation [NrCores] =
     '{default: fpnew_pkg::fpu_implementation_t'(0)},
   /// Total Number of SNAX TCDM ports
-  parameter int unsigned SnaxNarrowForWidePorts = 0,
+  parameter bit          SnaxWideOnly = 0,
+  parameter bit          SnaxNarrowAndWide = 0,
+  parameter int unsigned SnaxWidePorts = 0,
   parameter int unsigned SnaxNarrowPorts = 0,
-  parameter int unsigned TotalSnaxTcdmPorts = SnaxNarrowForWidePorts + SnaxNarrowPorts,
+  parameter int unsigned TotalSnaxTcdmPorts = SnaxWidePorts + SnaxNarrowPorts,
   parameter int unsigned SnaxNarrowStartIdx [NrCores] = '{default: 0},
   parameter int unsigned SnaxNarrowEndIdx   [NrCores] = '{default: 0},
   parameter int unsigned SnaxWideStartIdx   [NrCores] = '{default: 0},
@@ -657,87 +659,196 @@ module snitch_cluster
 
   // Use this ports for the total number and needs to be cute into multiple versions
   // It needs to be divided by 8 because each narrow TCDM port is 64 bits wide
-  localparam int unsigned NumSnaxWideTcdmPorts = TotalSnaxTcdmPorts/8;
 
-  if (ConnectSnaxAccWide != 0) begin: gen_yes_wide_acc_connect
+  localparam int unsigned NumSnaxWideTcdmPorts = SnaxWidePorts/8;
 
-    // First declare the wide SNAX tcdm ports
-    tcdm_dma_req_t [NumSnaxWideTcdmPorts-1:0] snax_wide_req;
-    tcdm_dma_rsp_t [NumSnaxWideTcdmPorts-1:0] snax_wide_rsp;
+  tcdm_dma_req_t [NumSnaxWideTcdmPorts-1:0] snax_wide_req;
+  tcdm_dma_rsp_t [NumSnaxWideTcdmPorts-1:0] snax_wide_rsp;
+
+  tcdm_req_t [SnaxNarrowPorts-1:0] snax_narrow_req;
+  tcdm_rsp_t [SnaxNarrowPorts-1:0] snax_narrow_rsp;
+
+  if(SnaxWideOnly)begin
+    assign snax_narrow_req = '0;
 
     // This is for hard remapping of signals
     // !!! Note that System verilog does not support
     // Part-select method for unpacked signals
     always_comb begin
       for (int i = 0; i < NumSnaxWideTcdmPorts; i++) begin
-        // Request ports
-        snax_wide_req[i].q.addr  = snax_tcdm_req_i[i*8].q.addr ;
-        snax_wide_req[i].q.write = snax_tcdm_req_i[i*8].q.write;
-        snax_wide_req[i].q.amo   = reqrsp_pkg::AMONone;
-        snax_wide_req[i].q.data  = {
-                                      snax_tcdm_req_i[i*8+7].q.data,
-                                      snax_tcdm_req_i[i*8+6].q.data,
-                                      snax_tcdm_req_i[i*8+5].q.data,
-                                      snax_tcdm_req_i[i*8+4].q.data,
-                                      snax_tcdm_req_i[i*8+3].q.data,
-                                      snax_tcdm_req_i[i*8+2].q.data,
-                                      snax_tcdm_req_i[i*8+1].q.data,
-                                      snax_tcdm_req_i[i*8].q.data
-                                    };
-        snax_wide_req[i].q.strb  = {
-                                      snax_tcdm_req_i[i*8+7].q.strb,
-                                      snax_tcdm_req_i[i*8+6].q.strb,
-                                      snax_tcdm_req_i[i*8+5].q.strb,
-                                      snax_tcdm_req_i[i*8+4].q.strb,
-                                      snax_tcdm_req_i[i*8+3].q.strb,
-                                      snax_tcdm_req_i[i*8+2].q.strb,
-                                      snax_tcdm_req_i[i*8+1].q.strb,
-                                      snax_tcdm_req_i[i*8].q.strb
-                                    };
-        snax_wide_req[i].q.user  = '0;
-        snax_wide_req[i].q_valid = &{
-                                      snax_tcdm_req_i[i*8+7].q_valid,
-                                      snax_tcdm_req_i[i*8+6].q_valid,
-                                      snax_tcdm_req_i[i*8+5].q_valid,
-                                      snax_tcdm_req_i[i*8+4].q_valid,
-                                      snax_tcdm_req_i[i*8+3].q_valid,
-                                      snax_tcdm_req_i[i*8+2].q_valid,
-                                      snax_tcdm_req_i[i*8+1].q_valid,
-                                      snax_tcdm_req_i[i*8].q_valid
-                                    };
+            // Request ports
+            snax_wide_req[i].q.addr  = snax_tcdm_req_i[i*8].q.addr ;
+            snax_wide_req[i].q.write = snax_tcdm_req_i[i*8].q.write;
+            snax_wide_req[i].q.amo   = reqrsp_pkg::AMONone;
+            snax_wide_req[i].q.data  = {
+                                          snax_tcdm_req_i[i*8+7].q.data,
+                                          snax_tcdm_req_i[i*8+6].q.data,
+                                          snax_tcdm_req_i[i*8+5].q.data,
+                                          snax_tcdm_req_i[i*8+4].q.data,
+                                          snax_tcdm_req_i[i*8+3].q.data,
+                                          snax_tcdm_req_i[i*8+2].q.data,
+                                          snax_tcdm_req_i[i*8+1].q.data,
+                                          snax_tcdm_req_i[i*8].q.data
+                                        };
+            snax_wide_req[i].q.strb  = {
+                                          snax_tcdm_req_i[i*8+7].q.strb,
+                                          snax_tcdm_req_i[i*8+6].q.strb,
+                                          snax_tcdm_req_i[i*8+5].q.strb,
+                                          snax_tcdm_req_i[i*8+4].q.strb,
+                                          snax_tcdm_req_i[i*8+3].q.strb,
+                                          snax_tcdm_req_i[i*8+2].q.strb,
+                                          snax_tcdm_req_i[i*8+1].q.strb,
+                                          snax_tcdm_req_i[i*8].q.strb
+                                        };
+            snax_wide_req[i].q.user  = '0;
+            snax_wide_req[i].q_valid = &{
+                                          snax_tcdm_req_i[i*8+7].q_valid,
+                                          snax_tcdm_req_i[i*8+6].q_valid,
+                                          snax_tcdm_req_i[i*8+5].q_valid,
+                                          snax_tcdm_req_i[i*8+4].q_valid,
+                                          snax_tcdm_req_i[i*8+3].q_valid,
+                                          snax_tcdm_req_i[i*8+2].q_valid,
+                                          snax_tcdm_req_i[i*8+1].q_valid,
+                                          snax_tcdm_req_i[i*8].q_valid
+                                        };
 
-        // Response ports
-        {
-          snax_tcdm_rsp_o[i*8+7].p.data,
-          snax_tcdm_rsp_o[i*8+6].p.data,
-          snax_tcdm_rsp_o[i*8+5].p.data,
-          snax_tcdm_rsp_o[i*8+4].p.data,
-          snax_tcdm_rsp_o[i*8+3].p.data,
-          snax_tcdm_rsp_o[i*8+2].p.data,
-          snax_tcdm_rsp_o[i*8+1].p.data,
-          snax_tcdm_rsp_o[i*8].p.data
-        } = snax_wide_rsp[i].p.data;
+            // Response ports
+            {
+              snax_tcdm_rsp_o[i*8+7].p.data,
+              snax_tcdm_rsp_o[i*8+6].p.data,
+              snax_tcdm_rsp_o[i*8+5].p.data,
+              snax_tcdm_rsp_o[i*8+4].p.data,
+              snax_tcdm_rsp_o[i*8+3].p.data,
+              snax_tcdm_rsp_o[i*8+2].p.data,
+              snax_tcdm_rsp_o[i*8+1].p.data,
+              snax_tcdm_rsp_o[i*8].p.data
+            } = snax_wide_rsp[i].p.data;
 
-        snax_tcdm_rsp_o[i*8+7].p_valid = snax_wide_rsp[i].p_valid;
-        snax_tcdm_rsp_o[i*8+6].p_valid = snax_wide_rsp[i].p_valid;
-        snax_tcdm_rsp_o[i*8+5].p_valid = snax_wide_rsp[i].p_valid;
-        snax_tcdm_rsp_o[i*8+4].p_valid = snax_wide_rsp[i].p_valid;
-        snax_tcdm_rsp_o[i*8+3].p_valid = snax_wide_rsp[i].p_valid;
-        snax_tcdm_rsp_o[i*8+2].p_valid = snax_wide_rsp[i].p_valid;
-        snax_tcdm_rsp_o[i*8+1].p_valid = snax_wide_rsp[i].p_valid;
-        snax_tcdm_rsp_o[i*8].p_valid = snax_wide_rsp[i].p_valid;
+            snax_tcdm_rsp_o[i*8+7].p_valid = snax_wide_rsp[i].p_valid;
+            snax_tcdm_rsp_o[i*8+6].p_valid = snax_wide_rsp[i].p_valid;
+            snax_tcdm_rsp_o[i*8+5].p_valid = snax_wide_rsp[i].p_valid;
+            snax_tcdm_rsp_o[i*8+4].p_valid = snax_wide_rsp[i].p_valid;
+            snax_tcdm_rsp_o[i*8+3].p_valid = snax_wide_rsp[i].p_valid;
+            snax_tcdm_rsp_o[i*8+2].p_valid = snax_wide_rsp[i].p_valid;
+            snax_tcdm_rsp_o[i*8+1].p_valid = snax_wide_rsp[i].p_valid;
+            snax_tcdm_rsp_o[i*8].p_valid = snax_wide_rsp[i].p_valid;
 
-        snax_tcdm_rsp_o[i*8+7].q_ready = snax_wide_rsp[i].q_ready;
-        snax_tcdm_rsp_o[i*8+6].q_ready = snax_wide_rsp[i].q_ready;
-        snax_tcdm_rsp_o[i*8+5].q_ready = snax_wide_rsp[i].q_ready;
-        snax_tcdm_rsp_o[i*8+4].q_ready = snax_wide_rsp[i].q_ready;
-        snax_tcdm_rsp_o[i*8+3].q_ready = snax_wide_rsp[i].q_ready;
-        snax_tcdm_rsp_o[i*8+2].q_ready = snax_wide_rsp[i].q_ready;
-        snax_tcdm_rsp_o[i*8+1].q_ready = snax_wide_rsp[i].q_ready;
-        snax_tcdm_rsp_o[i*8].q_ready = snax_wide_rsp[i].q_ready;
-      end
+            snax_tcdm_rsp_o[i*8+7].q_ready = snax_wide_rsp[i].q_ready;
+            snax_tcdm_rsp_o[i*8+6].q_ready = snax_wide_rsp[i].q_ready;
+            snax_tcdm_rsp_o[i*8+5].q_ready = snax_wide_rsp[i].q_ready;
+            snax_tcdm_rsp_o[i*8+4].q_ready = snax_wide_rsp[i].q_ready;
+            snax_tcdm_rsp_o[i*8+3].q_ready = snax_wide_rsp[i].q_ready;
+            snax_tcdm_rsp_o[i*8+2].q_ready = snax_wide_rsp[i].q_ready;
+            snax_tcdm_rsp_o[i*8+1].q_ready = snax_wide_rsp[i].q_ready;
+            snax_tcdm_rsp_o[i*8].q_ready = snax_wide_rsp[i].q_ready;
+          end
     end
+  end else if (SnaxNarrowAndWide) begin
+    always_comb begin
 
+    for(int i = 0; i < NrCores; i++) begin
+      int wide_port_idx = 0;
+      int narrow_port_idx = 0;
+        if(SnaxWideEndIdx[i] - SnaxWideStartIdx[i] > 0) begin
+          int NumSnaxWideTcdmPortCurrentCore = (SnaxWideEndIdx[i] - SnaxWideStartIdx[i])/8;
+          for(int j = 0; j < NumSnaxWideTcdmPortCurrentCore; j++) begin
+            // Request ports
+            snax_wide_req[j + wide_port_idx].q.addr  = snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8].q.addr ;
+            snax_wide_req[j + wide_port_idx].q.write = snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8].q.write;
+            snax_wide_req[j + wide_port_idx].q.amo   = reqrsp_pkg::AMONone;
+            snax_wide_req[j + wide_port_idx].q.data  = {
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+7].q.data,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+6].q.data,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+5].q.data,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+4].q.data,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+3].q.data,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+2].q.data,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+1].q.data,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8].q.data
+                                        };
+            snax_wide_req[j + wide_port_idx].q.strb  = {
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+7].q.strb,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+6].q.strb,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+5].q.strb,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+4].q.strb,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+3].q.strb,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+2].q.strb,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+1].q.strb,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8].q.strb
+                                        };
+            snax_wide_req[i + wide_port_idx].q.user  = '0;
+            snax_wide_req[i + wide_port_idx].q_valid = &{
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+7].q_valid,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+6].q_valid,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+5].q_valid,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+4].q_valid,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+3].q_valid,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+2].q_valid,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8+1].q_valid,
+                                          snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8].q_valid
+                                        };
+
+            // Response ports
+            {
+              snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+7].p.data,
+              snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+6].p.data,
+              snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+5].p.data,
+              snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+4].p.data,
+              snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+3].p.data,
+              snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+2].p.data,
+              snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+1].p.data,
+              snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8].p.data
+            } = snax_wide_rsp[j + wide_port_idx].p.data;
+
+            snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+7].p_valid = snax_wide_rsp[j + wide_port_idx].p_valid;
+            snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+6].p_valid = snax_wide_rsp[j + wide_port_idx].p_valid;
+            snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+5].p_valid = snax_wide_rsp[j + wide_port_idx].p_valid;
+            snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+4].p_valid = snax_wide_rsp[j + wide_port_idx].p_valid;
+            snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+3].p_valid = snax_wide_rsp[j + wide_port_idx].p_valid;
+            snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+2].p_valid = snax_wide_rsp[j + wide_port_idx].p_valid;
+            snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+1].p_valid = snax_wide_rsp[j + wide_port_idx].p_valid;
+            snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8].p_valid = snax_wide_rsp[j + wide_port_idx].p_valid;
+
+            snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+7].q_ready = snax_wide_rsp[j + wide_port_idx].q_ready;
+            snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+6].q_ready = snax_wide_rsp[j + wide_port_idx].q_ready;
+            snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+5].q_ready = snax_wide_rsp[j + wide_port_idx].q_ready;
+            snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+4].q_ready = snax_wide_rsp[j + wide_port_idx].q_ready;
+            snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+3].q_ready = snax_wide_rsp[j + wide_port_idx].q_ready;
+            snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+2].q_ready = snax_wide_rsp[j + wide_port_idx].q_ready;
+            snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8+1].q_ready = snax_wide_rsp[j + wide_port_idx].q_ready;
+            snax_tcdm_rsp_o[SnaxWideStartIdx[i] + j*8].q_ready = snax_wide_rsp[j + wide_port_idx].q_ready;
+            wide_port_idx += NumSnaxWideTcdmPortCurrentCore;
+          end
+        end
+        else if (SnaxNarrowEndIdx[i] - SnaxNarrowStartIdx[i] > 0) begin
+         int NumSnaxNarrowTcdmPortCurrentCore = (SnaxNarrowEndIdx[i] - SnaxNarrowStartIdx[i]);
+          for (int j = 0; j < NumSnaxNarrowTcdmPortCurrentCore; j++) begin
+            // Request ports
+            snax_narrow_req[j + narrow_port_idx].q.addr  = snax_tcdm_req_i[SnaxNarrowStartIdx[i] + j].q.addr ;
+            snax_narrow_req[j + narrow_port_idx].q.write = snax_tcdm_req_i[SnaxNarrowStartIdx[i] + j].q.write;
+            snax_narrow_req[j + narrow_port_idx].q.amo   = reqrsp_pkg::AMONone;
+            snax_narrow_req[j + narrow_port_idx].q.data  = snax_tcdm_req_i[SnaxNarrowStartIdx[i] + j].q.data;
+            snax_narrow_req[j + narrow_port_idx].q.strb  = snax_tcdm_req_i[SnaxNarrowStartIdx[i] + j].q.strb;
+            snax_narrow_req[j + narrow_port_idx].q.user  = '0;
+            snax_narrow_req[j + narrow_port_idx].q_valid = snax_tcdm_req_i[SnaxNarrowStartIdx[i] + j].q_valid;
+
+            // Response ports
+            snax_tcdm_rsp_o[SnaxNarrowStartIdx[i] + j].p.data = snax_narrow_rsp[j + narrow_port_idx].p.data;
+            snax_tcdm_rsp_o[SnaxNarrowStartIdx[i] + j].p_valid = snax_narrow_rsp[j + narrow_port_idx].p_valid;
+            snax_tcdm_rsp_o[SnaxNarrowStartIdx[i] + j].q_ready = snax_narrow_rsp[j + narrow_port_idx].q_ready;
+            narrow_port_idx += NumSnaxNarrowTcdmPortCurrentCore;
+          end
+        end
+    end
+    end
+  end else begin
+    assign snax_narrow_req = snax_tcdm_req_i;
+    assign snax_tcdm_rsp_o = snax_narrow_rsp;
+
+    assign snax_wide_req = '0;
+  end
+
+  if (NumSnaxWideTcdmPorts > 0) begin: gen_yes_wide_acc_connect
     snitch_tcdm_interconnect #(
       .NumInp (1 + NumSnaxWideTcdmPorts),
       .NumOut (NrSuperBanks),
@@ -879,7 +990,7 @@ module snitch_cluster
   // generate TCDM for snax if any of the cores has SNAX enabled
   // Make ConnectSnaxAccWide a switcher for now that all accelerators connect to wide
   // if this happens
-  if( (TotalSnaxTcdmPorts > 0) && !(|ConnectSnaxAccWide)) begin: gen_yes_snax_tcdm_interconnect
+  if( SnaxNarrowPorts > 0) begin: gen_yes_snax_tcdm_interconnect
 
     snitch_tcdm_interconnect #(
       .NumInp (NumTCDMIn + TotalSnaxTcdmPorts),
@@ -897,8 +1008,8 @@ module snitch_cluster
     ) i_tcdm_interconnect (
       .clk_i,
       .rst_ni,
-      .req_i ({axi_soc_req, tcdm_req, snax_tcdm_req_i}),
-      .rsp_o ({axi_soc_rsp, tcdm_rsp, snax_tcdm_rsp_o}),
+      .req_i ({axi_soc_req, tcdm_req, snax_narrow_req}),
+      .rsp_o ({axi_soc_rsp, tcdm_rsp, snax_narrow_rsp}),
       .mem_req_o (ic_req),
       .mem_rsp_i (ic_rsp)
     );

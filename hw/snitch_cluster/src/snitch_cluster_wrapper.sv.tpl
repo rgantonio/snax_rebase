@@ -11,6 +11,12 @@ narrow_start_idx_list = []
 narrow_end_idx_list = []
 wide_start_idx_list = []
 wide_end_idx_list = []
+idx_offset = 0
+SnaxWideOnly = 0
+SnaxWideOnlyNum = 0
+SnaxNarrowAndWide = 0
+SnaxWidePorts = 0
+SnaxNarrowPorts = 0
 
 # Cycle through each core
 # and check if an accelerator setting exists
@@ -47,11 +53,13 @@ for i in range(len(cfg['cores'])):
     if (cfg['cores'][i]['snax_acc_set']['snax_connect_tcdm_wide_only']):
       snax_acc_wide_only = True
       snax_tcdm_config_count += 1
+      SnaxWideOnlyNum = SnaxWideOnlyNum + 1
 
     if (cfg['cores'][i]['snax_acc_set']['snax_connect_narrow_wide_mix']):
       snax_acc_narrow_wide_mix = True
       snax_tcdm_config_count += 1
-    
+      SnaxNarrowAndWide = SnaxNarrowAndWide + 1
+
     # Assertion check just to make sure
     # No one makes a mistake in setting the configurations
     assert (snax_tcdm_config_count <= 1), "Error! Can only have 1 tcdm configuration. Multi port, wide only, or narrow-wide mix. Default is narrow only."
@@ -63,11 +71,30 @@ for i in range(len(cfg['cores'])):
     snax_wide_tcdm_start_idx = cfg['cores'][i]['snax_acc_set']['snax_wide_tcdm_start_idx']
     snax_wide_tcdm_end_idx = cfg['cores'][i]['snax_acc_set']['snax_wide_tcdm_end_idx']
 
-    narrow_start_idx_list.append(snax_narrow_tcdm_start_idx)
-    narrow_end_idx_list.append(snax_narrow_tcdm_end_idx)
-    wide_start_idx_list.append(snax_wide_tcdm_start_idx)
-    wide_end_idx_list.append(snax_wide_tcdm_end_idx)
+    if (len(narrow_start_idx_list) == 0):
+      narrow_start_idx_list.append(snax_narrow_tcdm_start_idx)
+      narrow_end_idx_list.append(snax_narrow_tcdm_end_idx)
+      wide_start_idx_list.append(snax_wide_tcdm_start_idx)
+      wide_end_idx_list.append(snax_wide_tcdm_end_idx)
+    else:
+      narrow_start_idx_list.append(snax_narrow_tcdm_start_idx + idx_offset) 
+      narrow_end_idx_list.append(snax_narrow_tcdm_end_idx + idx_offset)
+      wide_start_idx_list.append(snax_wide_tcdm_start_idx + idx_offset)
+      wide_end_idx_list.append(snax_wide_tcdm_end_idx + idx_offset)
 
+    SnaxWidePorts = SnaxWidePorts + snax_narrow_tcdm_end_idx - snax_narrow_tcdm_start_idx + 1
+    SnaxNarrowPorts = SnaxNarrowPorts + snax_wide_tcdm_end_idx - snax_wide_tcdm_start_idx + 1
+    
+    idx_offset += snax_tcdm_ports
+
+    if (SnaxWideOnlyNum == len(cfg['cores']) - 1):
+      SnaxWideOnly = 1
+    else:
+      if (SnaxNarrowAndWide != 0):
+        SnaxNarrowAndWide = 1
+      else:
+        error("Error! TCDM configuration is not correct. Please check the configuration.")
+      
     # Cycle through each accelerator setting per Snitch core
     for j in range(cfg['cores'][i]['snax_acc_set']['snax_num_acc']):
 
@@ -92,8 +119,10 @@ for i in range(len(cfg['cores'])):
             'snax_tcdm_ports': snax_tcdm_ports,
             'snax_tcdm_offset_start': tcdm_offset_start,
             'snax_tcdm_offset_stop': tcdm_offset_stop,
-            'snax_acc_wide_only': snax_acc_wide_only,
-            'snax_acc_narrow_wide_mix': snax_acc_narrow_wide_mix,
+            'snax_acc_wide_only': SnaxWideOnly,
+            'snax_acc_narrow_wide_mix': SnaxNarrowAndWide,
+            'SnaxWidePorts': SnaxWidePorts,
+            'SnaxNarrowPorts': SnaxNarrowPorts,
             'snax_narrow_tcdm_start_idx': snax_narrow_tcdm_start_idx,
             'snax_narrow_tcdm_end_idx': snax_narrow_tcdm_end_idx,
             'snax_wide_tcdm_start_idx': snax_wide_tcdm_start_idx,
@@ -491,6 +520,10 @@ module ${cfg['name']}_wrapper (
     .Xdma (${core_cfg_flat('xdma')}),
     .Xssr (${core_cfg_flat('xssr')}),
     .Xfrep (${core_cfg_flat('xfrep')}),
+    .SnaxWideOnly(${SnaxWideOnly}),
+    .SnaxNarrowAndWide(${SnaxNarrowAndWide}),
+    .SnaxWidePorts(${SnaxWidePorts}),
+    .SnaxNarrowPorts(${SnaxNarrowPorts}),
     .TotalSnaxTcdmPorts(${total_snax_tcdm_ports}),
     .SnaxNarrowStartIdx ( SnaxNarrowStartIdx  ),
     .SnaxNarrowEndIdx   ( SnaxNarrowEndIdx    ),
