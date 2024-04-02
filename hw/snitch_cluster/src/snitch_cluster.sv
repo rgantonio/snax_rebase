@@ -96,10 +96,6 @@ module snitch_cluster
   /// FPU configuration.
   parameter fpnew_pkg::fpu_implementation_t FPUImplementation [NrCores] =
     '{default: fpnew_pkg::fpu_implementation_t'(0)},
-  /// SNAX Acc initial narrow TCDM ports
-  parameter int unsigned SnaxAccNarrowTcdmPorts = 0,
-  /// SNAX Acc initial wide TCDM ports
-  parameter int unsigned SnaxAccWideTcdmPorts = 0,
   /// Total Number of SNAX TCDM ports
   parameter bit          SnaxWideOnly = 0,
   parameter bit          SnaxNarrowAndWide = 0,
@@ -749,7 +745,6 @@ module snitch_cluster
     end
   end else if (SnaxNarrowAndWide) begin
     always_comb begin
-
     for(int i = 0; i < NrCores; i++) begin
       int wide_port_idx = 0;
       int narrow_port_idx = 0;
@@ -997,7 +992,7 @@ module snitch_cluster
   if( SnaxNarrowPorts > 0) begin: gen_yes_snax_tcdm_interconnect
 
     snitch_tcdm_interconnect #(
-      .NumInp (NumTCDMIn + SnaxAccNarrowTcdmPorts),
+      .NumInp (NumTCDMIn + SnaxNarrowPorts),
       .NumOut (NrBanks),
       .tcdm_req_t (tcdm_req_t),
       .tcdm_rsp_t (tcdm_rsp_t),
