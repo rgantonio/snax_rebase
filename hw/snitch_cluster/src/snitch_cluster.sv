@@ -96,6 +96,10 @@ module snitch_cluster
   /// FPU configuration.
   parameter fpnew_pkg::fpu_implementation_t FPUImplementation [NrCores] =
     '{default: fpnew_pkg::fpu_implementation_t'(0)},
+  /// SNAX Acc initial narrow TCDM ports
+  parameter int unsigned SnaxAccNarrowTcdmPorts = 0,
+  /// SNAX Acc initial wide TCDM ports
+  parameter int unsigned SnaxAccWideTcdmPorts = 0,
   /// Total Number of SNAX TCDM ports
   parameter bit          SnaxWideOnly = 0,
   parameter bit          SnaxNarrowAndWide = 0,
@@ -750,7 +754,7 @@ module snitch_cluster
       int wide_port_idx = 0;
       int narrow_port_idx = 0;
         if(SnaxWideEndIdx[i] - SnaxWideStartIdx[i] > 0) begin
-          int NumSnaxWideTcdmPortCurrentCore = (SnaxWideEndIdx[i] - SnaxWideStartIdx[i])/8;
+          int NumSnaxWideTcdmPortCurrentCore = (SnaxWideEndIdx[i] - SnaxWideStartIdx[i] + 1)/8;
           for(int j = 0; j < NumSnaxWideTcdmPortCurrentCore; j++) begin
             // Request ports
             snax_wide_req[j + wide_port_idx].q.addr  = snax_tcdm_req_i[SnaxWideStartIdx[i] + j*8].q.addr ;
@@ -820,8 +824,8 @@ module snitch_cluster
             wide_port_idx += NumSnaxWideTcdmPortCurrentCore;
           end
         end
-        else if (SnaxNarrowEndIdx[i] - SnaxNarrowStartIdx[i] > 0) begin
-         int NumSnaxNarrowTcdmPortCurrentCore = (SnaxNarrowEndIdx[i] - SnaxNarrowStartIdx[i]);
+        if (SnaxNarrowEndIdx[i] - SnaxNarrowStartIdx[i] > 0) begin
+          int NumSnaxNarrowTcdmPortCurrentCore = (SnaxNarrowEndIdx[i] - SnaxNarrowStartIdx[i] + 1);
           for (int j = 0; j < NumSnaxNarrowTcdmPortCurrentCore; j++) begin
             // Request ports
             snax_narrow_req[j + narrow_port_idx].q.addr  = snax_tcdm_req_i[SnaxNarrowStartIdx[i] + j].q.addr ;
@@ -993,7 +997,7 @@ module snitch_cluster
   if( SnaxNarrowPorts > 0) begin: gen_yes_snax_tcdm_interconnect
 
     snitch_tcdm_interconnect #(
-      .NumInp (NumTCDMIn + TotalSnaxTcdmPorts),
+      .NumInp (NumTCDMIn + SnaxAccNarrowTcdmPorts),
       .NumOut (NrBanks),
       .tcdm_req_t (tcdm_req_t),
       .tcdm_rsp_t (tcdm_rsp_t),
@@ -1013,6 +1017,7 @@ module snitch_cluster
       .mem_req_o (ic_req),
       .mem_rsp_i (ic_rsp)
     );
+
   end else begin: gen_no_snax_tcdm_interconnect
 
     snitch_tcdm_interconnect #(
