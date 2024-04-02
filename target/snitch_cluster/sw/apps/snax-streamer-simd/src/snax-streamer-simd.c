@@ -10,7 +10,7 @@
 
 int main() {
 
-    // Compute golden data from c spec
+    // Compute golden data from post-processing c spec
     if(snrt_is_compute_core()){
         for (int loop1 = 0; loop1 < tempLoop1; loop1++) {
             for (int loop0 = 0; loop0 < tempLoop0; loop0++) {
@@ -49,12 +49,16 @@ int main() {
     // Wait for DMA to finish
     snrt_cluster_hw_barrier();
 
-    if (snrt_is_compute_core()) {
+    uint32_t dma_post_load = snrt_mcycle();
+
+    // using compute core to run the streamer-simd accelerator
+    if (snrt_global_core_idx() == 2) {
         uint32_t simd_start = snrt_mcycle();
 
         // Set Streamer configuration CSR
         set_streamer_simd_csr(tempLoop0, tempLoop1, tempStride0_in,
                         tempStride1_in, tempStride0_out, tempStride1_out, (int32_t)delta_local_in, (int32_t)delta_local_out);
+
         // Set CSR to start Streamer
         start_streamer_simd();
 
@@ -65,13 +69,19 @@ int main() {
         uint32_t csr2 = gen_csr2_config(multiplier_i);
 
         set_simd_csr(csr0, csr1, csr2, tempLoop0*tempLoop1);
+
         // Set CSR to start simd
         start_simd();
 
-        // Poll until Streamer and simd accelerator finish
+        // Wait until Streamer and simd accelerator finish
         wait_streamer_simd();
 
         uint32_t simd_end = snrt_mcycle();
+
+        uint32_t simd_streamer_perf_counter = read_simd_streamer_perf_counter();
+        printf("simd streamer perf counter: %d \n", simd_streamer_perf_counter);
+        uint32_t simd_perf_counter = read_simd_perf_counter();
+        printf("simd perf counter : %d \n", simd_perf_counter);
 
         // Compare SNAX streamer-simd result with golden c spec model
         err += check_simd_result(tempLoop0, tempLoop1, tempStride0_out,

@@ -52,23 +52,41 @@ void set_streamer_simd_csr(int tempLoop0, int tempLoop1, int tempStride0_in,
     write_csr(960+11, (uint32_t)(delta_local_out + snrt_l1_next()));
 }
 
-void start_streamer_simd() { write_csr(960+12, 1); }
+void start_streamer_simd() { write_csr(960+13, 1); }
 
 void set_simd_csr(uint32_t csr0, uint32_t csr1, uint32_t csr2, uint32_t temporal_loop_bound) {
     // set the constants for the SIMD unit
-    write_csr(960+13, csr0);
-    write_csr(960+14, csr1);
-    write_csr(960+15, csr2);
+    write_csr(960+14, csr0);
+    write_csr(960+15, csr1);
+    write_csr(960+16, csr2);
 
     // set the temporal loop bound
-    write_csr(960+16, temporal_loop_bound);
+    write_csr(960+17, temporal_loop_bound);
 }
 
-void start_simd() { write_csr(960+17, 1); }
+void start_simd() { write_csr(960+19, 1); }
 
 void wait_streamer_simd() {
-    write_csr(960+12, 0);
-    write_csr(960+17, 0);
+    write_csr(960+19, 0);
+    write_csr(960+19, 0);
+    write_csr(960+13, 0);
+}
+
+void start_simd_then_wait_streamer_simd(){
+    write_csr(960+19, 1); 
+    write_csr(960+19, 0);
+    write_csr(960+19, 0);
+    write_csr(960+13, 0);
+}
+
+uint32_t read_simd_streamer_perf_counter(){
+    uint32_t perf_counter = read_csr(960 + 12);
+    return perf_counter;
+}
+
+uint32_t read_simd_perf_counter(){
+    uint32_t perf_counter = read_csr(960+18);
+    return perf_counter;
 }
 
 void load_simd_test_data(int tempLoop0, int tempLoop1, int tempStride0,

@@ -43,6 +43,12 @@ void start_simd();
 // wait for the streamer to finish
 void wait_streamer_simd();
 
+void start_simd_then_wait_streamer_simd();
+
+uint32_t read_simd_streamer_perf_counter();
+
+uint32_t read_simd_perf_counter();
+
 // load the test data into TCDM
 void load_simd_test_data(int tempLoop0, int tempLoop1, int tempStride0,
                          int tempStride1, int32_t* base_ptr_local,
