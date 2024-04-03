@@ -79,13 +79,15 @@ for i in range(len(cfg['cores'])):
     wide_end_idx_list.append(snax_wide_tcdm_end_idx + idx_offset)
     idx_offset += snax_tcdm_ports
 
-    if (SnaxWideOnlyNum == len(cfg['cores'])):
+    if (SnaxWideOnlyNum == len(cfg['cores']) - 1):
       SnaxWideOnly = 1
     if (SnaxNarrowAndWideNum != 0):
       SnaxNarrowAndWide = 1
     
-    SnaxWidePorts += snax_wide_tcdm_end_idx - snax_wide_tcdm_start_idx + 1
-    SnaxNarrowPorts += snax_narrow_tcdm_end_idx - snax_narrow_tcdm_start_idx + 1
+    if( snax_wide_tcdm_end_idx != 0):
+      SnaxWidePorts += snax_wide_tcdm_end_idx - snax_wide_tcdm_start_idx + 1
+    if( snax_narrow_tcdm_end_idx != 0):
+      SnaxNarrowPorts += snax_narrow_tcdm_end_idx - snax_narrow_tcdm_start_idx + 1
     
     # Cycle through each accelerator setting per Snitch core
     for j in range(cfg['cores'][i]['snax_acc_set']['snax_num_acc']):
