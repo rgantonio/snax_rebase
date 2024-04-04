@@ -51,6 +51,15 @@ ifeq (${CFG_OVERRIDE}, cfg/snax-streamer-gemm.hjson)
 endif
 
 
+ifeq (${CFG_OVERRIDE}, cfg/snax-streamer-gemm.hjson)
+	SNAX_DEV_ROOT ?= $(shell $(BENDER) path snax-stream-gemm-dev)
+	include $(SNAX_DEV_ROOT)/Makefile
+
+	VSIM_BENDER += -t snax-stream-gemm-dev
+	VLT_BENDER  += -t snax-stream-gemm-dev
+	VCS_BENDER  += -t snax-stream-gemm-dev
+endif
+
 
 ############
 # Programs #
@@ -101,6 +110,7 @@ VLOG_FLAGS += -suppress 13314
 VLOG_FLAGS += ${VLOG_64BIT}
 
 VLT_FLAGS  += --trace
+VLT_FLAGS  += --trace-structs
 
 ###############
 # C testbench #
