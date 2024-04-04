@@ -15,27 +15,13 @@ else
 RUNTIME = runtime/rtl
 endif
 
-<<<<<<< Updated upstream
-SUBDIRS += $(RUNTIME) snax/mac snax/gemm snax/streamer-gemm snax/streamer-simd math apps tests
-=======
 SUBDIRS += $(RUNTIME) snax/mac snax/gemm snax/streamer-gemm snax/streamer-simd snax/data-reshuffler math apps tests
->>>>>>> Stashed changes
 
 .PHONY: all $(SUBDIRS)
 
 all: $(SUBDIRS)
 
 # Explicit dependency of apps on runtime
-<<<<<<< Updated upstream
-apps: $(RUNTIME) math snax/mac snax/gemm snax/streamer-gemm snax/streamer-simd
-	$(MAKE) -C $@ TARGET=$(TARGET)
-
-# Explicit dependency of tests on runtime
-tests: $(RUNTIME) math snax/mac snax/gemm snax/streamer-gemm snax/streamer-simd
-	$(MAKE) -C $@ $(TARGET)
-
-runtime/rtl runtime/banshee runtime/rtl-generic math snax/mac snax/gemm snax/streamer-gemm snax/streamer-simd:
-=======
 apps: $(RUNTIME) math snax/mac snax/gemm snax/streamer-gemm snax/streamer-simd snax/data-reshuffler
 	$(MAKE) -C $@ TARGET=$(TARGET)
 
@@ -44,5 +30,4 @@ tests: $(RUNTIME) math snax/mac snax/gemm snax/streamer-gemm snax/streamer-simd 
 	$(MAKE) -C $@ $(TARGET)
 
 runtime/rtl runtime/banshee runtime/rtl-generic math snax/mac snax/gemm snax/streamer-gemm snax/streamer-simd snax/data-reshuffler:
->>>>>>> Stashed changes
 	$(MAKE) -C $@ $(TARGET)
