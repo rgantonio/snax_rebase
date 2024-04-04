@@ -8,8 +8,8 @@
 
 // Set STREAMER configuration CSR
 void set_streamer_csr(int tempLoop0, int tempLoop1, int tempLoop2,
-                      int tempStride0A, int tempStride2A, int tempStride0B,
-                      int tempStride1B, int tempStride1C, int tempStride2C,
+                      int tempStride0A, int tempStride2A, int sptialStride1A, int tempStride0B,
+                      int tempStride1B,int sptialStride1B, int tempStride1C, int tempStride2C, int sptialStride1C, 
                       int delta_local_a, int delta_local_b, int delta_local_c) {
     // loop bounds, from innermost to outermost, from K to N to M
     write_csr(960, tempLoop0);
@@ -33,15 +33,15 @@ void set_streamer_csr(int tempLoop0, int tempLoop1, int tempLoop2,
 
     // spatial strides for A
     write_csr(972, 1);
-    write_csr(973, 8);
+    write_csr(973, sptialStride1A);
 
     // spatial strides for B
     write_csr(974, 1);
-    write_csr(975, 8);
+    write_csr(975, sptialStride1B);
 
     // spatial strides for C
     write_csr(976, 4);
-    write_csr(977, 32);
+    write_csr(977, sptialStride1C);
 
     // base ptr for A
     write_csr(978, (uint32_t)(delta_local_a + snrt_l1_next()));

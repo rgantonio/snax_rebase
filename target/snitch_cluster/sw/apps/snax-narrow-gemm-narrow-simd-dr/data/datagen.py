@@ -309,6 +309,11 @@ def emit_gemm_data(**kwargs):
             "int32_t", "tempStride1_GEMM_C_out", kwargs["tempStride1_GEMM_C_out"]
         )
     ]
+    data_str += [
+        format_scalar_definition(
+            "int32_t", "spatialStride1_GEMM_C_out", kwargs["spatialStride1_GEMM_C_out"]
+        )
+    ]
 
     data_str += [format_scalar_definition("int32_t", "delta_local_C_in", kwargs["delta_local_C_in"])]
 
@@ -357,8 +362,8 @@ def emit_gemm_data(**kwargs):
         kwargs["spatial_len_1"],
         kwargs["tempStride0_B_in"],
         kwargs["tempStride1_B_in"],
-        kwargs["tempLoop1_B"] * 8,
         1,
+        kwargs["spatialStride1_B_in"],
         b
     )
     # Generating golden C data using block GEMM

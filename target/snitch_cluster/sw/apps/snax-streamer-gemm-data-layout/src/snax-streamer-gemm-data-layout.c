@@ -27,14 +27,14 @@ int main() {
     // Using DMA only
     if (snrt_is_dm_core()) {
         load_input_data(Batch, M, K, N, local_a, local_b, A, B,
-                        strideInnermostA, strideInnermostB, ldA, ldB, strideA,
+                        DMA_strideInnermostA, DMA_strideInnermostB, DMA_ldA, DMA_ldB, strideA,
                         strideB);
     }
 
     // Wait for DMA to finish
     snrt_cluster_hw_barrier();
 
-    if (snrt_global_core_idx() == 1) {
+    if (snrt_global_core_idx() == 0) {
         // uint32_t gemm_start = snrt_mcycle();
 
         // Set Streamer configuration CSR

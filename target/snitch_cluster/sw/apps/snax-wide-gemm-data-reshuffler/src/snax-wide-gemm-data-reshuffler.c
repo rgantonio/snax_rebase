@@ -94,8 +94,8 @@ int main() {
         uint32_t gemm_start = snrt_mcycle();
 
         // Set Streamer configuration CSR
-        set_streamer_csr(tempLoop0_A, tempLoop1_B, tempLoop1_A, tempStride0_A_out, tempStride1_A_out, tempStride0_B_out, tempStride1_B_out,
-                         DMAtempStride0_C_in, DMAtempStride1_C_in, delta_local_A_out, delta_local_B_out,
+        set_streamer_csr(tempLoop0_A, tempLoop1_B, tempLoop1_A, tempStride0_A_out, tempStride1_A_out, spatialStride1_A_out, tempStride0_B_out, tempStride1_B_out, spatialStride1_B_out,
+                         DMAtempStride0_C_in, DMAtempStride1_C_in, DMAspatialStride1_C_in, delta_local_A_out, delta_local_B_out,
                          delta_local_C_in);
 
         // Set CSR to start Streamer

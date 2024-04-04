@@ -28,12 +28,15 @@ SUBDIRS += snax-gemm-engine
 SUBDIRS += snax-gemm-base
 SUBDIRS += snax-block-gemm
 SUBDIRS += snax-streamer-gemm
+SUBDIRS += snax-streamer-gemm-data-layout
 SUBDIRS += snax-mac-mult
 SUBDIRS += snax-streamer-simd
-SUBDIRS += snax-narrow-gemm-narrow-simd
 SUBDIRS += snax-data-reshuffler
 SUBDIRS += snax-wide-gemm-data-reshuffler
 SUBDIRS += snax-wide-gemm-wide-simd-dr
+SUBDIRS += snax-narrow-gemm-narrow-simd
+SUBDIRS += snax-narrow-gemm-narrow-simd-dr
+SUBDIRS += snax-narrow-gemm-narrow-simd-dr-c-left
 
 .PHONY: all clean $(SUBDIRS)
 

@@ -309,6 +309,11 @@ def emit_gemm_data(**kwargs):
             "int32_t", "tempStride1_GEMM_C_out", kwargs["tempStride1_GEMM_C_out"]
         )
     ]
+    data_str += [
+        format_scalar_definition(
+            "int32_t", "spatialStride1_GEMM_C_out", kwargs["spatialStride1_GEMM_C_out"]
+        )
+    ]
 
     data_str += [format_scalar_definition("int32_t", "delta_local_C_in", kwargs["delta_local_C_in"])]
 
@@ -357,8 +362,8 @@ def emit_gemm_data(**kwargs):
         kwargs["spatial_len_1"],
         kwargs["tempStride0_B_in"],
         kwargs["tempStride1_B_in"],
-        kwargs["tempLoop1_B"] * 8,
         1,
+        kwargs["spatialStride1_B_in"],
         b
     )
     # Generating golden C data using block GEMM
@@ -501,17 +506,18 @@ def emit_gemm_data(**kwargs):
     ] 
     data_str += [format_scalar_definition("bool", "transpose_C", 1)]
 
-    C_data_layout_golden = data_reshuffler_golden_model(
-        kwargs["tempLoop0_C"],
-        kwargs["tempLoop1_C"],
-        kwargs["spatial_len_0"],
-        kwargs["spatial_len_1"],
-        kwargs["tempStride0_C_in"],
-        kwargs["tempStride1_C_in"],
-        8,
-        1,
-        c_golden_simd
-    )
+    # C_data_layout_golden = data_reshuffler_golden_model(
+    #     kwargs["tempLoop0_C"],
+    #     kwargs["tempLoop1_C"],
+    #     kwargs["spatial_len_0"],
+    #     kwargs["spatial_len_1"],
+    #     kwargs["tempStride0_C_in"],
+    #     kwargs["tempStride1_C_in"],
+    #     8,
+    #     1,
+    #     c_golden_simd
+    # )
+    C_data_layout_golden = c_golden_simd
 
     data_str += [format_vector_definition("int8_t", "C_data_layout_golden", C_data_layout_golden)]
 
@@ -619,7 +625,7 @@ def emit_gemm_data(**kwargs):
     data_str += [format_vector_definition("int8_t", "D_data_layout_golden", D_data_layout_golden)]
 
     '''
-    E = D * C!
+    E = C * D!
     '''
 
     e_golden = block_gemm_golden_model(
@@ -629,10 +635,10 @@ def emit_gemm_data(**kwargs):
         kwargs["meshRow"],
         kwargs["tileSize"],
         kwargs["meshCol"],
-        D_data_layout_golden,
         C_data_layout_golden,
+        D_data_layout_golden,
+        subtraction_c,
         subtraction_d,
-        subtraction_c
     )
 
     data_str += [format_vector_definition("int32_t", "E_golden", e_golden)]

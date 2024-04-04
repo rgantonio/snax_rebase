@@ -45,8 +45,8 @@ int main() {
         uint32_t gemm_start = snrt_mcycle();
 
         // Set Streamer configuration CSR
-        set_streamer_csr(K, N, M, strideInnermostA, ldA, strideInnermostB, ldB,
-                         strideInnermostC, ldC, delta_local_a, delta_local_b,
+        set_streamer_csr(K, N, M, strideInnermostA, ldA, spatialA, strideInnermostB, ldB, spatialB,
+                         strideInnermostC, ldC, spatialC, delta_local_a, delta_local_b,
                          delta_local_c);
 
         // Set CSR to start Streamer

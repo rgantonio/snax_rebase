@@ -126,6 +126,10 @@ def emit_gemm_data(**kwargs):
     data_str += [format_scalar_definition("int32_t", "ldA", kwargs["ldA"])]
     data_str += [format_scalar_definition("int32_t", "ldB", kwargs["ldB"])]
     data_str += [format_scalar_definition("int32_t", "ldC", kwargs["ldC"])]
+    
+    data_str += [format_scalar_definition("int32_t", "spatialA", kwargs["spatialA"])]
+    data_str += [format_scalar_definition("int32_t", "spatialB", kwargs["spatialB"])]
+    data_str += [format_scalar_definition("int32_t", "spatialC", kwargs["spatialC"])]
 
     data_str += [
         format_scalar_definition("int32_t", "strideA", kwargs["strideA"])

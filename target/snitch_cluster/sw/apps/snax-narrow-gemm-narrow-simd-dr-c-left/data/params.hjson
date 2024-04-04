@@ -38,6 +38,7 @@
     // GEMM out for C
     tempStride0_GEMM_C_out: 256,
     tempStride1_GEMM_C_out: 512,
+    spatialStride1_GEMM_C_out: 32,
     // SIMD out for C
     // same as DMAtempStride0_C
     // DR configuration for C
@@ -54,8 +55,8 @@
     tempStride0_C_out: 64,
     tempStride1_C_out: 128,
     spatialStride1_C_out: 8,
-    delta_local_C_in: 2048,
-    delta_local_C_out: 4096,
+    delta_local_C_in: 4096,
+    delta_local_C_out: 2048,
     op_C: "tiledrowmajor2tiledcolmajor",
     // DR configuration for D
     tempLoop0_D: 2,

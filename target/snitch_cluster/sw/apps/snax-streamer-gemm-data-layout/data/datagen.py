@@ -55,6 +55,54 @@ def block_gemm_golden_model(m, k, n, row, size, col, a, b,
     return c
 
 
+def data_reshuffler_golden_model(tempLoop0, tempLoop1, spatial_len_0, spatial_len_1, tempStride0, tempStride1, spatialStride0, spatialStride1, data):
+    # abstract illusion: k innermost loop, m second innermost loop, K third innermost loop, M outermost loop
+
+    # total loop bounds = spatial loop bounds * temporal loop bounds
+    K = tempLoop0 * spatial_len_0
+    M = tempLoop1 * spatial_len_1
+
+    # loop bounds settings
+    matrix_size = {
+        'K': K,
+        'M': M,
+        'k': spatial_len_0,
+        'm': spatial_len_1
+    }
+
+    # stride settings
+    strides = {
+        'M': tempStride1,
+        'K': tempStride0,
+        'm': spatialStride1,
+        'k': spatialStride0
+    }
+
+    result_array = np.zeros((matrix_size["M"] * matrix_size["K"]), dtype=data.dtype)
+
+    # apply strided layout mapping for the golden model of data reshuffler
+    for M in range(matrix_size["M"] // matrix_size["m"]):
+        for K in range(matrix_size["K"] // matrix_size["k"]):
+            for m in range(matrix_size["m"]):
+                for k in range(matrix_size["k"]):
+                    result_array[
+                        # output address calculation with coutinued increment
+                        matrix_size["K"] // matrix_size["k"] * matrix_size["k"] * matrix_size['m'] * M 
+                        + matrix_size["k"] * matrix_size['m'] * K 
+                        + m * matrix_size['k'] 
+                        + k
+                        ] = data[
+                        # input address calculation with strided layout mapping eqaution
+                        strides["M"] * M
+                        + strides["K"] * K
+                        + strides["m"] * m
+                        + strides["k"] * k
+                    ]
+
+    # print(result_array)
+    return result_array.ravel()
+
+
 # Add stdint.h header
 def emit_header_file(**kwargs):
     emit_str = "#include <stdint.h>\n\n"
@@ -76,6 +124,26 @@ def emit_gemm_data(**kwargs):
     data_str += [format_scalar_definition("int8_t", "N", kwargs["N"])]
 
     # Generating strides settings
+    data_str += [
+        format_scalar_definition(
+            "int32_t", "DMA_strideInnermostA", kwargs["DMA_strideInnermostA"]
+        )
+    ]
+    data_str += [
+        format_scalar_definition(
+            "int32_t", "DMA_strideInnermostB", kwargs["DMA_strideInnermostB"]
+        )
+    ]
+    data_str += [
+        format_scalar_definition(
+            "int32_t", "DMA_ldA", kwargs["DMA_ldA"]
+        )
+    ]
+    data_str += [
+        format_scalar_definition(
+            "int32_t", "DMA_ldB", kwargs["DMA_ldB"]
+        )
+    ]
 
     data_str += [
         format_scalar_definition(
@@ -158,6 +226,29 @@ def emit_gemm_data(**kwargs):
     a = np.random.randint(MIN, MAX, length_a)
     b = np.random.randint(MIN, MAX, length_b)
 
+    A_data_layout_golden = data_reshuffler_golden_model(
+        kwargs["K"],
+        kwargs["M"],
+        kwargs["tileSize"],
+        kwargs["meshRow"],
+        kwargs["strideInnermostA"],
+        kwargs["ldA"],
+        1,
+        kwargs["spatialA"],
+        a
+    )
+    B_data_layout_golden = data_reshuffler_golden_model(
+        kwargs["K"],
+        kwargs["N"],
+        kwargs["tileSize"],
+        kwargs["meshCol"],
+        kwargs["strideInnermostB"],
+        kwargs["ldB"],
+        1,
+        kwargs["spatialB"],
+        b
+    )
+
     # Generating golden data
     c_golden = block_gemm_golden_model(
         kwargs["M"],
@@ -166,11 +257,12 @@ def emit_gemm_data(**kwargs):
         kwargs["meshRow"],
         kwargs["tileSize"],
         kwargs["meshCol"],
-        a,
-        b,
+        A_data_layout_golden,
+        B_data_layout_golden,
         subtraction_a,
         subtraction_b
     )
+
     c_init = np.zeros(c_golden.shape)
     c_cpu = np.zeros(c_golden.shape)
 
