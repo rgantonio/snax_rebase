@@ -30,6 +30,13 @@ SUBDIRS += snax-block-gemm
 SUBDIRS += snax-streamer-gemm
 SUBDIRS += snax-mac-mult
 SUBDIRS += snax-streamer-simd
+<<<<<<< Updated upstream
+=======
+SUBDIRS += snax-narrow-gemm-narrow-simd
+SUBDIRS += snax-data-reshuffler
+SUBDIRS += snax-wide-gemm-data-reshuffler
+SUBDIRS += snax-wide-gemm-wide-simd-dr
+>>>>>>> Stashed changes
 
 .PHONY: all clean $(SUBDIRS)
 

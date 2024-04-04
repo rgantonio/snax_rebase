@@ -207,6 +207,9 @@ uint32_t check_result(int32_t* output, int32_t* output_golden, uint8_t Batch,
                             i * meshCol + j;
                         // Check if output is same as golden output
                         if ((int32_t)*out_addr != output_golden[golden_idx]) {
+                            // printf("Error: output[%x] = %d, golden[%d] = %d\n",
+                            //        (int32_t)out_addr, (int32_t)*out_addr,
+                            //        golden_idx, output_golden[golden_idx]);
                             err++;
                         };
                     };
