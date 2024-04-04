@@ -187,12 +187,21 @@ sources:
     files:
       - hw/snitch/test/snitch_l0_tlb_tb.sv
 
-  # snax mac
-  - files:
+  # SNAX HWPE MAC
+  - target: snax_hwpe_mac
+    files:
       # Level 0
       - hw/snax_hwpe_mac/src/snax_hwpe_ctrl.sv
       - hw/snax_hwpe_mac/src/snax_hwpe_to_reqrsp.sv
       - hw/snax_hwpe_mac/src/snax_mac_wrapper.sv
+  
+  - files:
+      - hw/snax_mac/src/snax_mac_csr.sv
+      - hw/snax_mac/src/snax_mac.sv
+      - hw/snax_mac/src/snax_mac_reader_streamer.sv
+      - hw/snax_mac/src/snax_mac_writer_streamer.sv
+      - hw/snax_mac/src/snax_mac_translator.sv
+      - hw/snax_mac/src/snax_mac_wrapper.sv
 
   # snitch_vm
   - files:
