@@ -38,6 +38,7 @@ SUBDIRS += snax-wide-gemm-wide-simd-dr-c-left
 SUBDIRS += snax-narrow-gemm-narrow-simd
 SUBDIRS += snax-narrow-gemm-narrow-simd-dr
 SUBDIRS += snax-narrow-gemm-narrow-simd-dr-c-left
+SUBDIRS += snax-wide-gemm-snitch-reshuffler
 
 .PHONY: all clean $(SUBDIRS)
 
