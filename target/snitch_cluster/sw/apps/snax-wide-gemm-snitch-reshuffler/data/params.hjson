@@ -6,7 +6,7 @@
   DMAspatialStride1_A_in: 8
   tempStride0_A_in: 8
   tempStride1_A_in: 256
-  spatialStride1_A_in: 16
+  spatialStride1_A_in: 32
   tempStride0_A_out: 64
   tempStride1_A_out: 256
   spatialStride1_A_out: 8
@@ -20,7 +20,7 @@
   DMAspatialStride1_B_in: 8
   tempStride0_B_in: 8
   tempStride1_B_in: 256
-  spatialStride1_B_in: 16
+  spatialStride1_B_in: 32
   tempStride0_B_out: 64
   tempStride1_B_out: 256
   spatialStride1_B_out: 8

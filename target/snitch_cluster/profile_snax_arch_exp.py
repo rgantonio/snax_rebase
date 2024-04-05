@@ -7,6 +7,7 @@
 import os
 import hjson
 import re
+import csv
 
 common_dir = {
     #// hardware configuration
@@ -37,7 +38,7 @@ def build_sw(sw_exp_name, wl_size):
             "DMAspatialStride1_A_in": 8,
             "tempStride0_A_in": 8,
             "tempStride1_A_in": 64 * wl_size["K"],
-            "spatialStride1_A_in": 16,
+            "spatialStride1_A_in": 8 * wl_size["K"],
             "tempStride0_A_out": 64,
             "tempStride1_A_out": 64 * wl_size["K"],
             "spatialStride1_A_out": 8,
@@ -51,7 +52,7 @@ def build_sw(sw_exp_name, wl_size):
             "DMAspatialStride1_B_in": 8,
             "tempStride0_B_in": 8,
             "tempStride1_B_in": 64 * wl_size["K"],
-            "spatialStride1_B_in": 16,
+            "spatialStride1_B_in": 8 * wl_size["K"],
             "tempStride0_B_out": 64,
             "tempStride1_B_out": 64 * wl_size["K"],
             "spatialStride1_B_out": 8,
@@ -150,11 +151,13 @@ def parse_traces(dr_core_id, dr_csr):
 
 def parse_results(sw_exp_name, parse_dr_results = False, parse_dr_idx = 1, parse_dr_csr = "unknown_3d2"):
     res_dir = {
+        "CSR_cycle":0,
         "GeMM_cycle": 0,
         "SIMD_cycle": 0,
         "DR_cycle": 0,  
         "SN_R_cycle": [],
     }
+
     # Parse the results
     res_file = f"sw/apps/{sw_exp_name}/build/res.txt"
     with open(res_file, 'r') as f:
@@ -168,6 +171,7 @@ def parse_results(sw_exp_name, parse_dr_results = False, parse_dr_idx = 1, parse
                 res_dir["SN_R_cycle"].append(re.findall(r'\d+', line))
             if "Reshuffle B cycles:" in line:
                 res_dir["SN_R_cycle"].append(re.findall(r'\d+', line))
+
     # Parse the DR results from traces (can not be parsed from the res.txt file)            
     if parse_dr_results:
         res_dir["DR_cycle"] = parse_traces(parse_dr_idx, parse_dr_csr)
@@ -199,19 +203,19 @@ def profile_wide_gemm_data_reshuffler():
 
     sw_exp_name = "snax-wide-gemm-data-reshuffler"
 
-    wl_size = { "M": 2, "N": 2, "K": 2 }
-    run_sw_exp(sw_exp_name, wl_size)
-    res_list.append(parse_results(sw_exp_name, parse_dr_results = True))
-    print(res_list)
+    # wl_size = { "M": 2, "N": 2, "K": 2 }
+    # run_sw_exp(sw_exp_name, wl_size)
+    # res_list.append(parse_results(sw_exp_name, parse_dr_results = True))
+    # print(res_list)
 
     # wl_size = { "M": 2, "N": 2, "K": 4 }
     # run_sw_exp(sw_exp_name, wl_size)
-    # res_list.append(parse_results(sw_exp_name, parse_dr_results = False))
+    # res_list.append(parse_results(sw_exp_name, parse_dr_results = True))
     # print(res_list)
 
-    # wl_size = { "M": 2, "N": 5, "K": 4 }
+    # wl_size = { "M": 2, "N": 3, "K": 1 }
     # run_sw_exp(sw_exp_name, wl_size)
-    # res_list.append(parse_results(sw_exp_name, parse_dr_results = False))
+    # res_list.append(parse_results(sw_exp_name, parse_dr_results = True))
     # print(res_list)
 
 def profile_streamer_gemm():
@@ -247,6 +251,24 @@ res_list = []
 # profile_streamer_gemm()
 # profile_wide_gemm_data_reshuffler()
 profile_wide_gemm_snitch_reshuffler()
+
+# Define the field names
+field_names = ['CSR_cycle', 'GeMM_cycle', 'SIMD_cycle', 'DR_cycle', 'SN_R_cycle']
+
+# Specify the CSV file path
+csv_file_path = 'data.csv'
+
+# Open the CSV file in write mode
+with open(csv_file_path, mode='w', newline='') as file:
+    # Create a CSV writer object
+    writer = csv.DictWriter(file, fieldnames=field_names)
+
+    # Write the header
+    writer.writeheader()
+
+    # Write each row of data
+    for row in res_list:
+        writer.writerow(row)
 
 # print(parse_traces(1, "unknown_3d2"))
 

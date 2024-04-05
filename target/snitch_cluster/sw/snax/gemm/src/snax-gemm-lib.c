@@ -179,7 +179,7 @@ void wait_batch_gemm() {
 }
 
 uint32_t check_result(int32_t* output, int32_t* output_golden, uint8_t Batch,
-                      uint8_t M, uint8_t N, uint32_t strideInnermostC,
+                      uint8_t N, uint8_t M, uint32_t strideInnermostC,
                       uint32_t ldC, uint32_t strideC) {
     /*
      * Compare output to output_golden with length
