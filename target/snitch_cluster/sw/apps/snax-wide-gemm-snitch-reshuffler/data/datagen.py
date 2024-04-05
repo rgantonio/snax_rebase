@@ -341,40 +341,13 @@ def emit_gemm_data(**kwargs):
         kwargs["spatial_len_1"],
         kwargs["tempStride0_B_in"],
         kwargs["tempStride1_B_in"],
-        kwargs["tempLoop1_B"] * 8,
         1,
+        kwargs["spatialStride1_B_in"],
         b
     )
+
     # Generating golden data
-    c_golden = gemm_golden_model(
-        kwargs["tempLoop1_A"],
-        kwargs["tempLoop0_A"],
-        kwargs["tempLoop1_B"],
-        kwargs["meshRow"],
-        kwargs["tileSize"],
-        kwargs["meshCol"],
-        a,
-        b,
-        subtraction_a,
-        subtraction_b
-    )
-
-    # permuting the golden data
-    c_golden_DR = data_reshuffler_golden_model(
-        kwargs["tempLoop0_C"],
-        kwargs["tempLoop1_C"],
-        kwargs["spatial_len_0"],
-        kwargs["spatial_len_1"],
-        8,
-        128,
-        1,
-        16,
-        c_golden
-    )
-
-    data_str += [format_vector_definition("int32_t", "C_golden_old", c_golden_DR)]
-
-    c_golden_DR = block_gemm_golden_model(
+    c_golden = block_gemm_golden_model(
         kwargs["tempLoop1_A"],
         kwargs["tempLoop0_A"],
         kwargs["tempLoop1_B"],
@@ -387,14 +360,14 @@ def emit_gemm_data(**kwargs):
         subtraction_b
     )
 
-    data_str += [format_scalar_definition("bool", "transpose_A", 0)]
-    data_str += [format_scalar_definition("bool", "transpose_B", 1)]
-    data_str += [format_scalar_definition("bool", "transpose_C", 0)]
+    data_str += [format_scalar_definition("bool", "transpose_A", kwargs["transpose_A"])]
+    data_str += [format_scalar_definition("bool", "transpose_B", kwargs["transpose_B"])]
+    data_str += [format_scalar_definition("bool", "transpose_C", kwargs["transpose_C"])]
 
     # Writing testing data and golden data into data.h
     data_str += [format_vector_definition("int8_t", "A", a)]
     data_str += [format_vector_definition("int8_t", "B", b)]
-    data_str += [format_vector_definition("int32_t", "C_golden", c_golden_DR)]
+    data_str += [format_vector_definition("int32_t", "C_golden", c_golden)]
     data_str += [format_vector_definition("int8_t", "A_data_layout_golden", A_data_layout_golden)]
     data_str += [format_vector_definition("int8_t", "B_data_layout_golden", B_data_layout_golden)]
 

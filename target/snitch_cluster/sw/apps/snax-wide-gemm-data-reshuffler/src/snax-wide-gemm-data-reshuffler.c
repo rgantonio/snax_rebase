@@ -40,7 +40,7 @@ int main() {
     // Wait for DMA to finish
     snrt_cluster_hw_barrier();
 
-    if (snrt_global_core_idx() == 0) {
+    if (snrt_global_core_idx() == 1) {
         uint32_t data_reshuffler_start = snrt_mcycle();
 
         // Set Streamer configuration CSR
@@ -48,22 +48,26 @@ int main() {
                         tempStride1_A_in, spatialStride1_A_in, tempStride0_A_out, tempStride1_A_out, spatialStride1_A_out, (int32_t)delta_local_A_in, (int32_t)delta_local_A_out, transpose_A);
 
         // Set CSR to start Streamer
-        start_data_reshuffler();
+        // start_data_reshuffler();
 
-        wait_data_reshuffler();
+        // wait_data_reshuffler();
 
-        uint32_t data_reshuffler_end = snrt_mcycle();
+        // uint32_t data_reshuffler_end = snrt_mcycle();
 
+        start_then_wait_data_reshuffler();
+
+        read_data_reshuffler_perf_counter();
+        // printf("Data Reshuffler cycles: %d \n", read_data_reshuffler_perf_counter());
         // Compare SNAX streamer-data-reshuffler result with golden python model
-        // err += check_data_reshuffler_result(tempLoop0_A, tempLoop1_A, tempStride0_A_out,
-        //                     tempStride1_A_out, spatialStride1_A_out, local_A_out, A_data_layout_golden);
+        err += check_data_reshuffler_result(tempLoop0_A, tempLoop1_A, tempStride0_A_out,
+                            tempStride1_A_out, spatialStride1_A_out, local_A_out, A_data_layout_golden);
         // printf("Data reshuffler on A finished. error: %d\n", err);
     };
 
     snrt_cluster_hw_barrier();
 
     err = 0;
-    if (snrt_global_core_idx() == 0) {
+    if (snrt_global_core_idx() == 1) {
         uint32_t data_reshuffler_start = snrt_mcycle();
 
         // Set Streamer configuration CSR
@@ -71,15 +75,18 @@ int main() {
                         tempStride1_B_in, spatialStride1_B_in, tempStride0_B_out, tempStride1_B_out, spatialStride1_B_out, (int32_t)delta_local_B_in, (int32_t)delta_local_B_out, transpose_B);
 
         // Set CSR to start Streamer
-        start_data_reshuffler();
+        // start_data_reshuffler();
 
-        wait_data_reshuffler();
+        // wait_data_reshuffler();
 
         uint32_t data_reshuffler_end = snrt_mcycle();
 
+        start_then_wait_data_reshuffler();
+
+        read_data_reshuffler_perf_counter();
         // Compare SNAX streamer-data-reshuffler result with golden python model
-        // err += check_data_reshuffler_result(tempLoop0_B, tempLoop1_B, tempStride0_B_out,
-        //                     tempStride1_B_out, spatialStride1_B_out, local_B_out, B_data_layout_golden);
+        err += check_data_reshuffler_result(tempLoop0_B, tempLoop1_B, tempStride0_B_out,
+                            tempStride1_B_out, spatialStride1_B_out, local_B_out, B_data_layout_golden);
         // printf("Data reshuffler on B finished. error: %d\n", err);
     };
     
@@ -90,7 +97,7 @@ int main() {
     local_C_out = (int32_t*)(snrt_l1_next() + delta_local_C_out);
 
     err = 0;
-    if (snrt_global_core_idx() == 1) {
+    if (snrt_global_core_idx() == 0) {
         uint32_t gemm_start = snrt_mcycle();
 
         // Set Streamer configuration CSR

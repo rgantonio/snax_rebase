@@ -1,34 +1,29 @@
-// Copyright 2024 KU Leuven.
-// Licensed under the Apache License, Version 2.0, see LICENSE for details.
-// SPDX-License-Identifier: Apache-2.0
-
-// Cluster configuration for a simple testbench system.
 {
-    Batch: 1
-    K: 2,
-    N: 2,
-    M: 2,
-    DMA_strideInnermostA: 64,
-    DMA_strideInnermostB: 64,
-    DMA_ldA: 128,
-    DMA_ldB: 128,
-    spatialA: 16,
-    spatialB: 16,
-    spatialC: 32,
-    strideInnermostA: 8,
-    strideInnermostB: 8,
-    strideInnermostC: 256,
-    strideHalfC: 0,
-    ldA: 128,
-    ldB: 128,
-    ldC: 1024,
-    strideA: 0,
-    strideB: 0,
-    strideC: 0,
-    tileSize: 8,
-    meshRow: 8,
-    meshCol: 8,
-    delta_local_a: 0,
-    delta_local_b: 1024,
-    delta_local_c: 4096
+  Batch: 1
+  K: 6
+  N: 5
+  M: 2
+  DMA_strideInnermostA: 64
+  DMA_strideInnermostB: 64
+  DMA_ldA: 384
+  DMA_ldB: 384
+  spatialA: 16
+  spatialB: 16
+  spatialC: 32
+  strideInnermostA: 8
+  strideInnermostB: 8
+  strideInnermostC: 256
+  strideHalfC: 0
+  ldA: 384
+  ldB: 384
+  ldC: 1280
+  strideA: 0
+  strideB: 0
+  strideC: 0
+  tileSize: 8
+  meshRow: 8
+  meshCol: 8
+  delta_local_a: 0
+  delta_local_b: 768
+  delta_local_c: 2688
 }

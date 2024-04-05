@@ -177,16 +177,16 @@ def profile_wide_gemm_snitch_reshuffler():
     sw_exp_name = "snax-wide-gemm-snitch-reshuffler"
     arch_name = "snax-wide-gemm"
 
-    wl_size = { "M": 2, "N": 2, "K": 2 }
-    build_hw(arch_name)
-    run_sw_exp(sw_exp_name, wl_size)
-    res_list.append(parse_results(sw_exp_name, parse_dr_results = False))
-    print(res_list)
+    # wl_size = { "M": 2, "N": 2, "K": 2 }
+    # build_hw(arch_name)
+    # run_sw_exp(sw_exp_name, wl_size)
+    # res_list.append(parse_results(sw_exp_name, parse_dr_results = False))
+    # print(res_list)
 
-    wl_size = { "M": 2, "N": 2, "K": 4 }
-    run_sw_exp(sw_exp_name, wl_size)
-    res_list.append(parse_results(sw_exp_name, parse_dr_results = False))
-    print(res_list)
+    # wl_size = { "M": 2, "N": 2, "K": 4 }
+    # run_sw_exp(sw_exp_name, wl_size)
+    # res_list.append(parse_results(sw_exp_name, parse_dr_results = False))
+    # print(res_list)
 
     wl_size = { "M": 2, "N": 5, "K": 4 }
     run_sw_exp(sw_exp_name, wl_size)

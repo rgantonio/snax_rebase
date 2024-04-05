@@ -61,14 +61,15 @@ int main() {
         start_gemm_then_wait_streamer_gemm();
 
         uint32_t gemm_streamer_perf_counter = read_gemm_streamer_perf_counter();
-        printf("streamer perf counter: %d \n", gemm_streamer_perf_counter);
+        printf("GEMM Streamer cycles: %d \n", gemm_streamer_perf_counter);
 
         uint32_t gemm_perf_counter = read_gemm_perf_counter();
-        printf("gemm perf counter: %d \n", gemm_perf_counter);
+        printf("GEMM cycles: %d \n", gemm_perf_counter);
 
         // Compare SNAX GEMM result with golden model
         err += check_result(local_c, C_golden, Batch, M, N, strideInnermostC,
                             ldC, strideC);
+        printf("GEMM on A and B finished. error: %d\n", err);
     };
 
     return err;
