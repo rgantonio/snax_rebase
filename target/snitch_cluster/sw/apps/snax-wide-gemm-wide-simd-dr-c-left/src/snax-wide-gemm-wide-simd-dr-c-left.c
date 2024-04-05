@@ -186,38 +186,6 @@ int main() {
     snrt_cluster_hw_barrier();
 
     /****************************************************************************
-    * Perform data reshuffling for post-processed C
-    ****************************************************************************/
-
-    // Perform data reshuffling for C using data reshuffler core
-    // From tiledrowmajor to tiledcolmajor
-    if (snrt_global_core_idx() == 2) {
-
-        // Set data reshuffler configuration CSR
-        set_data_reshuffler_csr(tempLoop0_C, tempLoop1_C, tempStride0_C_in,
-                        tempStride1_C_in, spatialStride1_C_in, tempStride0_C_out, tempStride1_C_out, spatialStride1_C_out, (int32_t)delta_local_C_out, (int32_t)delta_local_C_in, transpose_C);
-
-        uint32_t data_reshuffler_start = snrt_mcycle();
-
-        // Set CSR to start data reshuffler
-        start_data_reshuffler();
-
-        // Wait for data-reshuffler to finish
-        wait_data_reshuffler();
-
-        uint32_t data_reshuffler_end = snrt_mcycle();
-        err += check_data_reshuffler_result(tempLoop0_C, tempLoop1_C, tempStride0_C_out,
-                            tempStride1_C_out, spatialStride1_C_out, (int8_t *)local_C_in, C_data_layout_golden);
-        // printf("Data reshuffling for post-processed C finished. error: %d\n", err);
-    };
-
-    snrt_cluster_hw_barrier();
-    if (snrt_global_core_idx() == 0) {
-        printf("Data reshuffling for post-processed C finished. error: %d\n", err);
-    }
-    snrt_cluster_hw_barrier();
-
-    /****************************************************************************
     * Move D data from L3 to L1 and perform data reshuffling for D
     ****************************************************************************/
 
@@ -258,8 +226,13 @@ int main() {
 
     snrt_cluster_hw_barrier();
 
+    if (snrt_global_core_idx() == 0) {
+        printf("Data reshuffling for D finished. error: %d\n", err);
+    }
+    snrt_cluster_hw_barrier();
+
     /****************************************************************************
-    * Perform GEMM on D and C using GEMM core, E = D * C, int8 -> int32
+    * Perform GEMM on C and D using GEMM core, E = C * D, int8 -> int32
     ****************************************************************************/
 
     int32_t *local_E_in;
@@ -268,16 +241,16 @@ int main() {
     if (snrt_global_core_idx() == 0) {
 
         // Set Streamer configuration CSR
-        set_streamer_csr(tempLoop0_D, tempLoop1_C, tempLoop1_D, tempStride0_D_out, tempStride1_D_out, spatialStride1_D_out, tempStride0_C_out, tempStride1_C_out, spatialStride1_C_out,
-                         tempStride0_GEMM_E_out, tempStride1_GEMM_E_out, spatialStride1_GEMM_E_out, delta_local_D_out, delta_local_C_in,
+        set_streamer_csr(tempLoop0_C, tempLoop1_D, tempLoop1_C, tempStride0_C_out, tempStride1_C_out, spatialStride1_C_out, tempStride0_D_out, tempStride1_D_out, spatialStride1_D_out,
+                         tempStride0_GEMM_E_out, tempStride1_GEMM_E_out, spatialStride1_GEMM_E_out, delta_local_C_out, delta_local_D_out,
                          delta_local_E_in);
 
         // Set GEMM configuration CSR
         uint32_t subtraction_setting =
-            gen_subtraction_config(subtraction_d, subtraction_c);
+            gen_subtraction_config(subtraction_c, subtraction_d);
 
         // Set GEMM configuration CSR
-        set_block_gemm_csr(tempLoop0_D, tempLoop1_C, tempLoop1_D, subtraction_setting);
+        set_block_gemm_csr(tempLoop0_C, tempLoop1_D, tempLoop1_C, subtraction_setting);
 
         uint32_t gemm_start = snrt_mcycle();
 
@@ -296,7 +269,7 @@ int main() {
         // Compare SNAX GEMM result with golden model
         err += check_result(local_E_in, E_golden, Batch, tempLoop1_C, tempLoop1_D, tempStride0_GEMM_E_out,
                             tempStride1_GEMM_E_out, strideC);
-        printf("GEMM on D and C finished. error: %d\n", err);
+        printf("GEMM on C and D finished. error: %d\n", err);
         printf("GEMM cycle is %d \n", gemm_cycle);
     };
 
