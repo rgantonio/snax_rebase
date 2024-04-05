@@ -169,6 +169,23 @@ ifeq (${CFG_OVERRIDE}, cfg/snax-narrow-gemm-narrow-simd-data-reshuffler.hjson)
 
 endif
 
+ifeq (${CFG_OVERRIDE}, cfg/snax-wide-gemm-data-reshuffler.hjson)
+	SNAX_DEV_ROOT ?= $(shell $(BENDER) path snax-streamer-gemm-dev)
+	include $(SNAX_DEV_ROOT)/Makefile
+
+	VSIM_BENDER += -t snax-streamer-gemm-dev
+	VLT_BENDER  += -t snax-streamer-gemm-dev
+	VCS_BENDER  += -t snax-streamer-gemm-dev
+
+	SNAX_DEV_ROOT ?= $(shell $(BENDER) path snax-data-reshuffler-dev)
+	include $(SNAX_DEV_ROOT)/Makefile
+
+	VSIM_BENDER += -t snax-data-reshuffler-dev
+	VLT_BENDER  += -t snax-data-reshuffler-dev
+	VCS_BENDER  += -t snax-data-reshuffler-dev
+
+endif
+
 ############
 # Programs #
 ############
