@@ -47,9 +47,10 @@ int main() {
     /****************************************************************************
     * Perform GEMM on A and B using GEMM core, C = A * B, int8 -> int32
     ****************************************************************************/
-    int32_t* local_C_in, *local_C_out;
+    int32_t* local_C_in, *local_C_out, *local_GEMM_C_out;
     local_C_in = (int32_t*)(snrt_l1_next() + delta_local_C_in);
     local_C_out = (int32_t*)(snrt_l1_next() + delta_local_C_out);
+    local_GEMM_C_out = (int32_t*)(snrt_l1_next() + delta_local_GEMM_C_out);
 
     // Perform GEMM on A and B using GEMM core
     if (snrt_global_core_idx() == 0) {
@@ -57,7 +58,7 @@ int main() {
         // Set Streamer configuration CSR
         set_streamer_csr(tempLoop0_A, tempLoop1_B, tempLoop1_A, tempStride0_A_in, tempStride1_A_in, spatialStride1_A_in, tempStride0_B_in, tempStride1_B_in, spatialStride1_B_in,
                          tempStride0_GEMM_C_out, tempStride1_GEMM_C_out, spatialStride1_GEMM_C_out, delta_local_A_in, delta_local_B_in,
-                         delta_local_C_in);
+                         delta_local_GEMM_C_out);
 
         // Set GEMM configuration CSR
         uint32_t subtraction_setting =
@@ -81,11 +82,11 @@ int main() {
 
         uint32_t gemm_cycle = read_gemm_perf_counter();
         // Compare SNAX GEMM result with golden model
-        err += check_result(local_C_in, C_golden_GEMM, Batch, tempLoop1_B, tempLoop1_A, tempStride0_GEMM_C_out,
+        err += check_result(local_GEMM_C_out, C_golden_GEMM, Batch, tempLoop1_B, tempLoop1_A, tempStride0_GEMM_C_out,
                             tempStride1_GEMM_C_out, strideC);
         
         printf("GEMM on A and B finished. error: %d\n", err);
-        printf("GEMM cycle is %d \n", gemm_cycle);
+        printf("GEMM cycles: %d \n", gemm_cycle);
     };
 
     snrt_cluster_hw_barrier();
@@ -101,8 +102,7 @@ int main() {
 
         // Set Streamer configuration CSR
         set_streamer_simd_csr(tempLoop0_C, tempLoop1_C, tempStride0_GEMM_C_out,
-                        tempStride1_GEMM_C_out, DMAtempStride0_C_in, DMAtempStride1_C_in, (int32_t)delta_local_C_in, (int32_t)delta_local_C_out);
-
+                        tempStride1_GEMM_C_out, DMAtempStride0_C_in, DMAtempStride1_C_in, (int32_t)delta_local_GEMM_C_out, (int32_t)delta_local_C_in);
 
         // Set simd configuration CSR
         uint32_t csr0 =
@@ -129,9 +129,9 @@ int main() {
 
         // Compare SNAX streamer-simd result with golden python model
         err += check_simd_result(tempLoop0_C, tempLoop1_C, DMAtempStride0_C_in,
-                            DMAtempStride1_C_in, (int8_t *)local_C_out, C_golden_SIMD);
+                           DMAtempStride1_C_in, (int8_t *)local_C_in, C_golden_SIMD);
         printf("Post-processing for GEMM'S output data C finished. error: %d\n", err);
-        printf("simd cycle is %d \n", simd_cycle);
+        printf("SIMD cycles: %d \n", simd_cycle);
     }
 
     // Wait for DMA to finish
@@ -146,8 +146,8 @@ int main() {
     if (snrt_global_core_idx() == 2) {
 
         // Set data reshuffler configuration CSR
-        set_data_reshuffler_csr(tempLoop0_C, tempLoop1_C, tempStride0_C_in,
-                        tempStride1_C_in, spatialStride1_C_in, tempStride0_C_out, tempStride1_C_out, spatialStride1_C_out, (int32_t)delta_local_C_out, (int32_t)delta_local_C_in, transpose_C);
+        set_data_reshuffler_csr(tempLoop1_C, tempLoop0_C, tempStride0_C_in,
+                        tempStride1_C_in, spatialStride1_C_in, tempStride0_C_out, tempStride1_C_out, spatialStride1_C_out, (int32_t)delta_local_C_in, (int32_t)delta_local_C_out, transpose_C);
 
         uint32_t data_reshuffler_start = snrt_mcycle();
 
@@ -158,8 +158,8 @@ int main() {
         wait_data_reshuffler();
 
         uint32_t data_reshuffler_end = snrt_mcycle();
-        err += check_data_reshuffler_result(tempLoop0_C, tempLoop1_C, tempStride0_C_out,
-                            tempStride1_C_out, spatialStride1_C_out, (int8_t *)local_C_in, C_data_layout_golden);
+        err += check_data_reshuffler_result(tempLoop1_C, tempLoop0_C, tempStride0_C_out,
+                            tempStride1_C_out, spatialStride1_C_out, (int8_t *)local_C_out, C_data_layout_golden);
         // printf("Data reshuffling for post-processed C finished. error: %d\n", err);
     };
 
@@ -197,8 +197,8 @@ int main() {
     if (snrt_global_core_idx() == 0) {
 
         // Set Streamer configuration CSR
-        set_streamer_csr(tempLoop0_D, tempLoop1_C, tempLoop1_D, tempStride0_D_in, tempStride1_D_in, spatialStride1_D_in, tempStride0_C_out, tempStride1_C_out, spatialStride1_C_out,
-                         tempStride0_GEMM_E_out, tempStride1_GEMM_E_out, spatialStride1_GEMM_E_out, delta_local_D_in, delta_local_C_in,
+        set_streamer_csr(tempLoop1_C, tempLoop0_C, tempLoop1_D, tempStride0_D_in, tempStride1_D_in, spatialStride1_D_in, tempStride0_C_out, tempStride1_C_out, spatialStride1_C_out,
+                         tempStride0_GEMM_E_out, tempStride1_GEMM_E_out, spatialStride1_GEMM_E_out, delta_local_D_in, delta_local_C_out,
                          delta_local_E_in);
 
         // Set GEMM configuration CSR
@@ -206,7 +206,7 @@ int main() {
             gen_subtraction_config(subtraction_d, subtraction_c);
 
         // Set GEMM configuration CSR
-        set_block_gemm_csr(tempLoop0_D, tempLoop1_C, tempLoop1_D, subtraction_setting);
+        set_block_gemm_csr(tempLoop1_C, tempLoop0_C, tempLoop1_D, subtraction_setting);
 
         uint32_t gemm_start = snrt_mcycle();
 
@@ -223,10 +223,10 @@ int main() {
         uint32_t gemm_cycle = read_gemm_perf_counter();
 
         // Compare SNAX GEMM result with golden model
-        err += check_result(local_E_in, E_golden, Batch, tempLoop1_C, tempLoop1_D, tempStride0_GEMM_E_out,
+        err += check_result(local_E_in, E_golden, Batch, tempLoop0_C, tempLoop1_D, tempStride0_GEMM_E_out,
                             tempStride1_GEMM_E_out, strideC);
         printf("GEMM on D and C finished. error: %d\n", err);
-        printf("GEMM cycle is %d \n", gemm_cycle);
+        printf("GEMM cycles: %d \n", gemm_cycle);
     };
 
     return err;

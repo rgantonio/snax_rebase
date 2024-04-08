@@ -43,6 +43,8 @@ int main() {
     // Set err value for checking
     int err = 0;
 
+    int repeat_times = 2;
+    
     // Prepare addresses in TCDM
     int8_t *local_A_in, *local_A_out, *local_B_in, *local_B_out;
 
@@ -68,7 +70,7 @@ int main() {
 
     if (snrt_global_core_idx() == 0) {
 
-        for (int i = 0; i < 10; i++){
+        for (int i = 0; i < repeat_times; i++){
             uint32_t data_reshuffler_start = snrt_mcycle();
 
             // Set Streamer configuration CSR
@@ -86,7 +88,7 @@ int main() {
 
     err = 0;
     if (snrt_global_core_idx() == 0) {
-        for (int i = 0; i < 10; i++){
+        for (int i = 0; i < repeat_times; i++){
             uint32_t data_reshuffler_start = snrt_mcycle();
 
             // Set Streamer configuration CSR
@@ -136,12 +138,12 @@ int main() {
         uint32_t gemm_cycle = read_gemm_perf_counter();
         printf("GEMM cycles: %d \n", gemm_cycle);
 
-        
-        printf("GEMM on A and B finished. error: %d\n", err);
-
         // Compare SNAX GEMM result with golden model
         err += check_result(local_C_in, C_golden, Batch, tempLoop1_B, tempLoop1_A, DMAtempStride0_C_in,
                             DMAtempStride1_C_in, strideC);
+
+        printf("GEMM on A and B finished. error: %d\n", err);
+
     };
 
     // snrt_cluster_hw_barrier();

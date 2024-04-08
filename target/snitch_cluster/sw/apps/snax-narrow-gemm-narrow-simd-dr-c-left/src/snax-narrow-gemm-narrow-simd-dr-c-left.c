@@ -85,7 +85,7 @@ int main() {
                             tempStride1_GEMM_C_out, strideC);
         
         printf("GEMM on A and B finished. error: %d\n", err);
-        printf("GEMM cycle is %d \n", gemm_cycle);
+        printf("GEMM cycles: %d \n", gemm_cycle);
     };
 
     snrt_cluster_hw_barrier();
@@ -101,7 +101,7 @@ int main() {
 
         // Set Streamer configuration CSR
         set_streamer_simd_csr(tempLoop0_C, tempLoop1_C, tempStride0_GEMM_C_out,
-                        tempStride1_GEMM_C_out, DMAtempStride0_C_in, DMAtempStride1_C_in, (int32_t)delta_local_C_in, (int32_t)delta_local_C_out);
+                        tempStride1_GEMM_C_out, tempStride0_C_in, tempStride1_C_in, (int32_t)delta_local_C_in, (int32_t)delta_local_C_out);
 
 
         // Set simd configuration CSR
@@ -128,10 +128,10 @@ int main() {
         uint32_t simd_cycle = read_simd_perf_counter();
 
         // Compare SNAX streamer-simd result with golden python model
-        err += check_simd_result(tempLoop0_C, tempLoop1_C, DMAtempStride0_C_in,
-                            DMAtempStride1_C_in, (int8_t *)local_C_out, C_golden_SIMD);
+        err += check_simd_result(tempLoop0_C, tempLoop1_C, tempStride0_C_in,
+                            tempStride1_C_in, (int8_t *)local_C_out, C_golden_SIMD);
         printf("Post-processing for GEMM'S output data C finished. error: %d\n", err);
-        printf("simd cycle is %d \n", simd_cycle);
+        printf("SIMD cycles: %d \n", simd_cycle);
     }
 
     // Wait for DMA to finish
@@ -156,7 +156,7 @@ int main() {
     snrt_cluster_hw_barrier();
 
     /****************************************************************************
-    * Perform GEMM on D and C using GEMM core, E = C * D, int8 -> int32
+    * Perform GEMM on C and D using GEMM core, E = C * D, int8 -> int32
     ****************************************************************************/
 
     int32_t *local_E_in;
@@ -191,10 +191,10 @@ int main() {
         uint32_t gemm_cycle = read_gemm_perf_counter();
 
         // Compare SNAX GEMM result with golden model
-        err += check_result(local_E_in, E_golden, Batch, tempLoop1_C, tempLoop1_D, tempStride0_GEMM_E_out,
+        err += check_result(local_E_in, E_golden, Batch, tempLoop1_D, tempLoop1_C, tempStride0_GEMM_E_out,
                             tempStride1_GEMM_E_out, strideC);
         printf("GEMM on C and D finished. error: %d\n", err);
-        printf("GEMM cycle is %d \n", gemm_cycle);
+        printf("GEMM cycles: %d \n", gemm_cycle);
     };
 
     return err;

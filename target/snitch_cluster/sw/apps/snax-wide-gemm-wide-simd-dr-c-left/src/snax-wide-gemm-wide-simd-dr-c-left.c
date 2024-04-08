@@ -64,10 +64,15 @@ int main() {
         uint32_t dr_cycle = read_data_reshuffler_perf_counter();
         // printf("data reshuffler cycle for A is %d \n", data_reshuffler_end - data_reshuffler_start);
         // printf("data reshuffler cycle for A is %d \n", dr_cycle);
-
+        err += check_data_reshuffler_result(tempLoop0_A, tempLoop1_A, tempStride0_A_out,
+                            tempStride1_A_out, spatialStride1_A_out, local_A_out, A_data_layout_golden);
 
     };
 
+    snrt_cluster_hw_barrier();
+    if (snrt_global_core_idx() == 0) {
+        printf("Data reshuffling for A finished. error: %d\n", err);
+    }                           
     snrt_cluster_hw_barrier();
 
     // Perform data reshuffling for B using data reshuffler core
@@ -88,8 +93,14 @@ int main() {
         uint32_t data_reshuffler_end = snrt_mcycle();
         uint32_t dr_cycle = read_data_reshuffler_perf_counter();
         // printf("data reshuffler cycle for B is %d \n", dr_cycle);
+        err += check_data_reshuffler_result(tempLoop0_B, tempLoop1_B, tempStride0_B_out,
+                            tempStride1_B_out, spatialStride1_B_out, local_B_out, B_data_layout_golden);
     };
 
+    snrt_cluster_hw_barrier();
+    if (snrt_global_core_idx() == 0) {
+        printf("Data reshuffling for B finished. error: %d\n", err);
+    }
     snrt_cluster_hw_barrier();
 
     /****************************************************************************
@@ -133,7 +144,7 @@ int main() {
                             tempStride1_GEMM_C_out, strideC);
         
         printf("GEMM on A and B finished. error: %d\n", err);
-        printf("GEMM cycle is %d \n", gemm_cycle);
+        printf("GEMM cycles: %d \n", gemm_cycle);
     };
 
     snrt_cluster_hw_barrier();
@@ -179,7 +190,7 @@ int main() {
         err += check_simd_result(tempLoop0_C, tempLoop1_C, DMAtempStride0_C_in,
                             DMAtempStride1_C_in, (int8_t *)local_C_out, C_golden_SIMD);
         printf("Post-processing for GEMM'S output data C finished. error: %d\n", err);
-        printf("simd cycle is %d \n", simd_cycle);
+        printf("SIMD cycles: %d \n", simd_cycle);
     }
 
     // Wait for DMA to finish
@@ -218,6 +229,7 @@ int main() {
         wait_data_reshuffler();
 
         uint32_t data_reshuffler_end = snrt_mcycle();
+        uint32_t dr_cycle = read_data_reshuffler_perf_counter();
         err += check_data_reshuffler_result(tempLoop0_D, tempLoop1_D, tempStride0_D_out,
                             tempStride1_D_out, spatialStride1_D_out, local_D_out, D_data_layout_golden);
         // printf("Data reshuffling for D finished. error: %d\n", err);
@@ -267,10 +279,10 @@ int main() {
         uint32_t gemm_cycle = read_gemm_perf_counter();
 
         // Compare SNAX GEMM result with golden model
-        err += check_result(local_E_in, E_golden, Batch, tempLoop1_C, tempLoop1_D, tempStride0_GEMM_E_out,
+        err += check_result(local_E_in, E_golden, Batch, tempLoop1_D, tempLoop1_C, tempStride0_GEMM_E_out,
                             tempStride1_GEMM_E_out, strideC);
         printf("GEMM on C and D finished. error: %d\n", err);
-        printf("GEMM cycle is %d \n", gemm_cycle);
+        printf("GEMM cycles: %d \n", gemm_cycle);
     };
 
     return err;

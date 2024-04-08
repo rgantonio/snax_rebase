@@ -314,7 +314,12 @@ def emit_gemm_data(**kwargs):
             "int32_t", "spatialStride1_GEMM_C_out", kwargs["spatialStride1_GEMM_C_out"]
         )
     ]
-    
+    data_str += [
+        format_scalar_definition(
+            "int32_t", "delta_local_GEMM_C_out", kwargs["delta_local_GEMM_C_out"]
+        )
+    ]
+
     data_str += [format_scalar_definition("int32_t", "delta_local_C_in", kwargs["delta_local_C_in"])]
 
     # Generating random 8 integer a and b for subtraction
@@ -362,8 +367,8 @@ def emit_gemm_data(**kwargs):
         kwargs["spatial_len_1"],
         kwargs["tempStride0_B_in"],
         kwargs["tempStride1_B_in"],
-        kwargs["tempLoop1_B"] * 8,
         1,
+        kwargs["spatialStride1_B_in"],
         b
     )
     # Generating golden C data using block GEMM
@@ -382,9 +387,12 @@ def emit_gemm_data(**kwargs):
 
     data_str += [format_vector_definition("int32_t", "C_golden_GEMM", c_golden_mm)]
 
-    data_str += [format_scalar_definition("bool", "transpose_A", 0)]
-    data_str += [format_scalar_definition("bool", "transpose_B", 1)]
 
+    data_str += [format_scalar_definition("bool", "transpose_A", kwargs["transpose_A"])]
+    data_str += [format_scalar_definition("bool", "transpose_B", kwargs["transpose_B"])]
+
+    data_str += [format_vector_definition("int8_t", "A_data_layout_golden", A_data_layout_golden)]
+    data_str += [format_vector_definition("int8_t", "B_data_layout_golden", B_data_layout_golden)]
 
     # Writing testing data and golden data into data.h
     data_str += [format_vector_definition("int8_t", "A", a)]
@@ -504,11 +512,11 @@ def emit_gemm_data(**kwargs):
             "int32_t", "spatialStride1_C_out", kwargs["spatialStride1_C_out"]
         )
     ] 
-    data_str += [format_scalar_definition("bool", "transpose_C", 1)]
+    data_str += [format_scalar_definition("bool", "transpose_C", kwargs["transpose_C"])]
 
     C_data_layout_golden = data_reshuffler_golden_model(
-        kwargs["tempLoop0_C"],
         kwargs["tempLoop1_C"],
+        kwargs["tempLoop0_C"],
         kwargs["spatial_len_0"],
         kwargs["spatial_len_1"],
         kwargs["tempStride0_C_in"],
@@ -598,7 +606,7 @@ def emit_gemm_data(**kwargs):
     )
 
     data_str += [format_vector_definition("int8_t", "D", d)]
-    data_str += [format_scalar_definition("bool", "transpose_D", 0)]
+    data_str += [format_scalar_definition("bool", "transpose_D", kwargs["transpose_D"])]
 
     # strides setting for E, two temp strides and one base address
     data_str += [format_scalar_definition("int32_t", "tempStride0_GEMM_E_out", kwargs["tempStride0_GEMM_E_out"])]
@@ -627,10 +635,13 @@ def emit_gemm_data(**kwargs):
     E = D * C!
     '''
 
+    assert kwargs["tempLoop0_D"] == kwargs["tempLoop1_C"]
+    assert kwargs["tempLoop0_A"] == kwargs["tempLoop0_B"]
+
     e_golden = block_gemm_golden_model(
         kwargs["tempLoop1_D"],
         kwargs["tempLoop0_D"],
-        kwargs["tempLoop1_C"],
+        kwargs["tempLoop0_C"],
         kwargs["meshRow"],
         kwargs["tileSize"],
         kwargs["meshCol"],
