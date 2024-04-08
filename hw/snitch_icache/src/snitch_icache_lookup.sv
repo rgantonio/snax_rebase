@@ -193,8 +193,40 @@ module snitch_icache_lookup #(
         );
     end
     `else
-        `TC_SRAM_IMPL_TAG(CFG.LINE_COUNT, CFG.TAG_WIDTH+2)
-        `TC_SRAM_IMPL_CACHE(CFG.LINE_COUNT, CFG.LINE_WIDTH)
+        // `include "mem_def/mem_def.svh"
+        //`TC_SRAM_IMPL(128, 128, S)
+        TS1N16FFCLLSBLVTD128X128M4SW i_cache_mem_0(
+                    .CLK    (clk_i),
+                    .CEB    (~ram_enable[i][(CFG.LINE_WIDTH)-1:(CFG.LINE_WIDTH)/2]),
+                    .WEB    (~ram_write),
+                    .A      (ram_addr),
+                    .D      (ram_wdata[(CFG.LINE_WIDTH)-1:(CFG.LINE_WIDTH)/2]),
+                    .BWEB   ('0),
+                    .RTSEL  (2'b01),
+                    .WTSEL  (2'b01),
+                    .Q      (ram_rdata[i][(CFG.LINE_WIDTH)-1:(CFG.LINE_WIDTH)/2]));
+        //`TC_SRAM_IMPL(128, 128, S)
+        TS1N16FFCLLSBLVTD128X128M4SW i_cache_mem_1(
+                    .CLK    (clk_i),
+                    .CEB    (~ram_enable[i][(CFG.LINE_WIDTH)/2-1:0]),
+                    .WEB    (~ram_write),
+                    .A      (ram_addr),
+                    .D      (ram_wdata[(CFG.LINE_WIDTH)/2-1:0]),
+                    .BWEB   ('0),
+                    .RTSEL  (2'b01),
+                    .WTSEL  (2'b01),
+                    .Q  (ram_rdata[i][(CFG.LINE_WIDTH)/2-1:0]));
+        //`TC_SRAM_IMPL(1056, 39, S)
+        TS1N16FFCLLSBLVTD128X39M4SW i_tag_mem(
+                    .CLK(clk_i),
+                    .CEB(~ram_enable[i]),
+                    .WEB(~ram_write),
+                    .A(ram_addr),
+                    .D(ram_wtag),
+                    .BWEB('0),
+                    .RTSEL(2'b01),
+                    .WTSEL(2'b01),
+                    .Q(ram_rtag[i]));
     `endif
 
     // Determine which RAM line hit, and multiplex that data to the output.
