@@ -18,10 +18,6 @@
 
 `include "snitch_vm/typedef.svh"
 
-`ifdef TARGET_SYNTHESIS
-`include "mem_def/mem_def.svh"
-`endif
-
 /// Snitch many-core cluster with improved TCDM interconnect.
 /// Snitch Cluster Top-Level.
 module snitch_cluster
@@ -846,9 +842,20 @@ module snitch_cluster
           end
         end
         // tech memory macro "M" Means Multi-Bank
-        `TC_SRAM_IMPL ("i_data_mem", "M", TCDMDepth, NarrowDataWidth)
         // tech memory macro "S" Means Single-Bank
-        // `TC_SRAM_IMPL ("i_data_mem", "S", TCDMDepth, NarrowDataWidth)
+
+        //`include "mem_def/mem_def.svh"
+        //`TC_SRAM_IMPL (S, TCDMDepth, NarrowDataWidth)
+         TS1N16FFCLLSBLVTD512X64M4SW i_data_mem(
+                              .CLK(clk_i),
+                              .CEB(~mem_cs),
+                              .WEB(~mem_wen),
+                              .A(mem_add[$clog2(TCDMDepth)-1:0]),
+                              .D(mem_wdata),
+                              .BWEB(~bit_en),
+                              .RTSEL(2'b01),
+                              .WTSEL(2'b01),
+                              .Q(mem_rdata));
       `endif
 
       data_t amo_rdata_local;
