@@ -191,13 +191,13 @@ module snitch_icache_lookup #(
           .be_i ('1),
           .rdata_o (ram_rdata[i])
         );
-    end
+
     `else
         // `include "mem_def/mem_def.svh"
         //`TC_SRAM_IMPL(128, 128, S)
         TS1N16FFCLLSBLVTD128X128M4SW i_cache_mem_0(
                     .CLK    (clk_i),
-                    .CEB    (~ram_enable[i][(CFG.LINE_WIDTH)-1:(CFG.LINE_WIDTH)/2]),
+                    .CEB    (~ram_enable[i]),
                     .WEB    (~ram_write),
                     .A      (ram_addr),
                     .D      (ram_wdata[(CFG.LINE_WIDTH)-1:(CFG.LINE_WIDTH)/2]),
@@ -208,7 +208,7 @@ module snitch_icache_lookup #(
         //`TC_SRAM_IMPL(128, 128, S)
         TS1N16FFCLLSBLVTD128X128M4SW i_cache_mem_1(
                     .CLK    (clk_i),
-                    .CEB    (~ram_enable[i][(CFG.LINE_WIDTH)/2-1:0]),
+                    .CEB    (~ram_enable[i]),
                     .WEB    (~ram_write),
                     .A      (ram_addr),
                     .D      (ram_wdata[(CFG.LINE_WIDTH)/2-1:0]),
@@ -228,7 +228,7 @@ module snitch_icache_lookup #(
                     .WTSEL(2'b01),
                     .Q(ram_rtag[i]));
     `endif
-
+    end
     // Determine which RAM line hit, and multiplex that data to the output.
     logic [CFG.TAG_WIDTH-1:0] required_tag;
     logic [CFG.SET_COUNT-1:0] line_hit;
