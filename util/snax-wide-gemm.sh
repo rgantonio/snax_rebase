@@ -10,8 +10,16 @@
 # Automagic Bash      #
 #######################
 
-#[[TODO]] - turn it a makefile
 
 export TARGET_ROOT=$HOME
 export PROJECT=snitch_cluster
-export CFG=snax-gemm
+export CFG=snax-wide-gemm
+
+cd /repo
+bender script synopsys -t synthesis -t $PROJECT -t snax-streamer-gemm-dev > syn_flist.tcl
+bender script vsim -t $PROJECT -t snax-streamer-gemm-dev -t test -t gate -t simulation > vsim_flist.tcl
+
+python3 util/clustergen.py -c target/$PROJECT/cfg/$CFG.hjson -o target/$PROJECT/generated --wrapper --mem
+
+
+
