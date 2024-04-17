@@ -13,13 +13,11 @@
 
 export TARGET_ROOT=$HOME
 export PROJECT=snitch_cluster
-export CFG=snax-wide-gemm-data-reshuffler
+export CFG=snax-narrow-gemm-narrow-simd-data-reshuffler
 
 cd /repo
-bender script synopsys -t synthesis -t $PROJECT -t snax-streamer-gemm-dev -t snax-data-reshuffler-dev > syn_flist.tcl
-bender script vsim -t $PROJECT -t snax-streamer-gemm-dev -t snax-data-reshuffler-dev -t test -t gate -t simulation > vsim_flist.tcl
+bender script synopsys -t synthesis -t $PROJECT -t snax-streamer-gemm-dev -t snax-data-reshuffler-dev -t snax-streamer-simd-dev > syn_flist.tcl
+bender script vsim -t $PROJECT -t snax-streamer-gemm-dev -t snax-data-reshuffler-dev -t snax-streamer-simd-dev -t test -t gate -t simulation > vsim_flist.tcl
 
 python3 util/clustergen.py -c target/$PROJECT/cfg/$CFG.hjson -o target/$PROJECT/generated --wrapper --mem
-
-
 
