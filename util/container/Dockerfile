@@ -29,8 +29,9 @@ RUN cargo install bender --version 0.27.1
 # Install Verilator
 RUN apt-get install -y verilator
 
-# Install LLVM 17
-RUN  wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 17 && rm llvm.sh
+# Install LLVM 17 + MLIR
+RUN wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 17 && rm llvm.sh
+RUN apt-get -y install mlir-17-tools
 
 # Install the Chisel Environment
 RUN apt-get update && \
