@@ -30,8 +30,8 @@ RUN cargo install bender --version 0.27.1
 # Install Verilator
 RUN apt-get install -y \
     git help2man perl make autoconf g++ flex bison ccache \
-    libgoogle-perftools-dev numactl perl-doc \
-    libfl2 libfl-dev zlibc zlib1g zlib1g-dev
+    libgoogle-perftools-dev numactl perl-doc
+RUN apt-get install -y libfl2 libfl-dev zlibc zlib1g zlib1g-dev || true
 RUN git clone https://github.com/verilator/verilator && \
     cd verilator && \
     git checkout stable && \
