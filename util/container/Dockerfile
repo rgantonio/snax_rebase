@@ -4,6 +4,7 @@ FROM ubuntu:22.04 AS builder
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y \
         build-essential \
+        device-tree-compiler \
         curl \
         git \
         gnupg2 \
@@ -27,7 +28,21 @@ RUN rustup override set 1.76.0
 RUN cargo install bender --version 0.27.1
 
 # Install Verilator
-RUN apt-get install -y verilator
+RUN apt-get install -y \
+    git help2man perl make autoconf g++ flex bison ccache \
+    libgoogle-perftools-dev numactl perl-doc \
+    libfl2 libfl-dev zlibc zlib1g zlib1g-dev
+RUN git clone https://github.com/verilator/verilator && \
+    cd verilator && \
+    git checkout stable && \
+    unset VERILATOR_ROOT && \
+    autoconf && \
+    ./configure && \
+    make -j$(nproc) && \
+    make install && \
+    cd .. && \
+    rm -rf verilator
+ENV VLT_ROOT /usr/local/share/verilator
 
 # Install LLVM 17 + MLIR + clang-format
 RUN wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 17 && rm llvm.sh
@@ -58,9 +73,10 @@ RUN cd ..
 RUN rm -rf snitch_cluster
 
 # Install the FIRRTL Compiler
-RUN wget https://github.com/llvm/circt/releases/download/firtool-1.73.0/firrtl-bin-linux-x64.tar.gz && \
-    tar -xvzf firrtl-bin-linux-x64.tar.gz && \
-    rm firrtl-bin-linux-x64.tar.gz
+RUN wget https://github.com/llvm/circt/releases/download/firtool-1.42.0/firrtl-bin-ubuntu-20.04.tar.gz && \
+    tar -xvzf firrtl-bin-ubuntu-20.04.tar.gz && \
+    rm firrtl-bin-ubuntu-20.04.tar.gz
+ENV PATH="/firtool-1.42.0//bin:${PATH}"
  
 # Install Oh-My-Zsh and Autocomplete Plugin
 RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
