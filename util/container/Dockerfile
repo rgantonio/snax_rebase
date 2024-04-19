@@ -44,6 +44,15 @@ RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | tee /etc/ap
 
 RUN apt-get install -y sbt
 
+# Install pip3
+RUN apt-get install -y python3-pip
+
+# Install Python Requirements from kuleuven-micas/snitch_cluster
+RUN git clone https://github.com/kuleuven-micas/snitch_cluster.git
+RUN cd snitch_cluster && pip3 install -r python-requirements.txt
+RUN cd ..
+RUN rm -rf snitch_cluster
+
 # Install the FIRRTL Compiler
 RUN wget https://github.com/llvm/circt/releases/download/firtool-1.73.0/firrtl-bin-linux-x64.tar.gz && \
     tar -xvzf firrtl-bin-linux-x64.tar.gz && \
