@@ -59,6 +59,9 @@ int main() {
                          tempStride0_GEMM_C_out, tempStride1_GEMM_C_out, spatialStride1_GEMM_C_out, delta_local_A_in, delta_local_B_in,
                          delta_local_C_in);
 
+        // Set CSR to start Streamer
+        set_streamer_start();
+
         // Set GEMM configuration CSR
         uint32_t subtraction_setting =
             gen_subtraction_config(subtraction_a, subtraction_b);
@@ -67,9 +70,6 @@ int main() {
         set_block_gemm_csr(tempLoop0_A, tempLoop1_B, tempLoop1_A, subtraction_setting);
 
         uint32_t gemm_start = snrt_mcycle();
-
-        // Set CSR to start Streamer
-        set_streamer_start();
 
         // Set CSR to start GEMM
         set_block_gemm_start();
@@ -169,6 +169,9 @@ int main() {
                          tempStride0_GEMM_E_out, tempStride1_GEMM_E_out, spatialStride1_GEMM_E_out, delta_local_C_out, delta_local_D_in,
                          delta_local_E_in);
 
+        // Set CSR to start Streamer
+        set_streamer_start();
+
         // Set GEMM configuration CSR
         uint32_t subtraction_setting =
             gen_subtraction_config(subtraction_c, subtraction_d);
@@ -177,9 +180,6 @@ int main() {
         set_block_gemm_csr(tempLoop0_C, tempLoop1_D, tempLoop1_C, subtraction_setting);
 
         uint32_t gemm_start = snrt_mcycle();
-
-        // Set CSR to start Streamer
-        set_streamer_start();
 
         // Set CSR to start GEMM
         set_block_gemm_start();

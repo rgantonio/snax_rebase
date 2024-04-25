@@ -67,7 +67,7 @@ int main() {
         printf("GEMM cycles: %d \n", gemm_perf_counter);
 
         // Compare SNAX GEMM result with golden model
-        err += check_result(local_c, C_golden, Batch, M, N, strideInnermostC,
+        err += check_result(local_c, C_golden, Batch, N, M, strideInnermostC,
                             ldC, strideC);
         printf("GEMM on A and B finished. error: %d\n", err);
     };

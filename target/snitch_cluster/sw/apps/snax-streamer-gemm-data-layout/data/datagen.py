@@ -119,9 +119,9 @@ def emit_gemm_data(**kwargs):
 
     # Generating matrix size settings
     data_str += [format_scalar_definition("int8_t", "Batch", kwargs["Batch"])]
-    data_str += [format_scalar_definition("int8_t", "M", kwargs["M"])]
-    data_str += [format_scalar_definition("int8_t", "K", kwargs["K"])]
-    data_str += [format_scalar_definition("int8_t", "N", kwargs["N"])]
+    data_str += [format_scalar_definition("int", "M", kwargs["M"])]
+    data_str += [format_scalar_definition("int", "K", kwargs["K"])]
+    data_str += [format_scalar_definition("int", "N", kwargs["N"])]
 
     # Generating strides settings
     data_str += [

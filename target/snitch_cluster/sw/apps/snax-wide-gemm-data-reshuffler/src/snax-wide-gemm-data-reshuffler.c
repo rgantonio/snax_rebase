@@ -40,7 +40,7 @@ int main() {
     // Wait for DMA to finish
     snrt_cluster_hw_barrier();
 
-    if (snrt_global_core_idx() == 1) {
+    if (snrt_global_core_idx() == 2) {
         uint32_t data_reshuffler_start = snrt_mcycle();
 
         // Set Streamer configuration CSR
@@ -66,8 +66,7 @@ int main() {
 
     snrt_cluster_hw_barrier();
 
-    err = 0;
-    if (snrt_global_core_idx() == 1) {
+    if (snrt_global_core_idx() == 2) {
         uint32_t data_reshuffler_start = snrt_mcycle();
 
         // Set Streamer configuration CSR
@@ -96,7 +95,6 @@ int main() {
     local_C_in = (int32_t*)(snrt_l1_next() + delta_local_C_in);
     local_C_out = (int32_t*)(snrt_l1_next() + delta_local_C_out);
 
-    err = 0;
     if (snrt_global_core_idx() == 0) {
         uint32_t gemm_start = snrt_mcycle();
 

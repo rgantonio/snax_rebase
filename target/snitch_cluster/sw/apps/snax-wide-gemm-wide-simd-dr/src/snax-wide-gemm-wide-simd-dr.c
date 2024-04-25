@@ -265,6 +265,7 @@ int main() {
         wait_data_reshuffler();
 
         uint32_t data_reshuffler_end = snrt_mcycle();
+        uint32_t dr_cycle = read_data_reshuffler_perf_counter();
         err += check_data_reshuffler_result(tempLoop0_D, tempLoop1_D, tempStride0_D_out,
                             tempStride1_D_out, spatialStride1_D_out, local_D_out, D_data_layout_golden);
         // printf("Data reshuffling for D finished. error: %d\n", err);

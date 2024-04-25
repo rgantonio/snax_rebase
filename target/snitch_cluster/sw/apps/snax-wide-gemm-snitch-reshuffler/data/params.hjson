@@ -1,36 +1,36 @@
 {
-  tempLoop0_A: 4
-  tempLoop1_A: 2
+  tempLoop0_A: 8
+  tempLoop1_A: 8
   DMAtempStride0_A_in: 64
-  DMAtempStride1_A_in: 256
+  DMAtempStride1_A_in: 512
   DMAspatialStride1_A_in: 8
   tempStride0_A_in: 8
-  tempStride1_A_in: 256
-  spatialStride1_A_in: 32
+  tempStride1_A_in: 512
+  spatialStride1_A_in: 64
   tempStride0_A_out: 64
-  tempStride1_A_out: 256
+  tempStride1_A_out: 512
   spatialStride1_A_out: 8
   delta_local_A_in: 0
-  delta_local_A_out: 512
+  delta_local_A_out: 4096
   transpose_A: 0
-  tempLoop0_B: 4
-  tempLoop1_B: 5
+  tempLoop0_B: 8
+  tempLoop1_B: 8
   DMAtempStride0_B_in: 64
-  DMAtempStride1_B_in: 256
+  DMAtempStride1_B_in: 512
   DMAspatialStride1_B_in: 8
   tempStride0_B_in: 8
-  tempStride1_B_in: 256
-  spatialStride1_B_in: 32
+  tempStride1_B_in: 512
+  spatialStride1_B_in: 64
   tempStride0_B_out: 64
-  tempStride1_B_out: 256
+  tempStride1_B_out: 512
   spatialStride1_B_out: 8
-  delta_local_B_in: 1024
-  delta_local_B_out: 2304
+  delta_local_B_in: 8192
+  delta_local_B_out: 12288
   transpose_B: 0
-  tempLoop0_C: 5
-  tempLoop1_C: 2
+  tempLoop0_C: 8
+  tempLoop1_C: 8
   DMAtempStride0_C_in: 256
-  DMAtempStride1_C_in: 1280
+  DMAtempStride1_C_in: 2048
   DMAspatialStride1_C_in: 32
   tempStride0_C_in: 512
   tempStride1_C_in: 32
@@ -38,7 +38,7 @@
   tempStride0_C_out: 256
   tempStride1_C_out: 512
   spatialStride1_C_out: 32
-  delta_local_C_in: 3584
+  delta_local_C_in: 16384
   delta_local_C_out: 8192
   transpose_C: 0
   Batch: 1

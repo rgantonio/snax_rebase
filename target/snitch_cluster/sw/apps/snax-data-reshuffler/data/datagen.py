@@ -206,7 +206,7 @@ def emit_gemm_data(**kwargs):
     elif op == 'tiledrowmajor2tiledcolmajor':
         transpose = 1
     else:
-        thorw("Invalid operation")
+        print("Invalid operation")
 
     data_str += [format_scalar_definition("bool", "transpose", transpose)]
 
@@ -236,7 +236,7 @@ def main():
         param = hjson.loads(f.read())
 
     # Emit header file
-    # print(emit_header_file(**param))
+    print(emit_header_file(**param))
  
     # more param settings testing
 
@@ -285,28 +285,28 @@ def main():
     # }
 
     # tiledrowmajor2tiledcolmajor
-    tempLoop0 = 8
-    tempLoop1 = 8
-    local_param = {
-        "op": "tiledrowmajor2tiledcolmajor",
-        "tempLoop0": tempLoop0,
-        "tempLoop1": tempLoop1,
-        "DMAtempStride0_in": 64,
-        "DMAtempStride1_in": tempLoop0 * 8 * 8,
-        "DMAspatialStride1_in": 8,
-        "tempStride0_in": 64,
-        "tempStride1_in": tempLoop0 * 8 * 8,
-        "spatialStride1_in": 8,
-        "tempStride0_out": 64,
-        "tempStride1_out": tempLoop0 * 8 * 8,
-        "spatialStride1_out": 8,
-        "delta_local_in": 0,
-        "delta_local_out": tempLoop0 * tempLoop1 * 8 * 8,
-        "spatial_len_0": 8,
-        "spatial_len_1": 8
-    }
+    # tempLoop0 = 8
+    # tempLoop1 = 8
+    # local_param = {
+    #     "op": "tiledrowmajor2tiledcolmajor",
+    #     "tempLoop0": tempLoop0,
+    #     "tempLoop1": tempLoop1,
+    #     "DMAtempStride0_in": 64,
+    #     "DMAtempStride1_in": tempLoop0 * 8 * 8,
+    #     "DMAspatialStride1_in": 8,
+    #     "tempStride0_in": 64,
+    #     "tempStride1_in": tempLoop0 * 8 * 8,
+    #     "spatialStride1_in": 8,
+    #     "tempStride0_out": 64,
+    #     "tempStride1_out": tempLoop0 * 8 * 8,
+    #     "spatialStride1_out": 8,
+    #     "delta_local_in": 0,
+    #     "delta_local_out": tempLoop0 * tempLoop1 * 8 * 8,
+    #     "spatial_len_0": 8,
+    #     "spatial_len_1": 8
+    # }
 
-    print(emit_header_file(**local_param))
+    # print(emit_header_file(**local_param))
 
 
 if __name__ == "__main__":

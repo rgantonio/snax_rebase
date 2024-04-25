@@ -8,6 +8,8 @@ import os
 import hjson
 import re
 import csv
+import math
+import random
 
 common_dir = {
     #// hardware configuration
@@ -30,6 +32,7 @@ def build_hw(arch_name):
 
 def build_sw(sw_exp_name, wl_size):
     # gen run-time config for exp2
+    delta = 8
     if sw_exp_name == "snax-wide-gemm-data-reshuffler" or sw_exp_name == "snax-wide-gemm-snitch-reshuffler":
         run_time_cfg = {
             "tempLoop0_A": wl_size["K"],
@@ -104,11 +107,12 @@ def build_sw(sw_exp_name, wl_size):
             "meshRow": 8,
             "meshCol": 8,
             "delta_local_a": 0,
-            "delta_local_b": 64 * wl_size["K"] * wl_size["M"],
-            "delta_local_c": 64 * wl_size["K"] * wl_size["M"] + 64 * wl_size["K"] * wl_size["N"]
+            "delta_local_b": 64 * wl_size["K"] * wl_size["M"] + delta,
+            "delta_local_c": 64 * wl_size["K"] * wl_size["M"] + 64 * wl_size["K"] * wl_size["N"] + delta
         }
 
     # gen run-time config for exp3
+    delta_reduce_contention = 8
     run_time_cfg_common_narrow_narrow = {
             "tempLoop0_A": wl_size["K"],
             "tempLoop1_A": wl_size["M"],
@@ -135,14 +139,14 @@ def build_sw(sw_exp_name, wl_size):
             "tempStride0_B_out": 64,
             "tempStride1_B_out": 64 * wl_size["K"],
             "spatialStride1_B_out": 8,
-            "delta_local_B_in": 64 * wl_size["K"] * wl_size["M"],
+            "delta_local_B_in": 64 * wl_size["K"] * wl_size["M"] + delta_reduce_contention,
             "delta_local_B_out": 0,
             "transpose_B": 0,
             # GEMM out for C
             "tempStride0_GEMM_C_out": 256,
             "tempStride1_GEMM_C_out": 256 * wl_size["N"],
             "spatialStride1_GEMM_C_out": 32,
-            "delta_local_GEMM_C_out": 64 * wl_size["K"] * wl_size["M"] + 64 * wl_size["K"] * wl_size["N"],
+            "delta_local_GEMM_C_out": 64 * wl_size["K"] * wl_size["M"] + 64 * wl_size["K"] * wl_size["N"] + delta_reduce_contention,
             # SIMD out for C
             "tempLoop0_C": wl_size["N"],
             "tempLoop1_C": wl_size["M"],
@@ -208,7 +212,7 @@ def build_sw(sw_exp_name, wl_size):
             "tempStride0_C_out": 64,
             "tempStride1_C_out": 64 * wl_size["M"],
             "spatialStride1_C_out": 8,
-            "delta_local_C_in": 64 * wl_size["K"] * wl_size["M"] + 64 * wl_size["K"] * wl_size["N"] + 256 * wl_size["N"] * wl_size["M"],
+            "delta_local_C_in": 64 * wl_size["K"] * wl_size["M"] + 64 * wl_size["K"] * wl_size["N"] + 256 * wl_size["N"] * wl_size["M"] + delta_reduce_contention,
             "delta_local_C_out": 0,
             "transpose_C": transpose_C,
             # DR configuration for D
@@ -223,14 +227,14 @@ def build_sw(sw_exp_name, wl_size):
             "tempStride0_D_out": 64,
             "tempStride1_D_out": 64 * wl_size["M"],
             "spatialStride1_D_out": 8,
-            "delta_local_D_in": 64 * wl_size["N"] * wl_size["M"],
-            "delta_local_D_out": 64 * wl_size["N"] * wl_size["M"] + 64 * wl_size["M"] * wl_size["M2"],
+            "delta_local_D_in": 64 * wl_size["N"] * wl_size["M"] + delta_reduce_contention,
+            "delta_local_D_out": 64 * wl_size["N"] * wl_size["M"] + 64 * wl_size["M"] * wl_size["M2"] + delta_reduce_contention,
             "transpose_D": 0,
             # configuration for E
             "tempStride0_GEMM_E_out": 256,
             "tempStride1_GEMM_E_out": 256 * wl_size["N"],
             "spatialStride1_GEMM_E_out": 32,
-            "delta_local_E_in": 64 * wl_size["N"] * wl_size["M"] + 64 * wl_size["M"] * wl_size["M2"] * 2,
+            "delta_local_E_in": 64 * wl_size["N"] * wl_size["M"] + 64 * wl_size["M"] * wl_size["M2"] * 2 + delta_reduce_contention * 2,
         }
 
     if sw_exp_name == "snax-narrow-gemm-narrow-simd-dr-c-left":
@@ -391,17 +395,20 @@ def parse_results(sw_exp_name, wl_size, parse_dr_results = False, parse_dr_idx =
     res_dir = {
         "sw_exp_name": sw_exp_name,
         "wl_size": wl_size,
-        "CSR_cycle": [],
-        "DR_CSR_cycle": [],
-        "GEMM_CSR_cycle": [],
-        "SIMD_CSR_cycle": [],
-        "WIDE_GEMM_STREAMER_CSR_cycle": [],
-        "NARROW_GEMM_STREAMER_CSR_cycle": [],
-        "SIMD_STREAMER_CSR_cycle": [],
+        "CSR_cycle": 0,
+        "DR_CSR_cycle": 0,
+        "GEMM_CSR_cycle": 0,
+        "SIMD_CSR_cycle": 0,
+        "WIDE_GEMM_STREAMER_CSR_cycle": 0,
+        "NARROW_GEMM_STREAMER_CSR_cycle": 0,
+        "SIMD_STREAMER_CSR_cycle": 0,
         "GeMM_cycle": [],
         "SIMD_cycle": [],
         "DR_cycle": [],  
         "SN_R_cycle": [],
+        "Utilization_GEMM": 0,
+        "Utilization_SIMD": 0,
+        "Utilization_DR": 0,
     }
 
     # Parse the results
@@ -476,10 +483,25 @@ def parse_results(sw_exp_name, wl_size, parse_dr_results = False, parse_dr_idx =
 
     for key, value in res_dir.items():
         if "CSR" in key and key != "CSR_cycle":
-            csr_sum += sum(value)
+            if type(value) == list:
+                csr_sum += sum(value)
+            else:
+                csr_sum += (value)
 
     res_dir["CSR_cycle"] = csr_sum
 
+    # Calculate the utilization
+    if sw_exp_name == "snax-streamer-gemm-data-layout":
+        if res_dir["GEMM_CSR_cycle"] != []:
+            res_dir["Utilization_GEMM"] = wl_size["M"] * wl_size["N"] * wl_size["K"] / int(res_dir["GeMM_cycle"][0][0])
+        else:
+            res_dir["Utilization_GEMM"] = 0
+            
+    # if res_dir["SIMD_CSR_cycle"] != []:
+    #     res_dir["Utilization_SIMD"] = wl_size["M"] * wl_size["N"] / int(res_dir["SIMD_cycle"][0][0])
+    # else:
+    #     res_dir["Utilization_SIMD"] = 0
+    
     # Parse the DR results from traces (can not be parsed from the res.txt file)            
     if parse_dr_results:
         res_dir["DR_cycle"] = parse_traces(parse_dr_idx, parse_dr_csr)
@@ -487,7 +509,10 @@ def parse_results(sw_exp_name, wl_size, parse_dr_results = False, parse_dr_idx =
 
 def write_csv(filename, res_list):
     # Define the field names
-    field_names = ['sw_exp_name', 'wl_size', "CSR_cycle", "DR_CSR_cycle", "GEMM_CSR_cycle", "SIMD_CSR_cycle", "STREAMER_CSR_cycle", 'GeMM_cycle', 'SIMD_cycle', 'DR_cycle', 'SN_R_cycle']
+    if len(res_list) == 0:
+        field_names = "empty_list.csv"
+    else:
+        field_names = res_list[0].keys()
 
     # Specify the CSV file path
     csv_file_path = filename
@@ -504,3 +529,40 @@ def write_csv(filename, res_list):
         for row in res_list:
             writer.writerow(row)
 
+def build_wide_gemm_snitch_reshuffler():
+    arch_name = "snax-wide-gemm"
+    build_hw(arch_name)
+
+def build_wide_gemm_data_reshuffler():
+    arch_name = "snax-wide-gemm-data-reshuffler"
+    build_hw(arch_name)
+
+def build_streamer_gemm():
+    arch_name = "snax-streamer-gemm"
+    build_hw(arch_name)
+
+def build_narrow_gemm_narrow_simd_dr():
+    arch_name = "snax-narrow-gemm-narrow-simd-data-reshuffler"
+    build_hw(arch_name)
+
+def build_wide_gemm_wide_simd_dr():
+    arch_name = "snax-wide-gemm-wide-simd-data-reshuffler"
+    build_hw(arch_name)
+
+
+def build_data_reshuffler():
+    arch_name = "snax-data-reshuffler"
+    build_hw(arch_name)
+
+def memory_size(M, K, N):
+    delta = 8
+    return math.ceil((M * K + K * N + M * N * 4 + delta) / 1024)
+
+def comp_tiled_size(matrix_size_m, matrix_size_k, matrix_size_n):
+    # print(math.ceil(matrix_size_m / 8) , math.ceil(matrix_size_k / 8) , math.ceil(matrix_size_n / 8))
+    # print(math.ceil(matrix_size_m / 8) * math.ceil(matrix_size_k / 8) * math.ceil(matrix_size_n / 8))
+    return { "M": math.ceil(matrix_size_m / 8), "K": math.ceil(matrix_size_k / 8), "N": math.ceil(matrix_size_n / 8) }
+
+def wide_gemm_data_reshuffler_mem_size(wl_size):
+    memory_size = wl_size["K"] * wl_size["M"] * 2 + wl_size["K"] * wl_size["N"] * 2 + 4 * wl_size["N"] * wl_size["M"]
+    return memory_size / 1024

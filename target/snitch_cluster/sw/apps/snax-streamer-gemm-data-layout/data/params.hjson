@@ -1,22 +1,22 @@
 {
   Batch: 1
-  K: 6
-  N: 5
-  M: 2
+  K: 8
+  N: 8
+  M: 18
   DMA_strideInnermostA: 64
   DMA_strideInnermostB: 64
-  DMA_ldA: 384
-  DMA_ldB: 384
-  spatialA: 16
-  spatialB: 16
+  DMA_ldA: 512
+  DMA_ldB: 512
+  spatialA: 64
+  spatialB: 64
   spatialC: 32
   strideInnermostA: 8
   strideInnermostB: 8
   strideInnermostC: 256
   strideHalfC: 0
-  ldA: 384
-  ldB: 384
-  ldC: 1280
+  ldA: 512
+  ldB: 512
+  ldC: 2048
   strideA: 0
   strideB: 0
   strideC: 0
@@ -24,6 +24,6 @@
   meshRow: 8
   meshCol: 8
   delta_local_a: 0
-  delta_local_b: 768
-  delta_local_c: 2688
+  delta_local_b: 9224
+  delta_local_c: 13320
 }
