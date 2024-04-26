@@ -1,3 +1,7 @@
+# Copyright 2020 ETH Zurich and University of Bologna.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
 FROM ubuntu:22.04 AS builder
 
 # apt update and upgrade
