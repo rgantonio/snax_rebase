@@ -78,7 +78,6 @@ jobs:
       - name: Build Hardware
         run: |
           make CFG_OVERRIDE=cfg/snax-mac.hjson \
-          VLT_USE_LLVM=ON \
           -C target/snitch_cluster bin/snitch_cluster.vlt
       - name: Run Tests
         working-directory: target/snitch_cluster
@@ -104,7 +103,6 @@ jobs:
       - name: Build Hardware
         run: |
           make CFG_OVERRIDE=cfg/snax-gemm.hjson \
-          VLT_USE_LLVM=ON \
           -C target/snitch_cluster bin/snitch_cluster.vlt
       - name: Run Tests
         working-directory: target/snitch_cluster
@@ -130,7 +128,6 @@ jobs:
       - name: Build Hardware
         run: |
           make CFG_OVERRIDE=cfg/snax-streamer-gemm.hjson \
-          VLT_USE_LLVM=ON \
           -C target/snitch_cluster bin/snitch_cluster.vlt
       - name: Run Tests
         working-directory: target/snitch_cluster
@@ -156,7 +153,6 @@ jobs:
       - name: Build Hardware
         run: |
           make CFG_OVERRIDE=cfg/snax-mac-mult.hjson \
-          VLT_USE_LLVM=ON \
           -C target/snitch_cluster bin/snitch_cluster.vlt
       - name: Run Tests
         working-directory: target/snitch_cluster
