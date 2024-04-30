@@ -25,11 +25,11 @@ RUN apt-get update && apt-get upgrade -y && \
 # Install Rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
-RUN rustup install 1.76.0
-RUN rustup override set 1.76.0
+RUN rustup install 1.77.2
+RUN rustup override set 1.77.2
 
 # Install Bender
-RUN cargo install bender --version 0.27.1
+RUN cargo install bender --version 0.28.1
 
 # Install Verilator
 RUN apt-get install -y \
@@ -47,6 +47,14 @@ RUN git clone https://github.com/verilator/verilator && \
     cd .. && \
     rm -rf verilator
 ENV VLT_ROOT /usr/local/share/verilator
+
+# Install Verible
+ENV VERIBLE_VERSION 0.0-3644-g6882622d
+RUN wget https://github.com/chipsalliance/verible/releases/download/v${VERIBLE_VERSION}/verible-v${VERIBLE_VERSION}-linux-static-x86_64.tar.gz && \
+    mkdir tempdir && \
+    tar -x -f verible-v${VERIBLE_VERSION}-linux-static-x86_64.tar.gz --strip-components=1 -C tempdir && \
+    cp -rn tempdir/bin/* ./bin/ && \
+    rm -rf verible-v${VERIBLE_VERSION}-linux-static-x86_64.tar.gz tempdir
 
 # Install LLVM 17 + MLIR + clang-format
 RUN wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 17 && rm llvm.sh
