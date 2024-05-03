@@ -2,7 +2,7 @@
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
-FROM ubuntu:22.04 AS builder
+FROM ubuntu:22.04 AS base
 
 # apt update and upgrade
 RUN apt-get update && apt-get upgrade -y && \
@@ -99,3 +99,43 @@ RUN chsh -s $(which zsh)
 
 # Zsh as default shell
 CMD ["zsh"]
+
+# Default systems
+FROM base as snax-mac
+
+RUN git clone https://github.com/kuleuven-micas/snitch_cluster /src
+RUN cd /src && git submodule update --init
+RUN cd /src && sbt package
+RUN cd /src && \
+	make -C target/snitch_cluster bin/snitch_cluster.vlt \
+	CFG_OVERRIDE=cfg/snax-mac.hjson -j $(nproc)
+
+FROM base as snax-gemm
+
+RUN git clone https://github.com/kuleuven-micas/snitch_cluster /src
+RUN cd /src && git submodule update --init
+RUN cd /src && sbt package
+RUN cd /src && \
+	make -C target/snitch_cluster bin/snitch_cluster.vlt \
+	CFG_OVERRIDE=cfg/snax-gemm.hjson -j $(nproc)
+
+FROM base as snax-streamer-gemm
+
+RUN git clone https://github.com/kuleuven-micas/snitch_cluster /src
+RUN cd /src && git submodule update --init
+RUN cd /src && sbt package
+RUN cd /src && \
+	make -C target/snitch_cluster bin/snitch_cluster.vlt \
+	CFG_OVERRIDE=cfg/snax-streamer-gemm.hjson -j $(nproc)
+
+# Copy Hardware to final image
+FROM base as target
+
+COPY --from=snax-mac /src/target/snitch_cluster/bin/snitch_cluster.vlt /opt/snax-mac-rtl/bin/snitch_cluster.vlt
+COPY --from=snax-mac /src/sw/snRuntime /opt/snax-mac/sw/snRuntime
+
+COPY --from=snax-gemm /src/target/snitch_cluster/bin/snitch_cluster.vlt /opt/snax-gemm/bin/snitch_cluster.vlt
+COPY --from=snax-gemm /src/sw/snRuntime /opt/snax-gemm/sw/snRuntime
+
+COPY --from=snax-streamer-gemm /src/target/snitch_cluster/bin/snitch_cluster.vlt /opt/snax-streamer-gemm/bin/snitch_cluster.vlt
+COPY --from=snax-streamer-gemm /src/sw/snRuntime /opt/snax-streamer-gemm/sw/snRuntime
