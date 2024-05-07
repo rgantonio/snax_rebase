@@ -1,7 +1,37 @@
 # Directory Structure
 
 The project is organized as a monolithic repository. Both hardware and software
-are co-located. The top-level ist structured as follows:
+are co-located. 
+
+The file tree is visualized as follows:
+
+```
+├── hw
+│   ├── chisel
+│   │   ├── csr_manager
+│   │   └── streamer
+│   ├── snax_accelerator_1
+│   ├── snax_accelerator_2
+│   ├── snitch_stuff
+│   └── templates
+├── sw
+├── target
+│   └── snitch_cluster
+│       ├── config
+│       ├── generated
+│       └── sw
+│           ├── apps
+│           │   ├── snax_system_1
+│           │   └── snax_system_2
+│           └── snax_lib 
+│               ├── snax_system_1
+│               └── snax_system_2
+└── util
+    ├── clustergen
+    └── wrappergen
+```
+
+The top-level is structured as follows:
 
 * `docs`: [Documentation](documentation.md) of the generator and software.
   Contains additional user guides.
