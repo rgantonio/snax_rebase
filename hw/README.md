@@ -10,7 +10,7 @@ Some of the IPs have stand-alone test benches. The top level structure of the `h
 
 All IPs inside the `hw` directory are structured as follows:
 
-- `<ip_name>`: each directory contains one IP that is instantiated in the cluster design, e.g., they are not stand-alone.
+- `<ip_name>`: each directory contains one IP that is instantiated in the cluster design
   - `doc`: documentation if existing
   - `src`: RTL sources
   - `test`: Standalone testbenches if existing
