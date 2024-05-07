@@ -72,6 +72,7 @@ VLT_FLAGS    += -Wno-UNOPTFLAT
 VLT_FLAGS    += -Wno-fatal
 VLT_FLAGS    += +define+SYNTHESIS
 VLT_FLAGS    += --unroll-count 1024
+VLT_FLAGS	 += --output-split
 ifeq ($(VERILATOR_VERSION), 5)
 	VLT_CFLAGS += -std=c++20 -pthread
 else 
