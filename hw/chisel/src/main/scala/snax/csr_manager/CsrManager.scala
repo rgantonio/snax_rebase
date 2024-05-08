@@ -115,4 +115,3 @@ class CsrManager(
   io.csr_config_out.bits <> csr
 
 }
-

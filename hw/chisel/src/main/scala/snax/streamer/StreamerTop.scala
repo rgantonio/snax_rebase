@@ -34,7 +34,7 @@ class StreamerTopIO(
   *   the parameters class instantiation for the streamer top module
   */
 class StreamerTop(
-    params: StreamerParams,
+    params: StreamerParams
 ) extends Module
     with RequireAsyncReset {
 
@@ -153,5 +153,3 @@ class StreamerTop(
   io.data <> streamer.io.data
 
 }
-
-

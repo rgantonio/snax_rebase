@@ -11,7 +11,7 @@ import chisel3.util._
   *   The parameter class contains all the parameters of a data mover module
   */
 class DataWriterIO(
-    params: DataMoverParams,
+    params: DataMoverParams
 ) extends DataMoverIO(params) {
 
   // valid data from the queue
@@ -62,4 +62,3 @@ class DataWriter(
   io.data_fifo_i.ready := io.ptr_agu_i.ready
 
 }
-

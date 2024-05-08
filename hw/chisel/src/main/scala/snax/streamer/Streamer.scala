@@ -27,7 +27,7 @@ class DataFromAcceleratorX(
 
 // csr related io
 class StreamerCsrIO(
-    params: StreamerParams,
+    params: StreamerParams
 ) extends Bundle {
 
   // configurations interface for a new data operation
@@ -372,5 +372,3 @@ class Streamer(
   }
 
 }
-
-

@@ -222,7 +222,7 @@ class DataMover(
 // classes which extend the DataMover module, but are just
 // set to 0 here for testing purposes.
 class DataMoverTester(
-    params: DataMoverParams,
+    params: DataMoverParams
 ) extends DataMover(params) {
 
   for (i <- 0 until params.tcdmPortsNum) {

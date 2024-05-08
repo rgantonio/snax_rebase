@@ -207,4 +207,3 @@ class TemporalAddrGenUnit(
 
   io.done := addr_gen_finish
 }
-

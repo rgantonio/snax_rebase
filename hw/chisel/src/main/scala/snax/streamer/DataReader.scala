@@ -12,7 +12,7 @@ import chisel3.util._
   *   The parameter class contains all the parameters of a data mover module
   */
 class DataReaderIO(
-    params: DataMoverParams,
+    params: DataMoverParams
 ) extends DataMoverIO(params) {
 
   // tcdm response
@@ -135,4 +135,3 @@ class DataReader(
   }
 
 }
-

@@ -28,7 +28,7 @@ trait CommonParams {
 case class TemporalAddrGenUnitParams(
     loopDim: Int,
     loopBoundWidth: Int,
-    addrWidth: Int,
+    addrWidth: Int
 )
 
 /** This class represents all the parameters for the Spatial Address Generation
@@ -43,7 +43,7 @@ case class TemporalAddrGenUnitParams(
 case class SpatialAddrGenUnitParams(
     loopDim: Int,
     loopBounds: Seq[Int],
-    addrWidth: Int,
+    addrWidth: Int
 )
 
 /** This class represents all the parameters for the Data Mover (including Data
@@ -67,7 +67,7 @@ case class DataMoverParams(
     spatialBounds: Seq[Int],
     spatialDim: Int,
     elementWidth: Int,
-    fifoWidth: Int,
+    fifoWidth: Int
 ) extends CommonParams
 
 /** FIFO parameters
@@ -173,12 +173,12 @@ trait HasStreamerInferredParams extends HasStreamerCoreParams {
   *   default value of these parameters is from the StreamerTestConstant object
   */
 case class StreamerParams(
-    temporalAddrGenUnitParams: TemporalAddrGenUnitParams, 
+    temporalAddrGenUnitParams: TemporalAddrGenUnitParams,
     stationarity: Seq[Int],
     dataReaderParams: Seq[DataMoverParams],
     dataWriterParams: Seq[DataMoverParams],
     fifoReaderParams: Seq[FIFOParams],
     fifoWriterParams: Seq[FIFOParams],
-    tagName: String,
+    tagName: String
 ) extends HasStreamerCoreParams
     with HasStreamerInferredParams
