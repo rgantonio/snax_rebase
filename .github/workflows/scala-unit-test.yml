@@ -20,6 +20,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run the unit tests
-        working-directory: util/chiselgen
+        working-directory: hw/chisel 
         run: |
           sbt test
