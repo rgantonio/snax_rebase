@@ -5,31 +5,6 @@ import chisel3.util._
 
 /* the meaning of these testing parameters can be found at Parameter.scala */
 
-object TemporalAddrGenUnitTestParameters {
-  def loopDim = 3
-  def loopBoundWidth = 8
-  def addrWidth = 32
-
-}
-
-object SpatialAddrGenUnitTestParameters {
-  def loopBounds = Seq(8, 8)
-  def loopDim = loopBounds.length
-  def addrWidth = 32
-}
-
-object DataMoverTestParameters {
-  def tcdmPortsNum = 8
-  def tcdmDataWidth = 64
-  def spatialBounds = Seq(8, 8)
-  def addrWidth = 32
-  def fifoWidth = 512
-  def elementWidth = 8
-
-  def spatialDim = spatialBounds.length
-
-}
-
 object StreamerTestConstant extends CommonParams {
 
   def MacScalingFactor = 4
@@ -105,13 +80,13 @@ object TestParameters {
     loopDim = 3,
     loopBoundWidth = 8,
     addrWidth = 32
-    )
+  )
 
   val spatialAddrGenUnit = SpatialAddrGenUnitParams (
     loopBounds = Seq(8, 8),
     loopDim = 2,
     addrWidth = 32
-    )
+  )
 
   val dataMover = DataMoverParams (
     tcdmPortsNum = 8,
@@ -120,9 +95,10 @@ object TestParameters {
     elementWidth = 8,
     spatialDim = 2,
     )
+
+  val fifo = FIFOParams (
+    width = 512,
+    depth = 4
+  ) 
 }
 
-object FIFOTestParameters {
-  def fifoWidth = 512
-  def fifoDepth = 4
-}

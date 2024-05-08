@@ -179,6 +179,6 @@ case class StreamerParams(
     dataWriterParams: Seq[DataMoverParams],
     fifoReaderParams: Seq[FIFOParams],
     fifoWriterParams: Seq[FIFOParams],
-    tagName: String
+    tagName: String = ""
 ) extends HasStreamerCoreParams
     with HasStreamerInferredParams
