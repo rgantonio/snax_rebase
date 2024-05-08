@@ -9,7 +9,7 @@ import org.scalatest.Tag
 
 class FIFOTest extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   "DUT" should "pass" in {
-    test(new FIFO)
+    test(new FIFO(width=FIFOTestParameters.fifoWidth, depth=FIFOTestParameters.fifoDepth))
       .withAnnotations(
         Seq(WriteVcdAnnotation)
       ) { dut =>

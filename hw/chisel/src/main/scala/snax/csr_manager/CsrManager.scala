@@ -116,14 +116,3 @@ class CsrManager(
 
 }
 
-// Scala main function for generating CsrManager system verilog file
-object CsrManager extends App {
-  emitVerilog(
-    new CsrManager(
-      csrManagerTestParameters.csrNum,
-      csrManagerTestParameters.csrAddrWidth,
-      csrManagerTestParameters.csrModuleTagName
-    ),
-    Array("--target-dir", "generated/csr_manager")
-  )
-}

@@ -67,7 +67,7 @@ class TemporalAddrGenUnitIO(
   *   The bit width of the addresses.
   */
 class TemporalAddrGenUnit(
-    params: TemporalAddrGenUnitParams = TemporalAddrGenUnitParams(),
+    params: TemporalAddrGenUnitParams,
     tagName: String = ""
 ) extends Module
     with RequireAsyncReset {
@@ -208,10 +208,3 @@ class TemporalAddrGenUnit(
   io.done := addr_gen_finish
 }
 
-// Scala main function for generating system verilog file for the TemporalAddrGenUnit module
-object TemporalAddrGenUnit extends App {
-  emitVerilog(
-    new TemporalAddrGenUnit(TemporalAddrGenUnitParams()),
-    Array("--target-dir", "generated/streamer")
-  )
-}

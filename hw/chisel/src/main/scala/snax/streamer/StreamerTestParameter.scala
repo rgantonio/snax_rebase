@@ -90,6 +90,38 @@ object StreamerTestConstant extends CommonParams {
   def tagName: String = ""
 }
 
+object TestParameters {
+  val streamer = StreamerParams(
+    temporalAddrGenUnitParams = StreamerTestConstant.temporalAddrGenUnitParams,
+    stationarity = StreamerTestConstant.stationarity,
+    dataReaderParams = StreamerTestConstant.dataReaderParams,
+    dataWriterParams = StreamerTestConstant.dataWriterParams,
+    fifoReaderParams = StreamerTestConstant.fifoReaderParams,
+    fifoWriterParams = StreamerTestConstant.fifoWriterParams,
+    tagName = "abc"
+  )
+
+  val temporalAddrGenUnit =  TemporalAddrGenUnitParams(
+    loopDim = 3,
+    loopBoundWidth = 8,
+    addrWidth = 32
+    )
+
+  val spatialAddrGenUnit = SpatialAddrGenUnitParams (
+    loopBounds = Seq(8, 8),
+    loopDim = 2,
+    addrWidth = 32
+    )
+
+  val dataMover = DataMoverParams (
+    tcdmPortsNum = 8,
+    spatialBounds = Seq(8, 8),
+    fifoWidth = 512,
+    elementWidth = 8,
+    spatialDim = 2,
+    )
+}
+
 object FIFOTestParameters {
   def fifoWidth = 512
   def fifoDepth = 4
