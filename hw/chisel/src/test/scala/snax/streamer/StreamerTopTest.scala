@@ -13,15 +13,7 @@ class StreamerTopTest
     with ChiselScalatestTester
     with Matchers {
   "DUT" should "pass" in {
-    test(new StreamerTop(new StreamerParams(
-       temporalAddrGenUnitParams = StreamerTestConstant.temporalAddrGenUnitParams,
-       stationarity = StreamerTestConstant.stationarity,
-       dataReaderParams = StreamerTestConstant.dataReaderParams,
-       dataWriterParams = StreamerTestConstant.dataWriterParams,
-       fifoReaderParams = StreamerTestConstant.fifoReaderParams,
-       fifoWriterParams = StreamerTestConstant.fifoWriterParams,
-       tagName = "abc",
-      )))
+    test(new StreamerTop(TestParameters.streamer))
       .withAnnotations(
         Seq(WriteVcdAnnotation)
       ) { dut =>
