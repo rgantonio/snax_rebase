@@ -10,15 +10,15 @@ SUBDIRS += nop
 ifneq ($(SELECT_RUNTIME), rtl-generic)
 SUBDIRS += blas/axpy
 SUBDIRS += blas/gemm
-SUBDIRS += dnn/batchnorm
-SUBDIRS += dnn/conv2d
-SUBDIRS += dnn/fusedconv
-SUBDIRS += dnn/gelu
-SUBDIRS += dnn/gemm
-SUBDIRS += dnn/layernorm
-SUBDIRS += dnn/linear
-SUBDIRS += dnn/maxpool
-SUBDIRS += dnn/softmax
+# SUBDIRS += dnn/batchnorm
+# SUBDIRS += dnn/conv2d
+# SUBDIRS += dnn/fusedconv
+# SUBDIRS += dnn/gelu
+# SUBDIRS += dnn/gemm
+# SUBDIRS += dnn/layernorm
+# SUBDIRS += dnn/linear
+# SUBDIRS += dnn/maxpool
+# SUBDIRS += dnn/softmax
 endif
 SUBDIRS += montecarlo/pi_estimation
 SUBDIRS += snax-mac
@@ -29,6 +29,7 @@ SUBDIRS += snax-gemm-base
 SUBDIRS += snax-block-gemm
 SUBDIRS += snax-streamer-gemm
 SUBDIRS += snax-mac-mult
+SUBDIRS += snax-cgra
 
 .PHONY: all clean $(SUBDIRS)
 

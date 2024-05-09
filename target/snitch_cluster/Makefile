@@ -51,6 +51,9 @@ ifeq (${CFG_OVERRIDE}, cfg/snax-streamer-gemm.hjson)
 	VCS_BENDER  += -t snax-streamer-gemm-dev
 endif
 
+# Specify the bender target to match the "target" in snax_cgra_dev bender
+VSIM_BENDER += -t snax_cgra_dev
+VLT_BENDER += -t snax_cgra_dev
 
 
 ############
