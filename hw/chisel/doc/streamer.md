@@ -11,9 +11,7 @@ Thanks to the strong expression power of Chisel, the Flexible Streamer Generator
 ## Microarchitecture
 The microarchitecture of the Flexible Streamer Generator is shown below.
 
-<p align="center">
-  <img src="./microarch.svg" alt="">
-</p>
+![image](https://github.com/KULeuven-MICAS/snitch_cluster/assets/47864363/b499c7be-f897-462d-a662-1a0dd18d9c3f)
 
 The main module of the Streamer is the data mover, including the data reader (reads data from the real memory system and acts as the producer for the accelerator) and data writer (writes data to the real memory system and acts as the consumer for the accelerator). Each data mover has its own address generation unit and works independently so that each data mover can do the data transfer as quickly as possible.
 
