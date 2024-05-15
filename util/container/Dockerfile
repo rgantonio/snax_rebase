@@ -85,10 +85,10 @@ RUN cd ..
 RUN rm -rf snitch_cluster
 
 # Install the FIRRTL Compiler
-RUN wget https://github.com/llvm/circt/releases/download/firtool-1.42.0/firrtl-bin-ubuntu-20.04.tar.gz && \
-    tar -xvzf firrtl-bin-ubuntu-20.04.tar.gz && \
-    rm firrtl-bin-ubuntu-20.04.tar.gz
-ENV PATH="/firtool-1.42.0//bin:${PATH}"
+RUN wget https://github.com/llvm/circt/releases/download/firtool-1.62.0/firrtl-bin-linux-x64.tar.gz && \
+    tar -xvzf firrtl-bin-linux-x64.tar.gz && \
+    rm firrtl-bin-linux-x64.tar.gz
+ENV PATH="/firtool-1.62.0/bin:${PATH}"
  
 # Install Oh-My-Zsh and Autocomplete Plugin
 RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
