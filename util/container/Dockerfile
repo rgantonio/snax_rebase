@@ -119,14 +119,14 @@ RUN cd /src && \
 	make -C target/snitch_cluster bin/snitch_cluster.vlt \
 	CFG_OVERRIDE=cfg/snax-gemm.hjson -j $(nproc)
 
-FROM base as snax-streamer-gemm
+FROM base as snax-alu
 
 RUN git clone https://github.com/kuleuven-micas/snitch_cluster /src
 RUN cd /src && git submodule update --init
 RUN cd /src && sbt package
 RUN cd /src && \
 	make -C target/snitch_cluster bin/snitch_cluster.vlt \
-	CFG_OVERRIDE=cfg/snax-streamer-gemm.hjson -j $(nproc)
+	CFG_OVERRIDE=cfg/snax-alu.hjson -j $(nproc)
 
 # Copy Hardware to final image
 FROM base as target
@@ -137,5 +137,5 @@ COPY --from=snax-mac /src/sw/snRuntime /opt/snax-mac/sw/snRuntime
 COPY --from=snax-gemm /src/target/snitch_cluster/bin/snitch_cluster.vlt /opt/snax-gemm/bin/snitch_cluster.vlt
 COPY --from=snax-gemm /src/sw/snRuntime /opt/snax-gemm/sw/snRuntime
 
-COPY --from=snax-streamer-gemm /src/target/snitch_cluster/bin/snitch_cluster.vlt /opt/snax-streamer-gemm/bin/snitch_cluster.vlt
-COPY --from=snax-streamer-gemm /src/sw/snRuntime /opt/snax-streamer-gemm/sw/snRuntime
+COPY --from=snax-alu /src/target/snitch_cluster/bin/snitch_cluster.vlt /opt/snax-alu/bin/snitch_cluster.vlt
+COPY --from=snax-alu /src/sw/snRuntime /opt/snax-alu/sw/snRuntime
