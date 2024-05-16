@@ -4,10 +4,11 @@ import mill.define.Sources
 import mill.modules.Util
 import mill.scalalib.TestModule.ScalaTest
 import scalalib._
+import scalafmt._
 // support BSP
 import mill.bsp._
 
-object Snax extends SbtModule { m =>
+object Snax extends SbtModule with ScalafmtModule { m =>
   override def millSourcePath = os.pwd
   override def scalaVersion = "2.13.12"
   override def scalacOptions = Seq(
