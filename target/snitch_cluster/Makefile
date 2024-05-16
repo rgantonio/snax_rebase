@@ -271,9 +271,6 @@ bin/snitch_cluster.vlt: $(SNAX_GEN) $(VLT_AR) $(VLT_COBJ) ${VLT_BUILDDIR}/lib/li
 	mkdir -p $(dir $@)
 	$(CXX) $(LDFLAGS) -std=c++14 -L ${VLT_BUILDDIR}/lib -o $@ $(VLT_COBJ) $(VLT_AR) -lfesvr -lpthread
 
-testjoren:
-	echo $(SNAX_GEN)
-
 ############
 # Modelsim #
 ############
