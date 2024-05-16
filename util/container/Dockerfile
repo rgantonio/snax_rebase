@@ -127,6 +127,3 @@ COPY --from=snax-mac /src/sw/snRuntime /opt/snax-mac/sw/snRuntime
 
 COPY --from=snax-gemm /src/target/snitch_cluster/bin/snitch_cluster.vlt /opt/snax-gemm/bin/snitch_cluster.vlt
 COPY --from=snax-gemm /src/sw/snRuntime /opt/snax-gemm/sw/snRuntime
-
-COPY --from=snax-alu /src/target/snitch_cluster/bin/snitch_cluster.vlt /opt/snax-alu/bin/snitch_cluster.vlt
-COPY --from=snax-alu /src/sw/snRuntime /opt/snax-alu/sw/snRuntime
