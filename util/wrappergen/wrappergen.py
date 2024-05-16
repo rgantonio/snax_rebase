@@ -54,8 +54,9 @@ def gen_file(cfg, tpl, target_path: str, file_name: str) -> None:
 
 def gen_chisel_file(chisel_path, chisel_param, gen_path):
     # Call chisel environment and generate the system verilog file
-    cmd = f' cd {chisel_path} && \
-        mill "Snax.runMain {chisel_param} {gen_path}"'
+    cmd = f" cd {chisel_path} && \
+        mill Snax.runMain {chisel_param} {gen_path}"
+    print(cmd)
     os.system(cmd)
 
     return
