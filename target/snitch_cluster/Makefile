@@ -43,19 +43,21 @@ include $(ROOT)/target/common/common.mk
 # for example cfg/snax-example.hjson -> snax-example
 CFG_OVERRIDE_NAME = $(patsubst cfg/%.hjson,%, $(CFG_OVERRIDE))
 
-ifdef CFG_OVERRIDE
-	VSIM_BENDER += -t $(CFG_OVERRIDE_NAME)
-	VLT_BENDER  += -t $(CFG_OVERRIDE_NAME)
-	VCS_BENDER  += -t $(CFG_OVERRIDE_NAME)
-endif
-
 # TODO: remove this section once monorepo conversion is complete
 ifeq (${CFG_OVERRIDE}, cfg/snax-gemm.hjson)
 	include $(shell $(BENDER) path $(CFG_OVERRIDE_NAME))/Makefile
 else ifeq (${CFG_OVERRIDE}, cfg/snax-streamer-gemm.hjson)
+	# Override faulty name
+	CFG_OVERRIDE_NAME = snax-treamer-gemm-dev
 	include $(shell $(BENDER) path $(CFG_OVERRIDE_NAME))/Makefile
 else
 	SNAX_GEN += ${GENERATED_DIR}/${CFG_OVERRIDE_NAME}
+endif
+
+ifdef CFG_OVERRIDE
+	VSIM_BENDER += -t $(CFG_OVERRIDE_NAME)
+	VLT_BENDER  += -t $(CFG_OVERRIDE_NAME)
+	VCS_BENDER  += -t $(CFG_OVERRIDE_NAME)
 endif
 
 ############
