@@ -48,7 +48,7 @@ ifeq (${CFG_OVERRIDE}, cfg/snax-gemm.hjson)
 	include $(shell $(BENDER) path $(CFG_OVERRIDE_NAME))/Makefile
 else ifeq (${CFG_OVERRIDE}, cfg/snax-streamer-gemm.hjson)
 	# Override faulty name
-	CFG_OVERRIDE_NAME = snax-treamer-gemm-dev
+	CFG_OVERRIDE_NAME = snax-streamer-gemm-dev
 	include $(shell $(BENDER) path $(CFG_OVERRIDE_NAME))/Makefile
 else
 	SNAX_GEN += ${GENERATED_DIR}/${CFG_OVERRIDE_NAME}
