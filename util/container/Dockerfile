@@ -107,8 +107,8 @@ RUN git clone https://github.com/kuleuven-micas/snitch_cluster /src
 RUN cd /src && git submodule update --init
 RUN cd /src && sbt package
 RUN cd /src && \
-	make -C target/snitch_cluster bin/snitch_cluster.vlt \
-	CFG_OVERRIDE=cfg/snax-mac.hjson -j $(nproc)
+  make -C target/snitch_cluster bin/snitch_cluster.vlt \
+  CFG_OVERRIDE=cfg/snax-mac.hjson -j $(nproc)
 
 FROM base as snax-gemm
 
@@ -116,17 +116,8 @@ RUN git clone https://github.com/kuleuven-micas/snitch_cluster /src
 RUN cd /src && git submodule update --init
 RUN cd /src && sbt package
 RUN cd /src && \
-	make -C target/snitch_cluster bin/snitch_cluster.vlt \
-	CFG_OVERRIDE=cfg/snax-gemm.hjson -j $(nproc)
-
-FROM base as snax-alu
-
-RUN git clone https://github.com/kuleuven-micas/snitch_cluster /src
-RUN cd /src && git submodule update --init
-RUN cd /src && sbt package
-RUN cd /src && \
-	make -C target/snitch_cluster bin/snitch_cluster.vlt \
-	CFG_OVERRIDE=cfg/snax-alu.hjson -j $(nproc)
+  make -C target/snitch_cluster bin/snitch_cluster.vlt \
+  CFG_OVERRIDE=cfg/snax-gemm.hjson -j $(nproc)
 
 # Copy Hardware to final image
 FROM base as target
