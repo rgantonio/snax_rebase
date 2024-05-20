@@ -163,7 +163,7 @@ jobs:
     name: Simulate SW on SNAX ALU Cluster w/ Verilator (Generic LLVM)
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/kuleuven-micas/snax:pr-110
+      image: ghcr.io/kuleuven-micas/snax:main
     steps:
       - uses: actions/checkout@v2
         with:
