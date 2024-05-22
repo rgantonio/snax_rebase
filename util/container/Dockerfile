@@ -36,6 +36,14 @@ RUN wget https://github.com/pulp-platform/riscv-isa-sim/releases/download/snitch
     tar xzf snitch-spike-dasm-0.1.0-x86_64-linux-gnu-ubuntu18.04.tar.gz && \
     rm snitch-spike-dasm-0.1.0-x86_64-linux-gnu-ubuntu18.04.tar.gz
 
+# Install LLVM 17 + MLIR + clang-format
+RUN wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 17 && rm llvm.sh
+RUN apt-get -y install mlir-17-tools
+RUN apt-get -y install clang-format-17
+
+# create symbolic links for all *-17 binaries
+RUN for f in /usr/bin/*-17; do ln -s $f ${f%-17}; done
+
 # Install Verilator
 RUN apt-get install -y \
   git help2man perl make autoconf g++ flex bison ccache \
@@ -46,7 +54,7 @@ RUN git clone https://github.com/verilator/verilator && \
   git checkout stable && \
   unset VERILATOR_ROOT && \
   autoconf && \
-  ./configure && \
+  ./configure CXX=clang++-17 AR=llvm-ar-17 CFG_CXXFLAGS_STD='-std=c++20' && \
   make -j$(nproc) && \
   make install && \
   cd .. && \
@@ -61,13 +69,6 @@ RUN wget https://github.com/chipsalliance/verible/releases/download/v${VERIBLE_V
   cp -rn tempdir/bin/* ./bin/ && \
   rm -rf verible-v${VERIBLE_VERSION}-linux-static-x86_64.tar.gz tempdir
 
-# Install LLVM 17 + MLIR + clang-format
-RUN wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 17 && rm llvm.sh
-RUN apt-get -y install mlir-17-tools
-RUN apt-get -y install clang-format-17
-
-# create symbolic links for all *-17 binaries
-RUN for f in /usr/bin/*-17; do ln -s $f ${f%-17}; done
 
 # Install the Chisel Environment
 RUN apt-get update && \
