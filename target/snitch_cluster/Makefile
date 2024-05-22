@@ -56,7 +56,7 @@ ifeq (${CFG_OVERRIDE}, cfg/snax-streamer-gemm.hjson)
 	VLT_BENDER  += -t snax-streamer-gemm
 	VCS_BENDER  += -t snax-streamer-gemm
 
-	SNAX_GEN += ${GENERATED_DIR}/snax-streamer-gemm
+	SNAX_GEN += $(shell $(BENDER) script flist -t snax-streamer-gemm)
 
 endif
 
@@ -74,11 +74,11 @@ endif
 
 ifeq (${CFG_OVERRIDE}, cfg/snax-alu.hjson)
 
-	SNAX_GEN += ${GENERATED_DIR}/snax-alu
-
 	VSIM_BENDER += -t snax-alu
 	VLT_BENDER  += -t snax-alu
 	VCS_BENDER  += -t snax-alu
+
+	SNAX_GEN += $(shell $(BENDER) script flist -t snax-alu)
 
 endif
 
