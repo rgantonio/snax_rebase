@@ -31,6 +31,11 @@ RUN rustup override set 1.77.2
 # Install Bender
 RUN cargo install bender --version 0.28.1
 
+# Install pre-built spike-dasm
+RUN wget https://github.com/pulp-platform/riscv-isa-sim/releases/download/snitch-v0.1.0/snitch-spike-dasm-0.1.0-x86_64-linux-gnu-ubuntu18.04.tar.gz && \
+    tar xzf snitch-spike-dasm-0.1.0-x86_64-linux-gnu-ubuntu18.04.tar.gz && \
+    rm snitch-spike-dasm-0.1.0-x86_64-linux-gnu-ubuntu18.04.tar.gz
+
 # Install Verilator
 RUN apt-get install -y \
   git help2man perl make autoconf g++ flex bison ccache \
