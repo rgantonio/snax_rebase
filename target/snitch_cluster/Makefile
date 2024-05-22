@@ -285,7 +285,7 @@ clean-vlt: clean-work
 	rm -rf bin/snitch_cluster.vlt $(VLT_BUILDDIR)
 
 $(VLT_AR): ${VLT_SOURCES} ${TB_SRCS}
-	$(call VERILATE,testharness)
+	+ $(call VERILATE,testharness)
 verilate: $(VLT_AR)
 
 # Build targets for verilator TB
