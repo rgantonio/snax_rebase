@@ -47,8 +47,8 @@ module snax_exercise_top #(
   //-------------------------------
   logic                    acc_output_success;
   logic                    acc_ready;
-  logic [RegDataWidth-1:0] csr_upper_bias;
-  logic [RegDataWidth-1:0] csr_lower_bias;
+  logic [RegDataWidth-1:0] upper_bias;
+  logic [RegDataWidth-1:0] lower_bias;
 
   assign acc_output_success = out_valid_o && out_ready_i;
 
@@ -80,8 +80,8 @@ module snax_exercise_top #(
     //-------------------------------
     .acc_output_success_i    ( acc_output_success      ),
     .acc_ready_o             ( acc_ready               ),
-    .csr_upper_bias_o        ( csr_upper_bias          ),
-    .csr_lower_bias_o        ( csr_lower_bias          )
+    .csr_upper_bias_o        ( upper_bias              ),
+    .csr_lower_bias_o        ( lower_bias              )
   );
 
   snax_exercise_pe #(

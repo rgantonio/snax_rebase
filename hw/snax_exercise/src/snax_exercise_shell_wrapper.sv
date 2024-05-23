@@ -8,8 +8,9 @@
 // Accelerator wrapper
 //-------------------------------
 module snax_exercise_shell_wrapper #(
-  // Custom parameters. As much as possible,
-  // these parameters should not be taken from outside
+  // What parameters should we use?
+  // This is a hint but you can still
+  // have your own defined parameters
   parameter int unsigned InDataWidth  = 64,
   parameter int unsigned OutDataWidth = 128,
   parameter int unsigned RegRWCount   = 3,
@@ -25,35 +26,61 @@ module snax_exercise_shell_wrapper #(
   //-------------------------------
   // Accelerator ports
   //-------------------------------
-  // Note, we maintained the form of these signals
-  // just to comply with the top-level wrapper
-
-  // Ports from accelerator to streamer
-  output logic [(OutDataWidth)-1:0] acc2stream_0_data_o,
-  output logic acc2stream_0_valid_o,
-  input  logic acc2stream_0_ready_i,
-
-  // Ports from streamer to accelerator
-  input  logic [(InDataWidth)-1:0] stream2acc_0_data_i,
-  input  logic stream2acc_0_valid_i,
-  output logic stream2acc_0_ready_o,
-
-  input  logic [(InDataWidth)-1:0] stream2acc_1_data_i,
-  input  logic stream2acc_1_valid_i,
-  output logic stream2acc_1_ready_o,
+  // What are the accelerator ports that you need to use?
+  // You might want to check the `*_shell_wrapper` template
+  // Alternatively, you could use the generations script
 
   //-------------------------------
   // CSR manager ports
   //-------------------------------
-  input  logic [RegRWCount-1:0][RegDataWidth-1:0] csr_reg_set_i,
-  input  logic                                    csr_reg_set_valid_i,
-  output logic                                    csr_reg_set_ready_o,
-  output logic [RegROCount-1:0][RegDataWidth-1:0] csr_reg_ro_set_o
+  // What are the control ports that you need to use?
+  // You might want to check the `*_shell_wrapper` template
+  // Alternatively, you could use the generations script
 );
 
   //-------------------------------
-  // What should we fill in?
+  // What should we fill in here?
   //-------------------------------
+  // Hint:
+  // You only need to instantiate the top-level module
+  // but you also need to re-wire things a bit
 
+  // We instantiate it for you!
+  snax_exercise_top #(
+    .RegDataWidth             ( ),
+    .DataWidth                ( )
+  ) i_ snax_exercise_top (
+    //-------------------------------
+    // Clocks and reset
+    //-------------------------------
+    .clk_i                    ( ),
+    .rst_ni                   ( ),
+    //-------------------------------
+    // Register RW from CSR manager
+    //-------------------------------
+    .csr_rw_reg_upper_i       ( ),
+    .csr_rw_reg_lower_i       ( ),
+    .csr_rw_reg_len_i         ( ),
+    .csr_rw_reg_start_i       ( ),
+    .csr_rw_reg_valid_i       ( ),
+    .csr_rw_reg_ready_o       ( ),
+    //-------------------------------
+    // Register RO to CSR manager
+    //-------------------------------
+    .csr_ro_reg_busy_o        ( ),
+    .csr_ro_reg_perf_count_o  ( ),
+    //-------------------------------
+    // Data path IO
+    //-------------------------------
+    .a_i                      ( ),
+    .a_valid_i                ( ),
+    .a_ready_o                ( ),
+    .b_i                      ( ),
+    .b_valid_i                ( ),
+    .b_ready_o                ( ),
+    .out_o                    ( ),
+    .out_valid_o              ( ),
+    .out_ready_i              ( )
+  );
 
 endmodule
