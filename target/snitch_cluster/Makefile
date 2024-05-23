@@ -217,6 +217,15 @@ test/bootrom.elf test/bootrom.dump test/bootrom.bin: test/bootrom.S test/bootrom
 	riscv64-unknown-elf-objdump -d test/bootrom.elf > test/bootrom.dump
 	riscv64-unknown-elf-objcopy -j .text -O binary test/bootrom.elf test/bootrom.bin
 
+/repo/target/snitch_cluster/generated/snax_streamer_gemm/snax_streamer_gemm_csrman_CsrManager.sv: $(SNAX_GEN)
+
+/repo/target/snitch_cluster/generated/snax_streamer_gemm/snax_streamer_gemm_streamer_StreamerTop.sv: $(SNAX_GEN)
+
+/repo/target/snitch_cluster/generated/snax_streamer_gemm/snax_streamer_gemm_csrman_wrapper.sv: $(SNAX_GEN)
+
+/repo/target/snitch_cluster/generated/snax_streamer_gemm/snax_streamer_gemm_streamer_wrapper.sv: $(SNAX_GEN)
+
+/repo/target/snitch_cluster/generated/snax_streamer_gemm/snax_streamer_gemm_wrapper.sv: $(SNAX_GEN)
 
 $(SNAX_GEN):
 	${WRAPPER_GEN} --cfg_path="$(ROOT)/target/snitch_cluster/$(CFG_OVERRIDE)" \
@@ -285,7 +294,7 @@ clean-vlt: clean-work
 	rm -rf bin/snitch_cluster.vlt $(VLT_BUILDDIR)
 
 $(VLT_AR): ${VLT_SOURCES} ${TB_SRCS}
-	$(call VERILATE,testharness)
+	+$(call VERILATE,testharness)
 verilate: $(VLT_AR)
 
 # Build targets for verilator TB
