@@ -46,22 +46,24 @@ class basicCounter(width: Int) extends Module {
  *  The parameter used for generation of the module
  **/
 
+class AddressGenUnitCfgIO(param: AddressGenUnitParam) extends Bundle {
+    val Ptr = UInt(param.addressWidth.W)
+    val Strides = Vec(param.dimension, UInt(32.W))
+    val Bounds = Vec(param.dimension, UInt(16.W))
+}
+
 
 class AddressGenUnit(param: AddressGenUnitParam) extends Module {
     val io = IO(new Bundle {
-        val cfg =Input(new Bundle {
-            val Ptr = UInt(param.addressWidth.W)
-            val Strides = Vec(param.dimension, UInt(32.W))
-            val Bounds = Vec(param.dimension, UInt(16.W))
-        })
+        val cfg =Input(new AddressGenUnitCfgIO(param))
         // Intake the new cfg file and reset all the counters
         val start = Input(Bool())
-        // Move to the next address in the next cycle
-        // val tick = Input(Bool())
-        // If the address is about to wrap, then lastAddress becomes high
+        // If the address is all generated and pushed into FIFO, busy is false
         val busy = Output(Bool())
+        // If all signal in address buffer is consumed, bufferEmpty becomes high (Dont know if it is useful)
+        val bufferEmpty = Output(Bool())
         // The calculated address. This equals to # of output channels (64-bit narrow TCDM)
-        val addresses = Vec(param.spatialUnrollingFactor, Decoupled(UInt(param.addressWidth.W)))
+        val addr = Vec(param.spatialUnrollingFactor, Decoupled(UInt(param.addressWidth.W)))
     })
 
     // Create a cfg_reg to temporarily hold the cfg value from the outside
@@ -72,7 +74,7 @@ class AddressGenUnit(param: AddressGenUnitParam) extends Module {
     counter.io.reset := io.start
 
     // Create the outputBuffer to store the generated address: one input + spatialUnrollingFactor outputs
-    val outputBuffer = Module(new snax.xdma.commonCells.complexQueue(inputWidth = io.addresses.head.bits.getWidth * param.spatialUnrollingFactor, outputWidth = io.addresses.head.bits.getWidth, depth = param.outputBufferDepth))
+    val outputBuffer = Module(new snax.xdma.commonCells.complexQueue(inputWidth = io.addr.head.bits.getWidth * param.spatialUnrollingFactor, outputWidth = io.addr.head.bits.getWidth, depth = param.outputBufferDepth))
 
     // The FSM to record if the AddressGenUnit is busy
     val sBUSY::sIDLE::Nil = Enum(2)
@@ -115,7 +117,7 @@ class AddressGenUnit(param: AddressGenUnitParam) extends Module {
     val currentPointer = io.cfg.Ptr + currentLoop.head * cfg_reg.Strides.head * param.spatialUnrollingFactor.U + currentLoop.tail.zip(cfg_reg.Strides.tail).map {case (a, b) => a * b}.reduce(_ + _)
 
     // Calculate all calculated address together
-    val currentAddress = Wire(Vec(io.addresses.length, UInt(param.addressWidth.W)))
+    val currentAddress = Wire(Vec(io.addr.length, UInt(param.addressWidth.W)))
     currentAddress.zipWithIndex.foreach { case (address, index) =>
         address := currentPointer + cfg_reg.Strides.head * index.U
     }
@@ -124,5 +126,9 @@ class AddressGenUnit(param: AddressGenUnitParam) extends Module {
     outputBuffer.io.in.head.bits := currentAddress.reduce((a, b) => Cat(b, a))
 
     // Connect the outputs of the buffer out
-    outputBuffer.io.out.zip(io.addresses).foreach {case(a, b) => a <> b}
+    outputBuffer.io.out.zip(io.addr).foreach {case(a, b) => a <> b}
+
+    // Connect io.bufferEmpty signal: If all output is 0, then all addresses are empty, which means io.bufferEmpty should be high
+    io.bufferEmpty := ~(outputBuffer.io.out.map(i => i.valid).reduce(_ | _))
+
 }
