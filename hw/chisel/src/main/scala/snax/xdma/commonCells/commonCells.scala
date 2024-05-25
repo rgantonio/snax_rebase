@@ -3,6 +3,17 @@ package snax.xdma.commonCells
 import chisel3._
 import chisel3.util._
 
+class tcdmParam(
+    val addrWidth: Int = 17, 
+    val dataWidth: Int = 64, 
+    val numChannel: Int = 8
+)
+
+object tcdmParam {
+    def apply(addrWidth: Int, dataWidth: Int, numChannel: Int) = new tcdmParam(addrWidth, dataWidth, numChannel)
+    def apply() = new tcdmParam(addrWidth = 17, dataWidth = 64, numChannel = 8)
+}
+
 class complexQueue(inputWidth: Int, outputWidth: Int, depth: Int) extends Module {
     val bigWidth = Seq(inputWidth, outputWidth).max
     val smallWidth = Seq(inputWidth, outputWidth).min
@@ -23,6 +34,8 @@ class complexQueue(inputWidth: Int, outputWidth: Int, depth: Int) extends Module
             }, 
             Decoupled(UInt(outputWidth.W))
         )
+        val allEmpty = Output(Bool())
+        val anyFull = Output(Bool())
     })
 
     val queues = for (i <- 0 until numChannel) yield {
@@ -57,6 +70,12 @@ class complexQueue(inputWidth: Int, outputWidth: Int, depth: Int) extends Module
             // Connect all data
             io.out.foreach(_.bits := queues.map(i => i.io.deq.bits).reduce{(a, b) => Cat(b, a)})
     }
+
+    // All empty signal is a debug signal and derived from sub channels: if all fifo is empty, then this signal is empty
+    io.allEmpty := queues.map(queue => ~(queue.io.deq.valid)).reduce(_ & _)
+
+    // Any full signal is a debug signal and derived from sub channels: if any fifo is full, then this signal is full
+    io.anyFull := queues.map(queue => ~(queue.io.enq.ready)).reduce(_ | _)
 }
 
 
