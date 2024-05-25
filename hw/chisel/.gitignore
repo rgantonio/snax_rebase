@@ -6,4 +6,6 @@ target
 test_run_dir
 .bsp
 .scala-build
+.metals
+.bloop
 out
