@@ -35,17 +35,34 @@ CHISEL_PATH := $(ROOT)/hw/chisel/
 
 include $(ROOT)/target/common/common.mk
 
+############
+# Programs #
+############
+
+REGGEN          ?= $(shell $(BENDER) path register_interface)/vendor/lowrisc_opentitan/util/regtool.py
+CLUSTER_GEN     ?= $(ROOT)/util/clustergen.py
+CLUSTER_GEN_SRC ?= $(wildcard $(ROOT)/util/clustergen/*.py)
+WRAPPER_GEN     ?= $(ROOT)/util/wrappergen/wrappergen.py
+
+#########################
+# Files and directories #
+#########################
+
+SW_DIR             = sw
+TARGET_C_HDRS_DIR ?= $(SW_DIR)/runtime/common
+GENERATED_DIR     ?= $(MKFILE_DIR)generated
+
 ####################
 # SNAX Generations #
 ####################
 
 define generate_snax_gen
 SNAX_GEN := \
-	/repo/target/snitch_cluster/generated/$(1)/$(1)_csrman_CsrManager.sv \
-	/repo/target/snitch_cluster/generated/$(1)/$(1)_streamer_StreamerTop.sv \
-	/repo/target/snitch_cluster/generated/$(1)/$(1)_csrman_wrapper.sv \
-	/repo/target/snitch_cluster/generated/$(1)/$(1)_streamer_wrapper.sv \
-	/repo/target/snitch_cluster/generated/$(1)/$(1)_wrapper.sv
+	$(GENERATED_DIR)/$(1)/$(1)_csrman_CsrManager.sv \
+	$(GENERATED_DIR)/$(1)/$(1)_streamer_StreamerTop.sv \
+	$(GENERATED_DIR)/$(1)/$(1)_csrman_wrapper.sv \
+	$(GENERATED_DIR)/$(1)/$(1)_streamer_wrapper.sv \
+	$(GENERATED_DIR)/$(1)/$(1)_wrapper.sv
 endef
 
 # Usage example
@@ -105,22 +122,6 @@ $(eval $(call generate_snax_gen,snax_data_reshuffler))
 
 endif
 
-############
-# Programs #
-############
-
-REGGEN          ?= $(shell $(BENDER) path register_interface)/vendor/lowrisc_opentitan/util/regtool.py
-CLUSTER_GEN     ?= $(ROOT)/util/clustergen.py
-CLUSTER_GEN_SRC ?= $(wildcard $(ROOT)/util/clustergen/*.py)
-WRAPPER_GEN     ?= $(ROOT)/util/wrappergen/wrappergen.py
-
-#########################
-# Files and directories #
-#########################
-
-SW_DIR             = sw
-TARGET_C_HDRS_DIR ?= $(SW_DIR)/runtime/common
-GENERATED_DIR     ?= $(MKFILE_DIR)generated
 
 # Verilated and compiled snitch cluster
 VLT_AR = ${VLT_BUILDDIR}/Vtestharness__ALL.a
@@ -254,7 +255,6 @@ $(FIRST_SNAX_GEN) : $(SNAX_TEMPLATE_SOURCES) $(CFG_FILE) $(SNAX_SCALA_SOURCES)
 
 # This is a fake job that forces parallel make to wait for the first thing to be generated
 $(OTHER_SNAX_GEN): $(FIRST_SNAX_GEN)
-
 
 ############
 # Software #
