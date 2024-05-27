@@ -2,15 +2,19 @@ package snax.xdma.xdmaStreamer
 
 import chisel3._
 import chisel3.util._
+// Import Chiseltest
 import chiseltest._
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.flatspec.AnyFlatSpec
-
-import chiseltest.internal.TesterThreadList
+// Import Random number generator
 import scala.util.Random
+// Import break support for loops
+import scala.util.control.Breaks.{breakable, break}
 
 class Reader_Tester_v2 extends AnyFreeSpec with ChiselScalatestTester {
-    "Reader's behavior is as expected" in test(new Reader(new ReaderWriterParam)).withAnnotations(Seq(WriteVcdAnnotation, VerilatorBackendAnnotation)) {dut =>
+    "Reader's behavior is as expected" in test(
+      new Reader(new ReaderWriterParam)
+    ).withAnnotations(Seq(WriteVcdAnnotation, VerilatorBackendAnnotation)) { dut =>
         // The accessed address is 1KB (0x0 - 0x400)
         // Configure AGU
         dut.io.cfg.Ptr.poke(0x0.U)
@@ -27,69 +31,128 @@ class Reader_Tester_v2 extends AnyFreeSpec with ChiselScalatestTester {
         dut.io.start.poke(true)
         dut.clock.step()
         dut.io.start.poke(false)
-        // Waiting for the AGU to begin 
-        while(dut.io.busy.peekBoolean() == false) dut.clock.step()
+        // Waiting for the AGU to begin
+        while (dut.io.busy.peekBoolean() == false) dut.clock.step()
 
         // AGU started work. Now we need to create branches to emulate each channels of TCDM ports
-        var concurrent_threads = new chiseltest.internal.TesterThreadList(Seq())
+        var concurrent_threads =
+            new chiseltest.internal.TesterThreadList(Seq())
         val mem = collection.mutable.Map[Int, BigInt]()
         var testTerminated = false
 
-        // Each individual thread simulate one TCDM port: If TCDM behaves differently, this is only part need to be modified
-        for (i <- 0 until 8) {
-            concurrent_threads = concurrent_threads.fork {
-                while (true) {
-                    if (testTerminated) scala.util.control.Breaks.break()
-                    if (dut.io.tcdm_req(i).valid.peekBoolean()) {
-                        // Generate a value to the emulated memory
-                        mem.addOne((
-                            dut.io.tcdm_req(i).bits.addr.peekInt().toInt, 
-                            BigInt(64, Random)
-                        ))
+        // Queues to temporarily store the address at request side, which will be consumed by responser
+        val queues = Seq.fill(8)(collection.mutable.Queue[Int]())
 
-                        println(
-                            "[Genrator] Data: "
-                            + mem(dut.io.tcdm_req(i).bits.addr.peekInt().toInt) 
-                            + " is saved at address: "
-                            + dut.io.tcdm_req(i).bits.addr.peekInt().toInt
-                        )
-                        // Emulate the behavior of TCDM memory under contention: The response
-                        dut.clock.step(Random.between(1, 4))
-                        dut.io.tcdm_req(i).ready.poke(true)
-                        dut.io.tcdm_rsp(i).valid.poke(true)
-                        dut.io.tcdm_rsp(i).bits.data.poke(
-                            mem(dut.io.tcdm_req(i).bits.addr.peekInt().toInt)
-                        )
-                        dut.clock.step()
-                        dut.io.tcdm_req(i).ready.poke(false)
-                        dut.io.tcdm_rsp(i).valid.poke(false)
+        // Each individual thread simulate one TCDM request port and one TCDM response: If TCDM behaves differently, this is only part need to be modified
+        for (i <- 0 until 8) {
+            // Emulate TCDM request side
+            concurrent_threads = concurrent_threads.fork {
+                breakable {
+                    while (true) {
+                        // Terminate this thread if the testbench ends
+                        if (testTerminated) break()
+
+                        // Emulate the contention at the TCDM Req side
+                        val random_delay = Random.between(0, 3)
+                        if (random_delay > 1) {
+                            dut.io.tcdm_req(i).ready.poke(false)
+                            dut.clock.step(random_delay)
+                            dut.io.tcdm_req(i).ready.poke(true)
+                        } else dut.io.tcdm_req(i).ready.poke(true)
+
+                        // If valid is high: the request is enqueue into a list, waiting for the consumption of response side
+                        if (dut.io.tcdm_req(i).valid.peekBoolean()) {
+                            mem.addOne(
+                              (
+                                dut.io.tcdm_req(i).bits.addr.peekInt().toInt,
+                                BigInt(64, Random)
+                              )
+                            )
+                            println(
+                              "[Generator] Data: "
+                                  + mem(
+                                    dut.io.tcdm_req(i).bits.addr.peekInt().toInt
+                                  )
+                                  + " is saved at address: "
+                                  + dut.io.tcdm_req(i).bits.addr.peekInt().toInt
+                            )
+                            // The request is sent to response side
+                            queues(i).enqueue(
+                              dut.io.tcdm_req(i).bits.addr.peekInt().toInt
+                            )
+                            println(
+                              "[Generator] Request with Address: "
+                                  + dut.io.tcdm_req(i).bits.addr.peekInt().toInt
+                                  + " is sending to TCDM response side"
+                            )
+
+                            // Current request is consumed
+                            dut.clock.step()
+
+                        }
                     }
-                    else dut.clock.step()
+                }
+            }
+
+            // Emulate TCDM response side
+            concurrent_threads = concurrent_threads.fork {
+                breakable {
+                    while (true) {
+                        // Terminate this thread if the testbench ends
+                        if (testTerminated) break()
+
+                        if (queues(i).isEmpty) dut.clock.step()
+                        else {
+                            println(
+                              "[Generator] Request with Address: "
+                                  + queues(i).front
+                                  + " is responded"
+                            )
+
+                            dut.io.tcdm_rsp(i).valid.poke(true)
+                            dut.io
+                                .tcdm_rsp(i)
+                                .bits
+                                .data
+                                .poke(
+                                  mem(queues(i).dequeue())
+                                )
+                            dut.clock.step()
+                            dut.io.tcdm_rsp(i).valid.poke(false)
+                        }
+                    }
                 }
             }
         }
 
         // The output verifier to verify if the output data is correct
         concurrent_threads = concurrent_threads.fork {
-            while (true) {
-                if (testTerminated) scala.util.control.Breaks.break()
-                if (dut.io.data.valid.peekBoolean()) {
-                    // retrieve the data back from the emulated rom
-                    val expected_output_non_combined = for (i <- 0 until 8) yield {
-                        val mem_element = mem.minBy(_._1)
-                        mem.remove(mem_element._1)
-                        mem_element._2
-                    }
-                    // Concatenate them into 512-bit value => This is the expected output
-                    val expected_output = expected_output_non_combined.reduceRight((a, b) => (b << 64) + a)
+            breakable {
+                while (true) {
+                    // Terminate this thread if the testbench ends
+                    if (testTerminated) break()
 
-                    dut.io.data.ready.poke(true)
-                    dut.io.data.bits.expect(expected_output)
-                    println("[Output Verifier] Value: " + expected_output + " equals to emulated memory. ")
-                    dut.clock.step()
-                    dut.io.data.ready.poke(false)
+                    if (dut.io.data.valid.peekBoolean()) {
+                        // retrieve the data back from the emulated rom
+                        val expected_output_non_combined =
+                            for (i <- 0 until 8) yield {
+                                val mem_element = mem.minBy(_._1)
+                                mem.remove(mem_element._1)
+                                mem_element._2
+                            }
+                        // Concatenate them into 512-bit value => This is the expected output
+                        val expected_output =
+                            expected_output_non_combined.reduceRight((a, b) => (b << 64) + a)
+
+                        dut.io.data.ready.poke(true)
+                        dut.io.data.bits.expect(expected_output)
+                        println(
+                          "[Output Verifier] Value: " + expected_output + " equals to emulated memory. "
+                        )
+                        dut.clock.step()
+                        dut.io.data.ready.poke(false)
+                    } else dut.clock.step()
                 }
-                else dut.clock.step()
             }
         }
 
@@ -99,15 +162,16 @@ class Reader_Tester_v2 extends AnyFreeSpec with ChiselScalatestTester {
             // Wait for the dut to start
             dut.clock.step(3)
             // Waiting for the addressgen to finish
-            while(dut.io.busy.peekBoolean()) dut.clock.step()
+            while (dut.io.busy.peekBoolean()) dut.clock.step()
             // Waiting for the Tester to readout all the data
-            while(mem.size != 0) dut.clock.step()
+            while (mem.size != 0) dut.clock.step()
             // Everything finished: The simulation is ended
-            println("[Monitor] The test is finished and all threads are about to be terminated by the monitor. ")
+            println(
+              "[Monitor] The test is finished and all threads are about to be terminated by the monitor. "
+            )
             dut.clock.step()
             testTerminated = true
         }
-
         concurrent_threads.joinAndStep()
     }
 }
