@@ -217,18 +217,22 @@ test/bootrom.elf test/bootrom.dump test/bootrom.bin: test/bootrom.S test/bootrom
 	riscv64-unknown-elf-objdump -d test/bootrom.elf > test/bootrom.dump
 	riscv64-unknown-elf-objcopy -j .text -O binary test/bootrom.elf test/bootrom.bin
 
-/repo/target/snitch_cluster/generated/snax_streamer_gemm/snax_streamer_gemm_csrman_CsrManager.sv: $(SNAX_GEN)
+SNAX_GEN := \
+	/repo/target/snitch_cluster/generated/snax_streamer_gemm/snax_streamer_gemm_csrman_CsrManager.sv \
+	/repo/target/snitch_cluster/generated/snax_streamer_gemm/snax_streamer_gemm_streamer_StreamerTop.sv \
+	/repo/target/snitch_cluster/generated/snax_streamer_gemm/snax_streamer_gemm_csrman_wrapper.sv \
+	/repo/target/snitch_cluster/generated/snax_streamer_gemm/snax_streamer_gemm_streamer_wrapper.sv \
+	/repo/target/snitch_cluster/generated/snax_streamer_gemm/snax_streamer_gemm_wrapper.sv
 
-/repo/target/snitch_cluster/generated/snax_streamer_gemm/snax_streamer_gemm_streamer_StreamerTop.sv: $(SNAX_GEN)
 
-/repo/target/snitch_cluster/generated/snax_streamer_gemm/snax_streamer_gemm_csrman_wrapper.sv: $(SNAX_GEN)
+SNAX_TEMPLATE_SOURCES = $(wildcard $(SNAX_TPL_PATH)*.tpl)
+CFG_FILE = $(ROOT)/target/snitch_cluster/$(CFG_OVERRIDE)
+SNAX_SCALA_SOURCES = \
+	$(wildcard ${CHISEL_PATH}/src/main/scala/snax/streamer/*.scala) \
+	$(wildcard ${CHISEL_PATH}/src/main/scala/snax/csr_manager/*.scala)
 
-/repo/target/snitch_cluster/generated/snax_streamer_gemm/snax_streamer_gemm_streamer_wrapper.sv: $(SNAX_GEN)
-
-/repo/target/snitch_cluster/generated/snax_streamer_gemm/snax_streamer_gemm_wrapper.sv: $(SNAX_GEN)
-
-$(SNAX_GEN):
-	${WRAPPER_GEN} --cfg_path="$(ROOT)/target/snitch_cluster/$(CFG_OVERRIDE)" \
+$(SNAX_GEN): $(SNAX_TEMPLATE_SOURCES) $(CFG_FILE) $(SNAX_SCALA_SOURCES)
+	${WRAPPER_GEN} --cfg_path="$(CFG_FILE)" \
 	--tpl_path="${SNAX_TPL_PATH}" \
 	--chisel_path="${CHISEL_PATH}" \
 	--gen_path="${GENERATED_DIR}/"
