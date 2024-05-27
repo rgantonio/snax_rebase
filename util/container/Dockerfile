@@ -123,7 +123,7 @@ RUN cd /src && git submodule update --init
 RUN cd /src && sbt package
 RUN cd /src && \
   make -C target/snitch_cluster bin/snitch_cluster.vlt \
-  CFG_OVERRIDE=cfg/snax-mac.hjson -j $(nproc)
+  CFG_OVERRIDE=cfg/snax-mac.hjson
 
 FROM base as snax-gemm
 
@@ -132,7 +132,7 @@ RUN cd /src && git submodule update --init
 RUN cd /src && sbt package
 RUN cd /src && \
   make -C target/snitch_cluster bin/snitch_cluster.vlt \
-  CFG_OVERRIDE=cfg/snax-gemm.hjson -j $(nproc)
+  CFG_OVERRIDE=cfg/snax-gemm.hjson
 
 # Copy Hardware to final image
 FROM base as target
