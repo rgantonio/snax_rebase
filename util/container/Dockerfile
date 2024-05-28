@@ -131,7 +131,7 @@ RUN git clone https://github.com/kuleuven-micas/snax_cluster.git && \
 
 # Install Python Requirements from kuleuven-micas/snax-mlir
 RUN git clone https://github.com/kuleuven-micas/snax-mlir.git && \
-    cd snax-mlir && pip3 install -r python-requirements.txt && \
+    cd snax-mlir && pip3 install -r requirements.txt && \
     cd .. && \
     rm -rf snax-mlir
 
