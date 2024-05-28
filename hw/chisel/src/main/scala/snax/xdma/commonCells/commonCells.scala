@@ -78,5 +78,48 @@ class complexQueue(inputWidth: Int, outputWidth: Int, depth: Int) extends Module
     io.anyFull := queues.map(queue => ~(queue.io.enq.ready)).reduce(_ | _)
 }
 
+class DemuxDecoupled[T <: Data](dataType: T) extends Module {
+    val io = IO(new Bundle {
+        val in = Flipped(Decoupled(dataType))
+        val out = Vec(2, Decoupled(dataType))
+        val sel = Input(Bool())
+    })
+
+    // Demux logic
+    when(io.sel) {
+        io.out(1).valid := io.in.valid
+        io.out(1).bits := io.in.bits
+        io.in.ready := io.out(1).ready
+        io.out(0).ready := false.B // Ensuring other output's ready does not affect the input
+    }.otherwise {
+        io.out(0).valid := io.in.valid
+        io.out(0).bits := io.in.bits
+        io.in.ready := io.out(0).ready
+        io.out(1).ready := false.B // Ensuring other output's ready does not affect the input
+    }
+}
+
+class MuxDecoupled[T <: Data](dataType: T) extends Module {
+    val io = IO(new Bundle {
+        val in = Vec(2, Flipped(Decoupled(dataType)))
+        val out = Decoupled(dataType)
+        val sel = Input(Bool())
+    })
+
+    // Mux logic
+    when(io.sel) {
+        io.out.valid := io.in(1).valid
+        io.out.bits := io.in(1).bits
+        io.in(1).ready := io.out.ready
+        io.in(0).ready := false.B // Unselected input should not be ready
+    }.otherwise {
+        io.out.valid := io.in(0).valid
+        io.out.bits := io.in(0).bits
+        io.in(0).ready := io.out.ready
+        io.in(1).ready := false.B // Unselected input should not be ready
+    }
+}
+
+
 
 
