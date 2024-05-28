@@ -122,6 +122,7 @@ RUN apt update -y \
  && make install -j$(nproc)
 
 ENV PATH="${PATH}:/opt/python3.11/bin"
+ENV PYTHONPATH="/opt/python3.11/lib/python3.11"
 
 # Install Python Requirements from kuleuven-micas/snax_cluster
 RUN git clone https://github.com/kuleuven-micas/snax_cluster.git && \
