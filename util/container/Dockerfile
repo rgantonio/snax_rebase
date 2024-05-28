@@ -97,14 +97,43 @@ RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | tee /etc/ap
 
 RUN apt-get install -y sbt
 
-# Install pip3
-RUN apt-get install -y python3-pip
+# Install python 3.11
+RUN apt update -y \
+ && apt install -y \
+      build-essential \
+      zlib1g-dev \
+      libncurses5-dev \
+      libgdbm-dev \
+      libnss3-dev \
+      libssl-dev \
+      libreadline-dev \
+      libffi-dev \
+      libsqlite3-dev \
+      wget \
+      libbz2-dev \
+      lzma \
+      liblzma-dev \
+      libbz2-dev \
+ && mkdir -p /tmp/python-src \
+ && wget -qO- https://www.python.org/ftp/python/3.11.5/Python-3.11.5.tgz | \
+    tar xz --strip-components=1 -C /tmp/python-src \
+ && cd /tmp/python-src \
+ && ./configure --prefix=/opt/python3.11 \
+ && make install -j$(nproc)
 
-# Install Python Requirements from kuleuven-micas/snitch_cluster
-RUN git clone https://github.com/kuleuven-micas/snitch_cluster.git
-RUN cd snitch_cluster && pip3 install -r python-requirements.txt
-RUN cd ..
-RUN rm -rf snitch_cluster
+ENV PATH="${PATH}:/opt/python3.11/bin"
+
+# Install Python Requirements from kuleuven-micas/snax_cluster
+RUN git clone https://github.com/kuleuven-micas/snax_cluster.git && \
+    cd snax_cluster && pip3 install -r python-requirements.txt && \
+    cd .. && \
+    rm -rf snax_cluster
+
+# Install Python Requirements from kuleuven-micas/snax-mlir
+RUN git clone https://github.com/kuleuven-micas/snax-mlir.git && \
+    cd snax-mlir && pip3 install -r python-requirements.txt && \
+    cd .. && \
+    rm -rf snax-mlir
 
 # Install Oh-My-Zsh and Autocomplete Plugin
 RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
