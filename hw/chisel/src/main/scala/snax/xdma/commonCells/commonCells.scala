@@ -3,6 +3,8 @@ package snax.xdma.commonCells
 import chisel3._
 import chisel3.util._
 import chisel3.reflect.DataMirror
+import chisel3.internal.throwException
+import chisel3.internal.throwException
 
 class tcdmParam(
     val addrWidth: Int = 17,
@@ -97,8 +99,8 @@ class complexQueue(inputWidth: Int, outputWidth: Int, depth: Int) extends Module
     io.anyFull := queues.map(queue => ~(queue.io.enq.ready)).reduce(_ | _)
 }
 
-/** 
-  * The 1in, 2out Demux for Decoupled signal
+/** The 1in, 2out Demux for Decoupled signal
+  * As the demux is the 1in, 2out system, we don't need to consider the demux of bits
   */
 class DemuxDecoupled[T <: Data](dataType: T) extends Module {
     val io = IO(new Bundle {
@@ -108,21 +110,21 @@ class DemuxDecoupled[T <: Data](dataType: T) extends Module {
     })
 
     // Demux logic
+    io.out(0).bits := io.in.bits
+    io.out(1).bits := io.in.bits
+
     when(io.sel) {
         io.out(1).valid := io.in.valid
-        io.out(1).bits := io.in.bits
         io.in.ready := io.out(1).ready
         io.out(0).valid := false.B // Unselected output should not be valid
     }.otherwise {
         io.out(0).valid := io.in.valid
-        io.out(0).bits := io.in.bits
         io.in.ready := io.out(0).ready
         io.out(1).valid := false.B // Unselected output should not be valid
     }
 }
 
-/** 
-  * The 1in, 2out Demux for Decoupled signal
+/** The 1in, 2out Demux for Decoupled signal
   */
 class MuxDecoupled[T <: Data](dataType: T) extends Module {
     val io = IO(new Bundle {
@@ -145,10 +147,9 @@ class MuxDecoupled[T <: Data](dataType: T) extends Module {
     }
 }
 
-/** 
-  * The definition of <|> connector for decoupled signal
-  * It automatically determine the signal direction, connect leftward Decoupled signal and rightward Decoupled signal \
-  * and insert one level of pipeline in between to avoid long combinatorial datapath
+/** The definition of <|> connector for decoupled signal It automatically determine the signal
+  * direction, connect leftward Decoupled signal and rightward Decoupled signal \ and insert one
+  * level of pipeline in between to avoid long combinatorial datapath
   */
 object DecoupledBufferConnect {
     implicit class BufferedDecoupledConnectionOp[T <: Data](val left: DecoupledIO[T]) {
@@ -157,13 +158,19 @@ object DecoupledBufferConnect {
             right: DecoupledIO[T]
         )(implicit sourceInfo: chisel3.experimental.SourceInfo): Unit = {
             val buffer = Module(new Queue(chiselTypeOf(left.bits), entries = 1))
-            if (DataMirror.directionOf(left.bits) == ActualDirection.Input) { // Left is the input
+            if (
+              DataMirror.hasOuterFlip(left) == false && 
+              DataMirror.hasOuterFlip(right) == true
+            ) { // Left is the output
                 left <> buffer.io.enq
                 buffer.io.deq <> right
-            } else { // Right is the input
+            } else if (
+              DataMirror.hasOuterFlip(left) == true && 
+              DataMirror.hasOuterFlip(right) == false
+            ){ // Right is the input
                 right <> buffer.io.enq
                 buffer.io.deq <> left
-            }
+            } else throw new Exception("<|> cannot determine the direction at left and right")
         }
     }
 }

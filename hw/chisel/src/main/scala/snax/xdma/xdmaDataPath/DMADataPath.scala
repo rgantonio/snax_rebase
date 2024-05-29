@@ -12,8 +12,8 @@ import snax.xdma.xdmaStreamer.{ReaderWriterParam, AddressGenUnitCfgIO, Reader, W
 class DMADataPathParam(
     val readerparam: ReaderWriterParam,
     val writerparam: ReaderWriterParam,
-    val readerext: Seq[DMAExtension],
-    val writerext: Seq[DMAExtension]
+    val readerext: Seq[DMAExtension] = Seq[DMAExtension](),
+    val writerext: Seq[DMAExtension] = Seq[DMAExtension]()
 )
 
 // Todo: the decoupled signal cut should be added inbetween extensions to avoid long combinatorial path?
@@ -28,18 +28,24 @@ class DMADataPath(param: DMADataPathParam) extends Module {
         val writer_agu_cfg_i = Input(
           new AddressGenUnitCfgIO(param = param.writerparam.agu_param)
         ) // Buffered within AGU
-        val reader_ext_cfg_i = Input(
-          Vec(
-            param.readerext.map { i => i.userCsrNum }.reduce(_ + _) + param.readerext.length,
-            UInt(32.W)
-          )
-        ) // Buffered within Extension Base Module
-        val writer_ext_cfg_i = Input(
-          Vec(
-            param.writerext.map { i => i.userCsrNum }.reduce(_ + _) + param.writerext.length,
-            UInt(32.W)
-          )
-        ) // Buffered within Extension Base Module
+        val reader_ext_cfg_i = if (param.readerext.length != 0) {
+            Input(
+              Vec(
+                param.readerext.map { i => i.userCsrNum }.reduce(_ + _) + param.readerext.length,
+                UInt(32.W)
+              )
+            ) // Buffered within Extension Base Module
+        } else Input(Vec(0, UInt(32.W)))
+
+        val writer_ext_cfg_i = if (param.readerext.length != 0) {
+            Input(
+              Vec(
+                param.writerext.map { i => i.userCsrNum }.reduce(_ + _) + param.writerext.length,
+                UInt(32.W)
+              )
+            ) // Buffered within Extension Base Module
+        } else Input(Vec(0, UInt(32.W)))
+
         val loopBack_i = Input(Bool()) // Unbuffered
         // Two start signal will inform the new cfg is available, trigger agu, and inform all extension that a stream is coming
         val reader_start_i = Input(Bool())
@@ -95,6 +101,11 @@ class DMADataPath(param: DMADataPathParam) extends Module {
 
     val reader = Module(new Reader(param.readerparam))
     val writer = Module(new Writer(param.writerparam))
+
+    // Connect TCDM memory to reader and writer
+    reader.io.tcdm_req <> io.tcdm_reader.req
+    reader.io.tcdm_rsp <> io.tcdm_reader.rsp
+    writer.io.tcdm_req <> io.tcdm_writer.req
 
     // Connect the wire (ctrl plane)
     reader.io.cfg := io.reader_agu_cfg_i
@@ -199,7 +210,21 @@ class DMADataPath(param: DMADataPathParam) extends Module {
     writerMux.io.sel := io.loopBack_i
     readerDemux.io.in <|> reader_data_after_extension
     writerMux.io.out <|> writer_data_before_extension
+    // Why there is a problem? 
     readerDemux.io.out(1) <> writerMux.io.in(1)
     readerDemux.io.out(0) <> io.cluster_data_o
     writerMux.io.in(0) <> io.cluster_data_i
+}
+
+object DMADataPath_SystemVerilogEmitter extends App {
+    println(
+      getVerilogString(
+        new DMADataPath(
+          new DMADataPathParam(
+            readerparam = new ReaderWriterParam,
+            writerparam = new ReaderWriterParam
+          )
+        )
+      )
+    )
 }
