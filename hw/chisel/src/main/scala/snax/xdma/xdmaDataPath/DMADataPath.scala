@@ -1,4 +1,4 @@
-package snax.xdma.xdmaStreamer
+package snax.xdma.xdmaDataPath
 
 import chisel3._
 import chisel3.util._
@@ -7,6 +7,7 @@ import snax.utils._
 
 import snax.xdma.commonCells.DecoupledBufferConnect._
 import snax.xdma.commonCells._
+import snax.xdma.xdmaStreamer.{ReaderWriterParam, AddressGenUnitCfgIO, Reader, Writer}
 
 class DMADataPathParam(
     val readerparam: ReaderWriterParam,
@@ -15,8 +16,7 @@ class DMADataPathParam(
     val writerext: Seq[DMAExtension]
 )
 
-
-// Todo: the decoupled signal cut should be added inbetween extensions to avoid long combinatorial path? 
+// Todo: the decoupled signal cut should be added inbetween extensions to avoid long combinatorial path?
 // New operand difinition <|> in commonCells.scala
 
 class DMADataPath(param: DMADataPathParam) extends Module {

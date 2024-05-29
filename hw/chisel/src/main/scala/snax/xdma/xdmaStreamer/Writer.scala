@@ -15,7 +15,7 @@ class Writer(param: ReaderWriterParam) extends Module {
         val start = Input(Bool())
         // The module is busy if addressgen is busy or fifo in addressgen is not empty
         val busy = Output(Bool())
-        // The reader's buffer is empty
+        // Both the AGU FIFO and data FIFO are empty
         val bufferEmpty = Output(Bool())
     })
 
@@ -46,7 +46,7 @@ class Writer(param: ReaderWriterParam) extends Module {
     dataBuffer.io.in.head <> io.data
     io.busy := addressgen.io.busy | (~addressgen.io.bufferEmpty)
     // Debug Signal
-    io.bufferEmpty := addressgen.io.bufferEmpty
+    io.bufferEmpty := addressgen.io.bufferEmpty & dataBuffer.io.allEmpty
 }
 
 object WriterPrinter extends App {

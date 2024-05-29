@@ -1,0 +1,39 @@
+package snax.xdma.commonCells
+
+import chisel3._
+import chisel3.util._
+// Import Chiseltest
+import chiseltest._
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.flatspec.AnyFlatSpec
+// Import Random number generator
+import scala.util.Random
+// Import break support for loops
+import scala.util.control.Breaks.{breakable, break}
+import snax.utils._
+//TODO
+class emuTCDM(dataWidth: Int, maxDelay: Int) {
+    val tcdm_mem = collection.mutable.Map[Int, BigInt]()
+    val tcdmTerminated = false
+    def emuReader(
+        req: => DecoupledIO[TcdmReq],
+        rsp: => DecoupledIO[TcdmRsp],
+        clock: => Clock
+    ): Unit = {
+        breakable(
+          while (true) {
+              if (tcdmTerminated) break()
+              val random_delay = Random.between(0, maxDelay)
+              if (random_delay > 1) {
+                  req.ready.poke(false)
+                  clock.step(random_delay)
+                  req.ready.poke(true)
+              } else req.ready.poke(true)
+
+              if (req.valid.peekBoolean()) {
+
+              }
+          }
+        )
+    }
+}
