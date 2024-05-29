@@ -36,7 +36,7 @@ RUN wget https://github.com/pulp-platform/riscv-isa-sim/releases/download/snitch
     tar xzf snitch-spike-dasm-0.1.0-x86_64-linux-gnu-ubuntu18.04.tar.gz && \
     rm snitch-spike-dasm-0.1.0-x86_64-linux-gnu-ubuntu18.04.tar.gz
 
-# Install LLVM 17 + MLIR + clang-format
+# Install LLVM 17 + MLIR + clang-format - This also installs python3
 RUN wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 17 && rm llvm.sh
 RUN apt-get -y install mlir-17-tools
 RUN apt-get -y install clang-format-17
@@ -97,32 +97,8 @@ RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | tee /etc/ap
 
 RUN apt-get install -y sbt
 
-# Install python 3.11
-RUN apt update -y \
- && apt install -y \
-      build-essential \
-      zlib1g-dev \
-      libncurses5-dev \
-      libgdbm-dev \
-      libnss3-dev \
-      libssl-dev \
-      libreadline-dev \
-      libffi-dev \
-      libsqlite3-dev \
-      wget \
-      libbz2-dev \
-      lzma \
-      liblzma-dev \
-      libbz2-dev \
- && mkdir -p /tmp/python-src \
- && wget -qO- https://www.python.org/ftp/python/3.11.5/Python-3.11.5.tgz | \
-    tar xz --strip-components=1 -C /tmp/python-src \
- && cd /tmp/python-src \
- && ./configure --prefix=/opt/python3.11 \
- && make install -j$(nproc)
-
-ENV PATH="${PATH}:/opt/python3.11/bin"
-ENV PYTHONPATH="/opt/python3.11/lib/python3.11"
+RUN apt-get install -y python3-pip && \
+    pip3 install --upgrade pip # otherwise git commit install from requirements.txt does not work
 
 # Install Python Requirements from kuleuven-micas/snax_cluster
 RUN git clone https://github.com/kuleuven-micas/snax_cluster.git && \
