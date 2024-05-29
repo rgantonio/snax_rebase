@@ -128,6 +128,12 @@ RUN git clone https://github.com/kuleuven-micas/snitch_cluster /src
 RUN cd /src && git submodule update --init
 RUN cd /src && sbt package
 RUN cd /src && \
+ make DEBUG=ON sw -j$(nproc) \
+ -C target/snitch_cluster \
+ SELECT_TOOLCHAIN=llvm-generic \
+ SELECT_RUNTIME=rtl-generic \
+ CFG_OVERRIDE=cfg/snax-mac.hjson
+RUN cd /src && \
   make -C target/snitch_cluster bin/snitch_cluster.vlt \
   CFG_OVERRIDE=cfg/snax-mac.hjson -j $(nproc)
 
@@ -137,6 +143,12 @@ RUN git clone https://github.com/kuleuven-micas/snitch_cluster /src
 RUN cd /src && git submodule update --init
 RUN cd /src && sbt package
 RUN cd /src && \
+ make DEBUG=ON sw -j$(nproc) \
+ -C target/snitch_cluster \
+ SELECT_TOOLCHAIN=llvm-generic \
+ SELECT_RUNTIME=rtl-generic \
+ CFG_OVERRIDE=cfg/snax-gemm.hjson
+RUN cd /src && \
   make -C target/snitch_cluster bin/snitch_cluster.vlt \
   CFG_OVERRIDE=cfg/snax-gemm.hjson -j $(nproc)
 
@@ -145,6 +157,20 @@ FROM base as target
 
 COPY --from=snax-mac /src/target/snitch_cluster/bin/snitch_cluster.vlt /opt/snax-mac-rtl/bin/snitch_cluster.vlt
 COPY --from=snax-mac /src/sw/snRuntime /opt/snax-mac/sw/snRuntime
+COPY --from=snax-mac /src/target/snitch_cluster/sw/runtime/rtl /opt/snax-mac/target/snitch_cluster/sw/runtime/rtl
+COPY --from=snax-mac /src/target/snitch_cluster/sw/runtime/rtl-generic /opt/snax-mac/target/snitch_cluster/sw/runtime/rtl-generic
+COPY --from=snax-mac /src/target/snitch_cluster/sw/runtime/common /opt/snax-mac/target/snitch_cluster/sw/runtime/common
+COPY --from=snax-mac /src/target/snitch_cluster/sw/snax/ /opt/snax-mac/target/snitch_cluster/sw/snax
+COPY --from=snax-mac /src/sw/math/ /opt/snax-mac/sw/math/
+COPY --from=snax-mac /src/sw/deps/riscv-opcodes /opt/snax-mac/sw/deps/riscv-opcodes
+COPY --from=snax-mac /src/sw/deps/printf /opt/snax-mac/sw/deps/printf
 
 COPY --from=snax-gemm /src/target/snitch_cluster/bin/snitch_cluster.vlt /opt/snax-gemm/bin/snitch_cluster.vlt
 COPY --from=snax-gemm /src/sw/snRuntime /opt/snax-gemm/sw/snRuntime
+COPY --from=snax-gemm /src/target/snitch_cluster/sw/runtime/rtl /opt/snax-gemm/target/snitch_cluster/sw/runtime/rtl
+COPY --from=snax-gemm /src/target/snitch_cluster/sw/runtime/rtl-generic /opt/snax-gemm/target/snitch_cluster/sw/runtime/rtl-generic
+COPY --from=snax-gemm /src/target/snitch_cluster/sw/runtime/common /opt/snax-gemm/target/snitch_cluster/sw/runtime/common
+COPY --from=snax-gemm /src/target/snitch_cluster/sw/snax/ /opt/snax-gemm/target/snitch_cluster/sw/snax
+COPY --from=snax-gemm /src/sw/math/ /opt/snax-gemm/sw/math/
+COPY --from=snax-gemm /src/sw/deps/riscv-opcodes /opt/snax-gemm/sw/deps/riscv-opcodes
+COPY --from=snax-gemm /src/sw/deps/printf /opt/snax-gemm/sw/deps/printf
