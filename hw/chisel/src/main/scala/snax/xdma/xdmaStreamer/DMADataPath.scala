@@ -15,6 +15,10 @@ class DMADataPathParam(
     val writerext: Seq[DMAExtension]
 )
 
+
+// Todo: the decoupled signal cut should be added inbetween extensions to avoid long combinatorial path? 
+// New operand difinition <|> in commonCells.scala
+
 class DMADataPath(param: DMADataPathParam) extends Module {
     val io = IO(new Bundle {
         // All config signal for reader and writer
