@@ -9,6 +9,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import chiseltest.internal.TesterThreadList
 import scala.util.Random
 
+import snax.xdma.designParams._
+
 object romGenerator {
     var generatedData = Seq[BigInt]()
     def generateContent(length: Int, width: Int): Unit = {

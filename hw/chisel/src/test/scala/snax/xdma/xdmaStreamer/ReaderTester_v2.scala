@@ -10,6 +10,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import scala.util.Random
 // Import break support for loops
 import scala.util.control.Breaks.{breakable, break}
+import snax.xdma.designParams._
 
 class Reader_Tester_v2 extends AnyFreeSpec with ChiselScalatestTester {
     "Reader's behavior is as expected" in test(

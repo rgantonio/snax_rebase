@@ -7,14 +7,8 @@ import snax.utils._
 
 import snax.xdma.commonCells.DecoupledBufferConnect._
 import snax.xdma.commonCells._
-import snax.xdma.xdmaStreamer.{ReaderWriterParam, AddressGenUnitCfgIO, Reader, Writer}
-
-class DMADataPathParam(
-    val readerparam: ReaderWriterParam,
-    val writerparam: ReaderWriterParam,
-    val readerext: Seq[DMAExtension] = Seq[DMAExtension](),
-    val writerext: Seq[DMAExtension] = Seq[DMAExtension]()
-)
+import snax.xdma.xdmaStreamer.{Reader, Writer, AddressGenUnitCfgIO}
+import snax.xdma.designParams._
 
 // Todo: the decoupled signal cut should be added inbetween extensions to avoid long combinatorial path?
 // New operand difinition <|> in commonCells.scala

@@ -4,6 +4,8 @@ import chisel3._
 import org.scalatest.flatspec.AnyFlatSpec
 import chiseltest._
 
+import snax.xdma.designParams._
+
 class basicCounter_Tester extends AnyFlatSpec with ChiselScalatestTester {
     println(getVerilogString(new basicCounter(8)))
     "The basic counter" should " pass" in {

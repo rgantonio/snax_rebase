@@ -3,18 +3,8 @@ package snax.xdma.xdmaStreamer
 import chisel3._
 import chisel3.util._
 
-class AddressGenUnitParam (
-    val dimension: Int, 
-    val addressWidth: Int, 
-    val spatialUnrollingFactor: Int, 
-    val outputBufferDepth: Int
-)
+import snax.xdma.designParams._
 
-object AddressGenUnitParam {
-    // The Very Simple instantiation of the Param    
-    def apply() = new AddressGenUnitParam(dimension = 2, addressWidth = 48, spatialUnrollingFactor = 8, outputBufferDepth = 8)
-    def apply(dimension: Int, addressWidth: Int, spatialUnrollingFactor: Int, outputBufferDepth: Int) = new AddressGenUnitParam(dimension = dimension, addressWidth = addressWidth, spatialUnrollingFactor = spatialUnrollingFactor, outputBufferDepth = outputBufferDepth)
-}
 
 class basicCounter(width: Int) extends Module {
     val io = IO(new Bundle {

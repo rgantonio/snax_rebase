@@ -4,34 +4,9 @@ import chisel3._
 import chisel3.util._
 
 import snax.utils._
-import snax.xdma.commonCells._
+import snax.xdma.designParams._
 
 // The reader takes the address from the AGU, offer to requestor, and responser collect the data from TCDM and pushed to FIFO packer to recombine into 512 bit data
-
-class ReaderWriterParam(
-    dimension: Int = 3,
-    tcdmAddressWidth: Int = 17,
-    tcdmDataWidth: Int = 64,
-    numChannel: Int = 8,
-    addressBufferDepth: Int = 8,
-    dataBufferDepth: Int = 8
-) {
-    val agu_param = AddressGenUnitParam(
-      dimension = dimension,
-      addressWidth = tcdmAddressWidth,
-      spatialUnrollingFactor = numChannel,
-      outputBufferDepth = addressBufferDepth
-    )
-
-    val tcdm_param = tcdmParam(
-      addrWidth = tcdmAddressWidth,
-      dataWidth = tcdmDataWidth,
-      numChannel = numChannel
-    )
-
-    // Data buffer's depth
-    val bufferDepth = dataBufferDepth
-}
 
 class Reader(param: ReaderWriterParam) extends Module {
     val io = IO(new Bundle {

@@ -6,18 +6,6 @@ import chisel3.reflect.DataMirror
 import chisel3.internal.throwException
 import chisel3.internal.throwException
 
-class tcdmParam(
-    val addrWidth: Int = 17,
-    val dataWidth: Int = 64,
-    val numChannel: Int = 8
-)
-
-object tcdmParam {
-    def apply(addrWidth: Int, dataWidth: Int, numChannel: Int) =
-        new tcdmParam(addrWidth, dataWidth, numChannel)
-    def apply() = new tcdmParam(addrWidth = 17, dataWidth = 64, numChannel = 8)
-}
-
 /** The complexQueue to do multiple channel in / single concatenated out or single channel in /
   * multiple splitted out fifo The user defined params include:
   * @param inputWidth:

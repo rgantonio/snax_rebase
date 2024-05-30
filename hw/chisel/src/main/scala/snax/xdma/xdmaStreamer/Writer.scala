@@ -6,6 +6,8 @@ import chisel3.util._
 import snax.utils._
 import snax.xdma.commonCells._
 
+import snax.xdma.designParams._
+
 class Writer(param: ReaderWriterParam) extends Module {
     val io = IO(new Bundle {
         val cfg = Input(new AddressGenUnitCfgIO(param.agu_param))
