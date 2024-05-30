@@ -169,7 +169,7 @@ COPY --from=snax-mac /src/sw/math/ /opt/snax-mac/sw/math/
 COPY --from=snax-mac /src/sw/deps/riscv-opcodes /opt/snax-mac/sw/deps/riscv-opcodes
 COPY --from=snax-mac /src/sw/deps/printf /opt/snax-mac/sw/deps/printf
 
-COPY --from=snax-gemm /src/target/snitch_cluster/bin/snitch_cluster.vlt /opt/snax-gemm/bin/snitch_cluster.vlt
+COPY --from=snax-gemm /src/target/snitch_cluster/bin/snitch_cluster.vlt /opt/snax-gemm-rtl/bin/snitch_cluster.vlt
 COPY --from=snax-gemm /src/sw/snRuntime /opt/snax-gemm/sw/snRuntime
 COPY --from=snax-gemm /src/target/snitch_cluster/sw/runtime/rtl /opt/snax-gemm/target/snitch_cluster/sw/runtime/rtl
 COPY --from=snax-gemm /src/target/snitch_cluster/sw/runtime/rtl-generic /opt/snax-gemm/target/snitch_cluster/sw/runtime/rtl-generic
