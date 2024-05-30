@@ -112,6 +112,10 @@ RUN git clone https://github.com/kuleuven-micas/snax-mlir.git && \
     cd .. && \
     rm -rf snax-mlir
 
+RUN mkdir -p /opt/snitch-llvm \
+ && wget -qO- https://github.com/pulp-platform/llvm-project/releases/download/0.12.0/riscv32-pulp-llvm-ubuntu1804-0.12.0.tar.gz | \
+    tar xz --strip-components=1 -C /opt/snitch-llvm
+
 # Install Oh-My-Zsh and Autocomplete Plugin
 RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 RUN git clone https://github.com/zsh-users/zsh-autosuggestions.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
