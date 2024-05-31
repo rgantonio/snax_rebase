@@ -25,7 +25,7 @@ class DMADataPath(param: DMADataPathParam) extends Module {
         val reader_ext_cfg_i = if (param.readerext.length != 0) {
             Input(
               Vec(
-                param.readerext.map { i => i.userCsrNum }.reduce(_ + _) + param.readerext.length,
+                param.readerext.map { i => i.io.csr_i.length }.reduce(_ + _),
                 UInt(32.W)
               )
             ) // Buffered within Extension Base Module
@@ -34,7 +34,7 @@ class DMADataPath(param: DMADataPathParam) extends Module {
         val writer_ext_cfg_i = if (param.readerext.length != 0) {
             Input(
               Vec(
-                param.writerext.map { i => i.userCsrNum }.reduce(_ + _) + param.writerext.length,
+                param.writerext.map { i => i.io.csr_i.length }.reduce(_ + _),
                 UInt(32.W)
               )
             ) // Buffered within Extension Base Module
@@ -103,12 +103,12 @@ class DMADataPath(param: DMADataPathParam) extends Module {
 
     // Connect the wire (ctrl plane)
     reader.io.cfg := io.reader_agu_cfg_i
-    io.reader_busy_o := reader.io.busy
     reader.io.start := io.reader_start_i
+    // reader_buffer_o is connected later as the busy signal from the signal is needed
 
     writer.io.cfg := io.writer_agu_cfg_i
     io.writer_busy_o := writer.io.busy
-    writer.io.start := io.writer_start_i
+    // writer_buffer_o is connected later as the busy signal from the signal is needed
 
     // Connect the extension
     // Reader Side

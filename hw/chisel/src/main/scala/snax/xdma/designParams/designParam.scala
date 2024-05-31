@@ -70,3 +70,15 @@ class DMADataPathParam(
     val readerext: Seq[DMAExtension] = Seq[DMAExtension](),
     val writerext: Seq[DMAExtension] = Seq[DMAExtension]()
 )
+
+class DMAExtensionParam(
+    val userCsrNum: Int = 0, 
+    val dataWidth: Int = 512
+)
+
+class DMACtrlParam(
+    val readerparam: ReaderWriterParam,
+    val writerparam: ReaderWriterParam,
+    val readerextparam: Seq[DMAExtensionParam] = Seq[DMAExtensionParam](),
+    val writerextparam: Seq[DMAExtensionParam] = Seq[DMAExtensionParam]()
+)
