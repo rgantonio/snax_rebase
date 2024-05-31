@@ -1,4 +1,4 @@
-package snax.xdma.xdmaDataPath
+package snax.xdma.xdmaFrontend
 
 import chisel3._
 import chisel3.util._
@@ -11,6 +11,7 @@ import scala.util.Random
 // Import break support for loops
 import scala.util.control.Breaks.{breakable, break}
 import snax.xdma.designParams._
+import snax.xdma.xdmaFrontend.DMADataPath
 
 
 class ReaderWriterTesterParam(

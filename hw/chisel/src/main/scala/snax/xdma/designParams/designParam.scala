@@ -9,9 +9,9 @@ package snax.xdma.designParams
  // tcdm Params
 
 class tcdmParam(
-    val addrWidth: Int = 17,
-    val dataWidth: Int = 64,
-    val numChannel: Int = 8
+    val addrWidth: Int = 17,    // 128kB tcdm size
+    val dataWidth: Int = 64,    // Connect to narrow xbar
+    val numChannel: Int = 8     // With eight channels
 )
 
 object tcdmParam {
@@ -63,7 +63,7 @@ class ReaderWriterParam(
 
 
 // DMA Params
-import snax.xdma.xdmaDataPath._
+import snax.xdma.xdmaFrontend.DMAExtension
 class DMADataPathParam(
     val readerparam: ReaderWriterParam,
     val writerparam: ReaderWriterParam,
