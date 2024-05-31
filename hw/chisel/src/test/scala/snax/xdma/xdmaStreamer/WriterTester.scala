@@ -10,6 +10,10 @@ import scala.util.Random
 // Import break support for loops
 import scala.util.control.Breaks.{breakable, break}
 
+import snax.xdma.designParams._
+
+
+
 case class DmaWriteTransaction(data: BigInt, delay: Int)
 
 class ReaderWriterTesterParam(
