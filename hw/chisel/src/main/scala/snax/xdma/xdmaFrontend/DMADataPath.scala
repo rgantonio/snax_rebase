@@ -6,6 +6,8 @@ import chisel3.util._
 import snax.utils._
 
 import snax.xdma.commonCells.DecoupledBufferConnect._
+import snax.xdma.commonCells.BitsConcat._
+
 import snax.xdma.commonCells._
 import snax.xdma.xdmaStreamer.{Reader, Writer, AddressGenUnitCfgIO}
 import snax.xdma.designParams._
@@ -13,36 +15,50 @@ import snax.xdma.designParams._
 // Todo: the decoupled signal cut should be added inbetween extensions to avoid long combinatorial path?
 // New operand difinition <|> in commonCells.scala
 
-//
-// class ReaderWriterDataPathConfig()
+class ReaderWriterCfgIO(param: ReaderWriterDataPathParam) extends Bundle {
+    val agu_cfg = new AddressGenUnitCfgIO(param = param.rwParam.agu_param) // Buffered within AGU
+    val ext_cfg = if (param.extParam.length != 0) {
+        Vec(
+          param.extParam.map { i => i.io.csr_i.length }.reduce(_ + _),
+          UInt(32.W)
+        ) // Buffered within Extension Base Module
+    } else Vec(0, UInt(32.W))
+
+    // The config forwarding technics is easy to be implemented: Just by reading agu_cfg.Ptr, the destination can be determined
+    // However, the data forwarding is still challenging: Shall we use the current DMA to move the data? (I suggest that we do this in the initial implementation)
+    // Serialize function to convert config into one long UInt
+    def serialize(): UInt = {
+        ext_cfg.asUInt ++ agu_cfg.Bounds.asUInt ++ agu_cfg.Strides.asUInt ++ agu_cfg.Ptr
+    }
+
+    def deserialize(data: UInt): Unit = {
+        var remainingData = data
+
+        // Assigning Ptr
+        agu_cfg.Ptr := remainingData(agu_cfg.Ptr.getWidth - 1, 0)
+        remainingData = remainingData(remainingData.getWidth - 1, agu_cfg.Ptr.getWidth)
+
+        // Assigning Strides
+        agu_cfg.Strides := remainingData(agu_cfg.Strides.asUInt.getWidth - 1, 0)
+            .asTypeOf(agu_cfg.Strides)
+        remainingData = remainingData(remainingData.getWidth - 1, agu_cfg.Strides.asUInt.getWidth)
+
+        // Assigning Bounds
+        agu_cfg.Bounds := remainingData(agu_cfg.Strides.asUInt.getWidth - 1, 0)
+            .asTypeOf(agu_cfg.Bounds)
+        remainingData = remainingData(remainingData.getWidth - 1, agu_cfg.Bounds.asUInt.getWidth)
+
+        // Assigning ext_cfg
+        ext_cfg := remainingData(ext_cfg.asUInt.getWidth - 1, 0).asTypeOf(ext_cfg)
+    }
+}
 
 class DMADataPath(readerparam: ReaderWriterDataPathParam, writerparam: ReaderWriterDataPathParam)
     extends Module {
     val io = IO(new Bundle {
         // All config signal for reader and writer
-        val reader_agu_cfg_i = Input(
-          new AddressGenUnitCfgIO(param = readerparam.rwParam.agu_param)
-        ) // Buffered within AGU
-        val writer_agu_cfg_i = Input(
-          new AddressGenUnitCfgIO(param = writerparam.rwParam.agu_param)
-        ) // Buffered within AGU
-        val reader_ext_cfg_i = if (readerparam.extParam.length != 0) {
-            Input(
-              Vec(
-                readerparam.extParam.map { i => i.io.csr_i.length }.reduce(_ + _),
-                UInt(32.W)
-              )
-            ) // Buffered within Extension Base Module
-        } else Input(Vec(0, UInt(32.W)))
-
-        val writer_ext_cfg_i = if (writerparam.extParam.length != 0) {
-            Input(
-              Vec(
-                writerparam.extParam.map { i => i.io.csr_i.length }.reduce(_ + _),
-                UInt(32.W)
-              )
-            ) // Buffered within Extension Base Module
-        } else Input(Vec(0, UInt(32.W)))
+        val reader_cfg = Input(new ReaderWriterCfgIO(readerparam))
+        val writer_cfg = Input(new ReaderWriterCfgIO(writerparam))
 
         val loopBack_i = Input(Bool()) // Unbuffered
         // Two start signal will inform the new cfg is available, trigger agu, and inform all extension that a stream is coming
@@ -108,11 +124,11 @@ class DMADataPath(readerparam: ReaderWriterDataPathParam, writerparam: ReaderWri
     writer.io.tcdm_req <> io.tcdm_writer.req
 
     // Connect the wire (ctrl plane)
-    reader.io.cfg := io.reader_agu_cfg_i
+    reader.io.cfg := io.reader_cfg.agu_cfg
     reader.io.start := io.reader_start_i
     // reader_busy_o is connected later as the busy signal from the signal is needed
 
-    writer.io.cfg := io.writer_agu_cfg_i
+    writer.io.cfg := io.writer_cfg.agu_cfg
     writer.io.start := io.writer_start_i
     // writer_busy_o is connected later as the busy signal from the signal is needed
 
@@ -128,7 +144,7 @@ class DMADataPath(readerparam: ReaderWriterDataPathParam, writerparam: ReaderWri
         // There is some extension available: connect them
         // Connect CSR interface
         var remainingCSR =
-            io.reader_ext_cfg_i.toIndexedSeq // Give an alias to all extension's csr for a easier manipulation
+            io.reader_cfg.ext_cfg.toIndexedSeq // Give an alias to all extension's csr for a easier manipulation
         for (i <- readerparam.extParam) {
             i.io.csr_i := remainingCSR.take(i.io.csr_i.length)
             remainingCSR = remainingCSR.drop(i.io.csr_i.length)
@@ -173,7 +189,7 @@ class DMADataPath(readerparam: ReaderWriterDataPathParam, writerparam: ReaderWri
         // There is some extension available: connect them
         // Connect CSR interface
         var remainingCSR =
-            io.writer_ext_cfg_i.toIndexedSeq // Give an alias to all extension's csr for a easier manipulation
+            io.writer_cfg.ext_cfg.toIndexedSeq // Give an alias to all extension's csr for a easier manipulation
         for (i <- writerparam.extParam) {
             i.io.csr_i := remainingCSR.take(i.io.csr_i.length)
             remainingCSR = remainingCSR.drop(i.io.csr_i.length)
@@ -220,6 +236,8 @@ class DMADataPath(readerparam: ReaderWriterDataPathParam, writerparam: ReaderWri
     writerMux.io.in(0) <> io.cluster_data_i
 }
 
+// Below is the class to determine if chisel generate Verilog correctly
+
 object DMADataPath_SystemVerilogEmitter extends App {
     println(
       getVerilogString(
@@ -231,6 +249,31 @@ object DMADataPath_SystemVerilogEmitter extends App {
           writerparam = new ReaderWriterDataPathParam(
             rwParam = new ReaderWriterParam,
             extParam = Seq()
+          )
+        )
+      )
+    )
+}
+
+class Serializer_Deserializer_Tester(param: ReaderWriterDataPathParam) extends Module {
+    val io = IO(new Bundle {
+        val in = Input(new ReaderWriterCfgIO(param))
+        val out_serialized = Output(UInt(512.W))
+        val out = Output(new ReaderWriterCfgIO(param))
+    })
+
+    io.out_serialized := io.in.serialize()
+    val out = Wire(new ReaderWriterCfgIO(param))
+    out.deserialize(io.out_serialized)
+    io.out := out
+}
+
+object Serializer_Deserializer_Tester_SystemVerilogEmitter extends App {
+    println(
+      getVerilogString(
+        new Serializer_Deserializer_Tester(
+          new ReaderWriterDataPathParam(
+            rwParam = new ReaderWriterParam
           )
         )
       )

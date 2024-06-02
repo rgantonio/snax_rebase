@@ -162,3 +162,12 @@ object DecoupledBufferConnect {
         }
     }
 }
+
+object BitsConcat {
+    implicit class UIntConcatOp[T <: Bits](val left: T) {
+        // This class defines the implicit class for the new operand <|>
+        def ++(
+            right: T
+        )(implicit sourceInfo: chisel3.experimental.SourceInfo): T =  Cat(left, right).asInstanceOf[T]
+    }
+}

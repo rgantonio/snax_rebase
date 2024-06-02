@@ -77,21 +77,22 @@ class DMADataPathTester extends AnyFreeSpec with ChiselScalatestTester {
         // Start up the system
         dut.clock.step(10)
         // Poke the reader agu
-        dut.io.reader_agu_cfg_i.Ptr.poke(readerTestingParams.address)
-        dut.io.reader_agu_cfg_i.Bounds(0).poke(readerTestingParams.spatial_bound)
-        dut.io.reader_agu_cfg_i.Bounds(1).poke(readerTestingParams.temporal_bound(0))
-        dut.io.reader_agu_cfg_i.Bounds(2).poke(readerTestingParams.temporal_bound(1))
-        dut.io.reader_agu_cfg_i.Strides(0).poke(readerTestingParams.spatial_stride)
-        dut.io.reader_agu_cfg_i.Strides(1).poke(readerTestingParams.temporal_stride(0))
-        dut.io.reader_agu_cfg_i.Strides(2).poke(readerTestingParams.temporal_stride(1))
+        dut.io.reader_cfg.agu_cfg.Ptr.poke(readerTestingParams.address)
+        dut.io.reader_cfg.agu_cfg.Bounds(0).poke(readerTestingParams.spatial_bound)
+        dut.io.reader_cfg.agu_cfg.Bounds(1).poke(readerTestingParams.temporal_bound(0))
+        dut.io.reader_cfg.agu_cfg.Bounds(2).poke(readerTestingParams.temporal_bound(1))
+        dut.io.reader_cfg.agu_cfg.Strides(0).poke(readerTestingParams.spatial_stride)
+        dut.io.reader_cfg.agu_cfg.Strides(1).poke(readerTestingParams.temporal_stride(0))
+        dut.io.reader_cfg.agu_cfg.Strides(2).poke(readerTestingParams.temporal_stride(1))
         // Poke the write agu
-        dut.io.writer_agu_cfg_i.Ptr.poke(writerTestingParams.address)
-        dut.io.writer_agu_cfg_i.Bounds(0).poke(writerTestingParams.spatial_bound)
-        dut.io.writer_agu_cfg_i.Bounds(1).poke(writerTestingParams.temporal_bound(0))
-        dut.io.writer_agu_cfg_i.Bounds(2).poke(writerTestingParams.temporal_bound(1))
-        dut.io.writer_agu_cfg_i.Strides(0).poke(writerTestingParams.spatial_stride)
-        dut.io.writer_agu_cfg_i.Strides(1).poke(writerTestingParams.temporal_stride(0))
-        dut.io.writer_agu_cfg_i.Strides(2).poke(writerTestingParams.temporal_stride(1))
+
+        dut.io.writer_cfg.agu_cfg.Ptr.poke(writerTestingParams.address)
+        dut.io.writer_cfg.agu_cfg.Bounds(0).poke(writerTestingParams.spatial_bound)
+        dut.io.writer_cfg.agu_cfg.Bounds(1).poke(writerTestingParams.temporal_bound(0))
+        dut.io.writer_cfg.agu_cfg.Bounds(2).poke(writerTestingParams.temporal_bound(1))
+        dut.io.writer_cfg.agu_cfg.Strides(0).poke(writerTestingParams.spatial_stride)
+        dut.io.writer_cfg.agu_cfg.Strides(1).poke(writerTestingParams.temporal_stride(0))
+        dut.io.writer_cfg.agu_cfg.Strides(2).poke(writerTestingParams.temporal_stride(1))
         // Poke the loop back to ture since we are only testing w/o any axi transactions
         dut.io.loopBack_i.poke(true)
         // Poke the cluster_data_i to zero
