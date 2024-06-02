@@ -26,11 +26,11 @@ class ReaderWriterTesterParam(
 class DMADataPathTester extends AnyFreeSpec with ChiselScalatestTester {
     "DMA Data Path behavior is as expected" in test(
       new DMADataPath(
-        new DMADataPathParam(
-          readerparam = new ReaderWriterParam(),
-          writerparam = new ReaderWriterParam(),
-          readerext = Seq.empty,
-          writerext = Seq.empty
+        readerparam = new ReaderWriterDataPathParam(
+          rwParam = new ReaderWriterParam
+        ), 
+        writerparam = new ReaderWriterDataPathParam(
+          rwParam = new ReaderWriterParam
         )
       )
     ).withAnnotations(Seq(WriteVcdAnnotation, VerilatorBackendAnnotation)) { dut =>

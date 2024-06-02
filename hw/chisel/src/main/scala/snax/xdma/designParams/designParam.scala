@@ -64,11 +64,11 @@ class ReaderWriterParam(
 
 // DMA Params
 import snax.xdma.xdmaFrontend.DMAExtension
-class DMADataPathParam(
-    val readerparam: ReaderWriterParam,
-    val writerparam: ReaderWriterParam,
-    val readerext: Seq[DMAExtension] = Seq[DMAExtension](),
-    val writerext: Seq[DMAExtension] = Seq[DMAExtension]()
+class ReaderWriterDataPathParam(
+    val rwParam: ReaderWriterParam,
+    // val writerparam: ReaderWriterParam,
+    val extParam: Seq[DMAExtension] = Seq[DMAExtension](),
+    // val writerext: Seq[DMAExtension] = Seq[DMAExtension]()
 )
 
 class DMAExtensionParam(
