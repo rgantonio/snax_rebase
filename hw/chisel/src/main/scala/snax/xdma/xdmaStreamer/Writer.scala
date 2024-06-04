@@ -31,7 +31,7 @@ class Writer(param: ReaderWriterParam) extends Module {
         isReader = false
     ))
 
-    val dataBuffer = Module(new snax.xdma.commonCells.complexQueue(
+    val dataBuffer = Module(new snax.xdma.commonCells.complexQueue_Concat(
         inputWidth = param.tcdm_param.dataWidth * param.tcdm_param.numChannel, 
         outputWidth = param.tcdm_param.dataWidth, 
         depth = param.bufferDepth

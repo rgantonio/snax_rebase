@@ -64,7 +64,7 @@ class AddressGenUnit(param: AddressGenUnitParam) extends Module {
     counter.io.reset := io.start
 
     // Create the outputBuffer to store the generated address: one input + spatialUnrollingFactor outputs
-    val outputBuffer = Module(new snax.xdma.commonCells.complexQueue(inputWidth = io.addr.head.bits.getWidth * param.spatialUnrollingFactor, outputWidth = io.addr.head.bits.getWidth, depth = param.outputBufferDepth))
+    val outputBuffer = Module(new snax.xdma.commonCells.complexQueue_Concat(inputWidth = io.addr.head.bits.getWidth * param.spatialUnrollingFactor, outputWidth = io.addr.head.bits.getWidth, depth = param.outputBufferDepth))
 
     // The FSM to record if the AddressGenUnit is busy
     val sBUSY::sIDLE::Nil = Enum(2)

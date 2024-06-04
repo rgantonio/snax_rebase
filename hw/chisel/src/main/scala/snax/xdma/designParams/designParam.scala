@@ -11,13 +11,14 @@ package snax.xdma.designParams
 class tcdmParam(
     val addrWidth: Int = 17,    // 128kB tcdm size
     val dataWidth: Int = 64,    // Connect to narrow xbar
-    val numChannel: Int = 8     // With eight channels
+    val numChannel: Int = 8,    // With eight channels
+    val tcdmSize: Int = 128     // The size of tcdm
 )
 
 object tcdmParam {
-    def apply(addrWidth: Int, dataWidth: Int, numChannel: Int) =
-        new tcdmParam(addrWidth, dataWidth, numChannel)
-    def apply() = new tcdmParam(addrWidth = 17, dataWidth = 64, numChannel = 8)
+    def apply(addrWidth: Int, dataWidth: Int, numChannel: Int, tcdmSize: Int) =
+        new tcdmParam(addrWidth, dataWidth, numChannel, tcdmSize)
+    def apply() = new tcdmParam(addrWidth = 17, dataWidth = 64, numChannel = 8, tcdmSize = 128)
 }
 
 // Streamer Params
@@ -40,6 +41,7 @@ class ReaderWriterParam(
     dimension: Int = 3,
     tcdmAddressWidth: Int = 17,
     tcdmDataWidth: Int = 64,
+    tcdmSize: Int = 128, 
     numChannel: Int = 8,
     addressBufferDepth: Int = 8,
     dataBufferDepth: Int = 8
@@ -54,7 +56,8 @@ class ReaderWriterParam(
     val tcdm_param = tcdmParam(
       addrWidth = tcdmAddressWidth,
       dataWidth = tcdmDataWidth,
-      numChannel = numChannel
+      numChannel = numChannel, 
+      tcdmSize = tcdmSize
     )
 
     // Data buffer's depth

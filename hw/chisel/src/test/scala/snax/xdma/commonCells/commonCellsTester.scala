@@ -6,7 +6,7 @@ import chiseltest._
 
 class complexQueue_Tester extends AnyFlatSpec with ChiselScalatestTester {
     "The test of complexQueue (64->512)" should " pass" in {
-        test(new complexQueue(64, 512, 16)).withAnnotations(Seq(WriteVcdAnnotation)) {dut =>
+        test(new complexQueue_Concat(64, 512, 16)).withAnnotations(Seq(WriteVcdAnnotation)) {dut =>
             // Can store 128 data
             //Writing data
             for (i <- 0 until 128) {
@@ -29,7 +29,7 @@ class complexQueue_Tester extends AnyFlatSpec with ChiselScalatestTester {
     }
 
     "The test of complexQueue (512->64)" should " pass" in {
-        test(new complexQueue(512, 64, 16)).withAnnotations(Seq(WriteVcdAnnotation)) {dut =>
+        test(new complexQueue_Concat(512, 64, 16)).withAnnotations(Seq(WriteVcdAnnotation)) {dut =>
             // Can store 16 512-bit data
             //Writing data
             for (i <- 0 until 16) {

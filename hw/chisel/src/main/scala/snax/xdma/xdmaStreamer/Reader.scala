@@ -57,7 +57,7 @@ class Reader(param: ReaderWriterParam) extends Module {
 
     // Output FIFOs to combine the data from the output of responsers
     val dataBuffer = Module(
-      new snax.xdma.commonCells.complexQueue(
+      new snax.xdma.commonCells.complexQueue_Concat(
         inputWidth = param.tcdm_param.dataWidth,
         outputWidth = param.tcdm_param.dataWidth * param.tcdm_param.numChannel,
         depth = param.bufferDepth

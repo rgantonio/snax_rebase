@@ -15,6 +15,7 @@ import snax.xdma.designParams._
 // Todo: the decoupled signal cut should be added inbetween extensions to avoid long combinatorial path?
 // New operand difinition <|> in commonCells.scala
 
+// The IO Class that used for interface between local Datapath and DMA Ctrl
 class ReaderWriterCfgIO(param: ReaderWriterDataPathParam) extends Bundle {
     val agu_cfg = new AddressGenUnitCfgIO(param = param.rwParam.agu_param) // Buffered within AGU
     val ext_cfg = if (param.extParam.length != 0) {
@@ -31,7 +32,10 @@ class ReaderWriterCfgIO(param: ReaderWriterDataPathParam) extends Bundle {
         ext_cfg.asUInt ++ agu_cfg.Bounds.asUInt ++ agu_cfg.Strides.asUInt ++ agu_cfg.Ptr
     }
 
-    def deserialize(data: UInt): Unit = {
+    // Deserialize function to convert long UInt back to config
+    // The conversion is done from LSB to MSB
+    // After the conversion, the remaining data is returned for further conversion
+    def deserialize(data: UInt): UInt = {
         var remainingData = data
 
         // Assigning Ptr
@@ -50,6 +54,8 @@ class ReaderWriterCfgIO(param: ReaderWriterDataPathParam) extends Bundle {
 
         // Assigning ext_cfg
         ext_cfg := remainingData(ext_cfg.asUInt.getWidth - 1, 0).asTypeOf(ext_cfg)
+        remainingData = remainingData(remainingData.getWidth - 1, ext_cfg.asUInt.getWidth)
+        remainingData
     }
 }
 

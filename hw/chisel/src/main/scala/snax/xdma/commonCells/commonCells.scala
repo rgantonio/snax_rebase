@@ -6,7 +6,7 @@ import chisel3.reflect.DataMirror
 import chisel3.internal.throwException
 import chisel3.internal.throwException
 
-/** The complexQueue to do multiple channel in / single concatenated out or single channel in /
+/** The complexQueue_Concat to do multiple channel in / single concatenated out or single channel in /
   * multiple splitted out fifo The user defined params include:
   * @param inputWidth:
   *   the width of the input
@@ -17,7 +17,7 @@ import chisel3.internal.throwException
   *   option If inputWidth is larger than outputWidth, then it will be the second option No matter
   *   which case, the big width one should equal to integer times of the small width one
   */
-class complexQueue(inputWidth: Int, outputWidth: Int, depth: Int) extends Module {
+class complexQueue_Concat(inputWidth: Int, outputWidth: Int, depth: Int) extends Module {
     val bigWidth = Seq(inputWidth, outputWidth).max
     val smallWidth = Seq(inputWidth, outputWidth).min
     require(
