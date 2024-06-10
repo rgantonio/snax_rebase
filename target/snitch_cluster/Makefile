@@ -154,6 +154,35 @@ $(eval $(call generate_snax_gen,snax_data_reshuffler))
  
 endif
 
+ifeq (${CFG_OVERRIDE}, cfg/snax-cross-gemm-wide-simd-data-reshuffler.hjson)
+# ifeq (${CFG_OVERRIDE}, cfg/snax-wide-gemm-wide-simd-data-reshuffler.hjson)
+
+$(eval $(call generate_snax_gen,snax_streamer_gemm))
+
+    SNAX_GEMM_ROOT ?= $(shell $(BENDER) path snax-gemm)
+    include $(SNAX_GEMM_ROOT)/Makefile
+
+    VSIM_BENDER += -t snax_streamer_gemm
+    VLT_BENDER  += -t snax_streamer_gemm
+    VCS_BENDER  += -t snax_streamer_gemm
+
+$(eval $(call generate_snax_gen,snax_data_reshuffler))
+
+	VSIM_BENDER += -t snax_data_reshuffler
+	VLT_BENDER  += -t snax_data_reshuffler
+	VCS_BENDER  += -t snax_data_reshuffler
+
+$(eval $(call generate_snax_gen,snax_streamer_simd))
+
+	SNAX_SIMD_ROOT ?= $(shell $(BENDER) path snax-postprocessing-simd)
+	include $(SNAX_SIMD_ROOT)/Makefile
+
+	VSIM_BENDER += -t snax_streamer_simd
+	VLT_BENDER  += -t snax_streamer_simd
+	VCS_BENDER  += -t snax_streamer_simd
+
+endif
+
 VSIM_BENDER += -t QUESTA_SIM
 
 # Verilated and compiled snitch cluster

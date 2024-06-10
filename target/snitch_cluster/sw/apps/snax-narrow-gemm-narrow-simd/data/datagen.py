@@ -55,6 +55,37 @@ def block_gemm_golden_model(m, k, n, row, size, col, a, b,
     return c
 
 
+# Golden model for postprocessing in python
+def postprocessing_simd_golden_model(
+        data_in,
+        input_zp_i,
+        output_zp_i,
+        shift_i,
+        max_int_i,
+        min_int_i,
+        double_round_i,
+        multiplier_i):
+    c = np.zeros(data_in.shape)
+    for i in range(len(data_in)):
+        var = data_in[i] - input_zp_i
+        # avoid overflow
+        var = np.int64(var) * np.int64(multiplier_i)
+        var = np.int32(var >> (shift_i - 1))
+        if double_round_i:
+            if var >= 0:
+                var = var + 1
+            else:
+                var = var - 1
+        var = var >> 1
+        var = var + output_zp_i
+        if var > max_int_i:
+            var = max_int_i
+        if var < min_int_i:
+            var = min_int_i
+        c[i] = var
+    return c
+
+
 # Add stdint.h header
 def emit_header_file(**kwargs):
     emit_str = "#include <stdint.h>\n\n"
@@ -76,7 +107,6 @@ def emit_gemm_data(**kwargs):
     data_str += [format_scalar_definition("int", "N", kwargs["N"])]
 
     # Generating strides settings
-
     data_str += [
         format_scalar_definition(
             "int32_t", "strideInnermostA", kwargs["strideInnermostA"]
@@ -92,16 +122,11 @@ def emit_gemm_data(**kwargs):
             "int32_t", "strideInnermostC", kwargs["strideInnermostC"]
         )
     ]
-    data_str += [
-        format_scalar_definition(
-            "int32_t", "strideHalfC", kwargs["strideHalfC"]
-        )
-    ]
 
     data_str += [format_scalar_definition("int32_t", "ldA", kwargs["ldA"])]
     data_str += [format_scalar_definition("int32_t", "ldB", kwargs["ldB"])]
     data_str += [format_scalar_definition("int32_t", "ldC", kwargs["ldC"])]
-
+    
     data_str += [format_scalar_definition("int32_t", "spatialA", kwargs["spatialA"])]
     data_str += [format_scalar_definition("int32_t", "spatialB", kwargs["spatialB"])]
     data_str += [format_scalar_definition("int32_t", "spatialC", kwargs["spatialC"])]
@@ -116,6 +141,7 @@ def emit_gemm_data(**kwargs):
         format_scalar_definition("int32_t", "strideC", kwargs["strideC"])
     ]
 
+    # Generating base address settings
     data_str += [
         format_scalar_definition(
             "int32_t", "delta_local_a", kwargs["delta_local_a"]
@@ -158,8 +184,8 @@ def emit_gemm_data(**kwargs):
     a = np.random.randint(MIN, MAX, length_a)
     b = np.random.randint(MIN, MAX, length_b)
 
-    # Generating golden data
-    c_golden = block_gemm_golden_model(
+    # Generating golden data for block matrix multiplication
+    c_golden_mm = block_gemm_golden_model(
         kwargs["M"],
         kwargs["K"],
         kwargs["N"],
@@ -171,16 +197,80 @@ def emit_gemm_data(**kwargs):
         subtraction_a,
         subtraction_b
     )
-
-    c_init = np.zeros(c_golden.shape)
-    c_cpu = np.zeros(c_golden.shape)
+    c_init = np.zeros(c_golden_mm.shape)
+    c_cpu = np.zeros(c_golden_mm.shape)
 
     # Writing testing data and golden data into data.h
     data_str += [format_vector_definition("int8_t", "A", a)]
     data_str += [format_vector_definition("int8_t", "B", b)]
-    data_str += [format_vector_definition("int32_t", "C_golden", c_golden)]
-    data_str += [format_vector_definition("int32_t", "C", c_init)]
-    data_str += [format_vector_definition("int32_t", "C_cpu", c_cpu)]
+    data_str += [format_vector_definition("int32_t", "C_golden_MM", c_golden_mm)]
+
+    # Postprocessing SIMD
+    # Generating strides and base address settings for simd output
+    data_str += [format_scalar_definition("int32_t", "delta_local_d", kwargs["delta_local_d"])]
+    data_str += [format_scalar_definition("int32_t", "strideInnermostD", kwargs["strideInnermostD"])]
+    data_str += [format_scalar_definition("int32_t", "ldD", kwargs["ldD"])]
+
+    # Generating random constant values
+    input_zp_i = np.random.randint(MIN, MAX)
+    output_zp_i = np.random.randint(MIN, MAX)
+    shift_i = np.random.randint(0, 63) # values between 0-63
+    max_int_i = MAX
+    min_int_i = MIN
+    double_round_i = np.random.randint(0, 1)
+    multiplier_i = np.random.randint(-2**31, 2**31 - 1)
+
+    # Writing the constant values to data.h
+    data_str += [
+        format_scalar_definition(
+            "int8_t", "input_zp_i", input_zp_i
+        )
+    ]
+    data_str += [
+        format_scalar_definition(
+            "int8_t", "output_zp_i", output_zp_i
+        )
+    ]
+    data_str += [
+        format_scalar_definition(
+            "int8_t", "shift_i", shift_i
+        )
+    ]
+    data_str += [
+        format_scalar_definition(
+            "int8_t", "max_int_i", max_int_i
+        )
+    ]
+    data_str += [
+    format_scalar_definition(
+            "int8_t", "min_int_i", min_int_i
+        )
+    ]
+    data_str += [
+        format_scalar_definition(
+            "int8_t", "double_round_i", double_round_i
+        )
+    ]
+    data_str += [
+        format_scalar_definition(
+            "int32_t", "multiplier_i", multiplier_i
+        )
+    ]
+
+    # Generating golden data for postprocessing
+    c_golden_simd = postprocessing_simd_golden_model(
+        c_golden_mm,
+        input_zp_i,
+        output_zp_i,
+        shift_i,
+        max_int_i,
+        min_int_i,
+        double_round_i,
+        multiplier_i,
+    )
+
+    # Writing golden data into data.h
+    data_str += [format_vector_definition("int8_t", "C_golden_SIMD", c_golden_simd)]
 
     data_str = "\n\n".join(data_str)
 

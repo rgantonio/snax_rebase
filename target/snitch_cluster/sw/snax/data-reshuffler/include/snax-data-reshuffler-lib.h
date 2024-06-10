@@ -22,9 +22,9 @@ void set_data_reshuffler_csr(int tempLoop0, int tempLoop1, int tempStride0_in,
                              int32_t delta_local_out, bool transpose);
 
 // Set CSR to start STREAMER
-void start_streamer();
+void start_data_reshuffler_streamer();
 
-void wait_streamer();
+void wait_data_reshuffler_streamer();
 
 void start_data_reshuffler();
 

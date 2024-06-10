@@ -41,9 +41,9 @@ void set_data_reshuffler_csr(int tempLoop0, int tempLoop1, int tempStride0_in,
 }
 
 // Set CSR to start STREAMER
-void start_streamer() { write_csr(960 + 10, 1); }
+void start_data_reshuffler_streamer() { write_csr(960 + 10, 1); }
 
-void wait_streamer() { write_csr(960 + 10, 0); }
+void wait_data_reshuffler_streamer() { write_csr(960 + 10, 0); }
 
 void start_data_reshuffler() { write_csr(960 + 13, 1); }
 

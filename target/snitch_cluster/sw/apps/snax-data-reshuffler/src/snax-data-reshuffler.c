@@ -48,11 +48,11 @@ int main() {
 
         // Set CSR to start data-reshuffler
         start_data_reshuffler();
-        start_streamer();
+        start_data_reshuffler_streamer();
 
         // Wait for data-reshuffler to finish
         wait_data_reshuffler();
-        wait_streamer();
+        wait_data_reshuffler_streamer();
 
         // Compare SNAX data-reshuffler result with golden python model
         err += check_data_reshuffler_result(
